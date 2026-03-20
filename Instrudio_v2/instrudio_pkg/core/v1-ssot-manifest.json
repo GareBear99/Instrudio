@@ -1,0 +1,38 @@
+{
+  "version": "1.2.0",
+  "releaseTrain": "Instrudio V1 Core",
+  "singleSourceOfTruth": {
+    "definitionsPath": "instruments/definitions",
+    "runtime": "core/definition-runtime.js",
+    "coreInstruments": [
+      "studio_grand",
+      "studio_violin",
+      "celestial_harp",
+      "studio_bongos"
+    ],
+    "allInstrumentDefinitions": [
+      "studio_grand",
+      "studio_violin",
+      "celestial_harp",
+      "studio_bongos",
+      "studio_accordion",
+      "studio_bagpipes",
+      "studio_guitar",
+      "studio_harmonica",
+      "studio_saxophone",
+      "studio_triangle"
+    ]
+  },
+  "pages": {
+    "studio_grand": "piano.html",
+    "studio_violin": "violin.html",
+    "celestial_harp": "harp.html",
+    "studio_bongos": "bongo.html",
+    "studio_accordion": "accordion.html",
+    "studio_bagpipes": "bagpipes.html",
+    "studio_guitar": "guitar.html",
+    "studio_harmonica": "harmonica.html",
+    "studio_saxophone": "saxophone.html",
+    "studio_triangle": "triangle.html"
+  }
+}

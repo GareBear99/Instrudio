@@ -1,0 +1,28 @@
+{
+  "id": "studio_guitar",
+  "slug": "guitar",
+  "name": "Studio Guitar",
+  "version": "1.0.0",
+  "release": "extended",
+  "page": "guitar.html",
+  "pageTitle": "Studio Guitar · Instrudio",
+  "headline": "Studio Guitar",
+  "subheadline": "Electro studio guitar mapped into the shared definition runtime.",
+  "category": "strings",
+  "bridgeInstrument": "guitar",
+  "minMidi": 40,
+  "maxMidi": 76,
+  "autoplay": {
+    "respectsManualTechnique": true,
+    "supportsLibrary": true
+  },
+  "ssotFields": [
+    "pageTitle",
+    "headline",
+    "page",
+    "bridgeInstrument",
+    "minMidi",
+    "maxMidi",
+    "release"
+  ]
+}

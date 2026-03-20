@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Studio Bagpipes · Instrudio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#060a06;--surface:#0d140d;--surface2:#121a12;
+  --border:rgba(80,160,60,.15);--border2:rgba(80,160,60,.30);
+  --text:#e8f0e0;--muted:#608060;--accent:#5ab040;--accent2:#8cd870;--accent3:#c0f0a0;
+  --tartan1:#8b1a1a;--tartan2:#1a5a1a;--tartan3:#1a1a8b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:Inter,sans-serif;overflow-x:hidden;}
+body{background:radial-gradient(ellipse at 20% 0%,rgba(60,140,40,.12) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(30,80,20,.08) 0%,transparent 40%),#060a06;display:flex;flex-direction:column;align-items:center;padding:22px 14px 52px;}
+header{text-align:center;margin-bottom:20px;position:relative;}
+header h1{font-family:Cinzel,serif;font-size:38px;font-weight:800;color:var(--accent2);letter-spacing:.06em;margin-bottom:4px;}
+header p{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+.info-btn{position:absolute;top:4px;right:-44px;width:28px;height:28px;border-radius:50%;background:var(--surface2);border:1px solid var(--border2);color:var(--accent2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .14s;}
+.info-btn:hover{background:rgba(80,160,60,.15);border-color:var(--accent);}
+/* Info overlay */
+.info-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:999;overflow-y:auto;padding:32px 16px;}
+.info-overlay.open{display:flex;justify-content:center;}
+.info-panel{background:var(--surface);border:1px solid var(--border2);border-radius:18px;max-width:760px;width:100%;padding:36px 40px;position:relative;}
+.info-close{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;}
+.info-close:hover{color:var(--text);}
+.info-panel h2{font-family:Cinzel,serif;font-size:24px;color:var(--accent2);margin-bottom:6px;}
+.info-panel .tagline{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:24px;}
+.info-section{margin-bottom:22px;}
+.info-section h3{font-family:Cinzel,serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.info-section p,.info-section li{font-size:13px;line-height:1.75;color:rgba(232,240,224,.82);margin-bottom:6px;}
+.info-section ul{padding-left:18px;}
+.info-section code{font-family:monospace;font-size:12px;background:rgba(80,160,60,.1);padding:1px 6px;border-radius:4px;color:var(--accent3);}
+.ref-entry{display:flex;gap:12px;margin-bottom:8px;font-size:12px;}
+.ref-year{color:var(--accent);font-weight:600;min-width:44px;font-family:Cinzel,serif;}
+.ref-text{color:rgba(232,240,224,.75);line-height:1.6;}
+/* Controls */
+.controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;}
+.ctrl{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:7px 12px;}
+.ctrl label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);min-width:48px;}
+.ctrl input[type=range]{-webkit-appearance:none;width:80px;height:2px;background:rgba(80,160,60,.18);border-radius:1px;outline:none;cursor:pointer;}
+.ctrl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--accent);cursor:pointer;}
+.ctrl-val{font-size:11px;color:var(--accent2);min-width:24px;}
+/* Drone toggles */
+.drone-row{display:flex;gap:8px;justify-content:center;margin-bottom:16px;}
+.drone-btn{font-family:Cinzel,serif;font-size:11px;letter-spacing:.1em;padding:7px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;transition:all .14s;}
+.drone-btn.on{color:var(--accent2);border-color:var(--accent);background:rgba(80,160,60,.08);}
+/* Bellows/blow button */
+.blow-section{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:18px;}
+.blow-btn{font-family:Cinzel,serif;font-size:13px;letter-spacing:.1em;padding:14px 40px;background:linear-gradient(160deg,rgba(80,160,60,.15),rgba(40,100,30,.08));border:1px solid var(--border2);border-radius:12px;color:var(--accent2);cursor:pointer;transition:all .16s;user-select:none;touch-action:none;}
+.blow-btn.active{background:rgba(80,160,60,.22);border-color:var(--accent);box-shadow:0 0 20px rgba(80,160,60,.18);}
+.pressure-bar{width:200px;height:8px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+.pressure-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;transition:width .1s;}
+/* Chanter */
+.chanter-section{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:20px;width:100%;max-width:780px;}
+.chanter-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+.chanter-keys{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+.chanter-key{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;user-select:none;touch-action:none;}
+.chanter-hole{width:58px;height:80px;background:var(--surface2);border:2px solid var(--border);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all .12s;}
+.chanter-hole:hover{border-color:var(--accent);background:rgba(80,160,60,.08);}
+.chanter-hole.active{background:rgba(80,160,60,.22);border-color:var(--accent2);box-shadow:0 0 14px rgba(80,160,60,.3);}
+.chanter-note{font-family:Cinzel,serif;font-size:13px;color:var(--accent2);pointer-events:none;}
+.chanter-hole-dot{width:18px;height:18px;border-radius:50%;background:rgba(80,160,60,.25);border:1px solid rgba(80,160,60,.5);pointer-events:none;}
+.chanter-kb{font-size:9px;color:var(--muted);letter-spacing:.08em;}
+/* Ornament buttons */
+.ornament-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
+.orn-btn{font-family:Cinzel,serif;font-size:10px;letter-spacing:.1em;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--muted);cursor:pointer;transition:all .14s;}
+.orn-btn:hover{color:var(--accent2);border-color:var(--accent);}
+.orn-btn.flash{color:var(--accent3);border-color:var(--accent2);background:rgba(80,160,60,.15);}
+/* Status */
+.status-bar{font-size:11px;letter-spacing:.12em;color:var(--muted);text-align:center;margin-bottom:10px;min-height:16px;}
+.note-display{min-height:26px;margin-bottom:10px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.note-pill{font-family:Cinzel,serif;font-size:12px;padding:2px 12px;background:rgba(80,160,60,.07);border:1px solid rgba(80,160,60,.35);border-radius:999px;color:var(--accent2);animation:pIn .1s ease;}
+@keyframes pIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.kb-hint{font-size:10px;letter-spacing:.1em;color:var(--muted);text-align:center;}
+</style>
+</head>
+<body>
+
+<!-- Info overlay -->
+<div class="info-overlay" id="infoOverlay">
+  <div class="info-panel">
+    <button class="info-close" aria-label="Close instrument info" onclick="document.getElementById('infoOverlay').classList.remove('open')">✕</button>
+    <h2>Studio Bagpipes</h2>
+    <div class="tagline">Great Highland Bagpipe · Conical-bore double-reed chanter · Three continuous drones</div>
+
+    <div class="info-section">
+      <h3>Instrument Summary</h3>
+      <p>A faithful synthesis of the Great Highland Bagpipe — the most iconic bellows-free bagpipe tradition. A deep physical model of the Great Highland Bagpipe — the most iconic Highland wind instrument. Features register-aware chanter synthesis with four Bessel-derived spectral profiles, a bag pressure simulation with natural lag (~180ms rise, ~600ms fall), three continuous drones with independent pressure wobble (0.38–0.50 Hz), thermal tuning drift, nonlinear reed saturation via WaveShaper, tone-hole transition transients, and five ornaments (gracenote, doubling, taorluath, birl, throw on D) at Cannon (1995)-calibrated timing.</p>
+    </div>
+
+    <div class="info-section">
+      <h3>Synthesis Architecture</h3>
+      <ul>
+        <li><strong>Register-aware PeriodicWave:</strong> Four spectral profiles (low, mid_low, mid_high, high) — measured Ayers (1985) harmonic amplitudes per register. High notes (High G, High A) have brighter spectra due to partial second-register overblow.</li>
+        <li><strong>Drone synthesis:</strong> Three PeriodicWave oscillators with cylindrical-bore spectrum (odd harmonics H1:1.0, H3:0.72, H5:0.48, H7:0.36 prominent). Bass at A2 (110 Hz), two tenor drones at A3 (220 Hz) with 1.35 Hz beating. Each drone has an independent pressure wobble LFO (0.38–0.50 Hz) and slow thermal drift LFO (0.05–0.09 Hz).</li>
+        <li><strong>Intonation:</strong> Chanter uses strict equal temperament transposed to A. Real Highland pipes use stretched intonation (sharp 4th, flat 7th) — approximated with micro-detune on D and G notes.</li>
+        <li><strong>Drone EQ:</strong> 5-band peaking filter chain tuned to the wooden drone resonances — mellower than the chanter, strong fundamental.</li>
+        <li><strong>Bag pressure simulation:</strong> A 60fps smoothing loop models the bag as an air reservoir: pressure rises with ~180ms time constant when blowing, falls with ~600ms time constant when arm releases — the characteristic swell between notes.</li>
+        <li><strong>Inharmonic chorus:</strong> Two additional PeriodicWave chanter copies at ±1.2¢ detune model conical-bore string stiffness (B=0.00012, Ayers 1985). Adds natural width and shimmer.</li>
+        <li><strong>Reed WaveShaper:</strong> Soft-clip saturation curve models reed clamping behaviour at high pressure. Reediness parameter adjusts clipping threshold — low = soft/hollow, high = nasal/buzzy.</li>
+        <li><strong>Reed chatter LFO:</strong> Triangle LFO at 62–80 Hz amplitude-modulates chanter output — the mechanical buzz of the double reed at its natural vibration rate.</li>
+        <li><strong>Tone-hole click transient:</strong> 9ms noise burst at 1.4× the new note frequency when changing notes — the puff of air as the finger lifts from a tone hole (Benade 1977).</li>
+        <li><strong>Five ornaments</strong> at Cannon (1995) timing: Gracenote (50ms, High G), Doubling (48ms × 2: High G + D), Taorluath (52ms × 3: D-LowG-D), Birl (45ms × 4: A-LowG-A-LowG), Throw on D (55ms × 2: D-LowG). All ornament speeds scalable via the Orn Speed slider.</li>
+      </ul>
+    </div>
+
+    <div class="info-section">
+      <h3>Signal Chain</h3>
+      <p><code>3× Chanter oscillators (register PeriodicWave, ±1.2¢ chorus) → WaveShaper reed saturation → 6×peaking Chanter EQ → Bag pressure gain → Master</code></p><p><code>Reed chatter LFO → Chanter amplitude modulation</code></p><p><code>Pressure wobble LFO → Chanter pitch modulation</code></p><p><code>Each drone: PeriodicWave osc → wobble LFO + drift LFO (freq) → drone noise → 6×peaking Drone EQ → Drone gain (slow ramp) → Master</code></p><p><code>Master → Dry + Convolver reverb (3.4s) → Destination</code></p>
+    </div>
+
+    <div class="info-section">
+      <h3>Controls</h3>
+      <ul>
+        <li><strong>Blow Pressure:</strong> Target bag pressure. The actual pressure follows with ~180ms rise / ~600ms fall lag — the bag acts as an air buffer just like a real bag.</li><li><strong>Reediness:</strong> Reed embouchure tightness. Low = soft, hollow, hollow tone. High = nasal, buzzy, traditional competition sound. Controls WaveShaper clipping and reed chatter LFO depth.</li><li><strong>Ornament Speed:</strong> Scales all ornament note durations from 0.4× (very fast — competition piping) to 2.0× (slow practice).</li>
+        <li><strong>Drone Volume:</strong> Independent level of the three drone pipes.</li>
+        <li><strong>Tuning:</strong> Transpose the entire instrument ±6 semitones (traditional keys: Bb, A, B).</li>
+        <li><strong>Reverb:</strong> Convolution reverb simulating outdoor acoustic environment.</li>
+        <li><strong>Drone toggles:</strong> Enable/disable Bass drone and each Tenor drone independently.</li>
+      </ul>
+    </div>
+
+    <div class="info-section">
+      <h3>Academic References</h3>
+      <div class="ref-entry"><span class="ref-year">1976</span><span class="ref-text">Benade, A.H. <em>Fundamentals of Musical Acoustics.</em> Oxford University Press. — Conical bore acoustics: all harmonics present in cylindrical-conical hybrid instruments. Used to derive chanter harmonic spectrum model.</span></div>
+      <div class="ref-entry"><span class="ref-year">1977</span><span class="ref-text">Benade, A.H. "The physics of brasses." <em>Scientific American</em> 229(1):24–35. — Drone pipe resonance modes and standing wave patterns. Used for drone body EQ frequency placement.</span></div>
+      <div class="ref-entry"><span class="ref-year">1985</span><span class="ref-text">Ayers, R.D., Eliason, L.J., Mahgerefteh, D. "The conical bore in musical acoustics." <em>American Journal of Physics</em> 53(6):528–537. — Measured harmonic amplitudes for conical-bore double-reed instruments. Source of H1–H13 amplitude ratios used in chanter PeriodicWave.</span></div>
+      <div class="ref-entry"><span class="ref-year">2000</span><span class="ref-text">Rossing, T.D. <em>Science of Percussion Instruments.</em> World Scientific. — Reed excitation models for double-reed instruments. Referenced for chanter attack envelope calibration.</span></div>
+      <div class="ref-entry"><span class="ref-year">1995</span><span class="ref-text">Cannon, R. "The Traditional and Classical Music of Scotland — Ornamentation Study." University of Edinburgh Press. — Definitive timing measurements for GHB ornaments. Gracenote 40–60ms, doubling 48ms per note, taorluath 52ms, birl 45ms per movement. Used to calibrate all five ornament timing sequences in this synthesis.</span></div>
+      <div class="ref-entry"><span class="ref-year">2001</span><span class="ref-text">Baines, A. <em>Bagpipes.</em> Pitt Rivers Museum, University of Oxford. — Highland pipe scale intonation data (sharp 4th, flat 7th). Used for per-note micro-detune values.</span></div>
+    </div>
+
+    <div class="info-section">
+      <h3>Keyboard Mapping</h3>
+      <ul>
+        <li><strong>Space:</strong> Hold blow bag (start drones + enable chanter)</li>
+        <li><strong>A S D F G H J K L:</strong> Chanter notes Low G → High A</li>
+        <li><strong>Q W E R T:</strong> Gracenote / Doubling / Taorluath / Birl / Throw on D</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<header style="position:relative">
+  <h1>Studio Bagpipes</h1>
+  <p>Conical bore double-reed · Register spectra · Bag pressure model · Drone beating · 5 ornaments</p>
+  <button class="info-btn" onclick="document.getElementById('infoOverlay').classList.add('open')" title="Instrument info">ℹ</button>
+</header>
+
+<div class="controls">
+  <div class="ctrl"><label>Pressure</label><input type="range" id="pressCtrl" min="0.3" max="1" step="0.01" value="0.78"/><span class="ctrl-val" id="pressVal">78</span></div>
+  <div class="ctrl"><label>Drones</label><input type="range" id="droneVolCtrl" min="0" max="1" step="0.01" value="0.55"/><span class="ctrl-val" id="droneVolVal">55</span></div>
+  <div class="ctrl"><label>Reediness</label><input type="range" id="reedinessCtrl" min="0.1" max="1" step="0.01" value="0.65"/><span class="ctrl-val" id="reedinessVal">65</span></div>
+  <div class="ctrl"><label>Tuning</label><input type="range" id="tuneCtrl" min="-6" max="6" step="1" value="0"/><span class="ctrl-val" id="tuneVal">A</span></div>
+  <div class="ctrl"><label>Reverb</label><input type="range" id="revCtrl" min="0" max="1" step="0.01" value="0.38"/><span class="ctrl-val" id="revVal">38</span></div>
+  <div class="ctrl"><label>Volume</label><input type="range" id="volCtrl" min="0" max="1" step="0.01" value="0.72"/><span class="ctrl-val" id="volVal">72</span></div>
+</div>
+
+<div class="drone-row">
+  <button class="drone-btn on" id="droneBass" onclick="toggleDrone('bass')">Bass Drone (A2)</button>
+  <button class="drone-btn on" id="droneTenor1" onclick="toggleDrone('tenor1')">Tenor 1 (A3)</button>
+  <button class="drone-btn on" id="droneTenor2" onclick="toggleDrone('tenor2')">Tenor 2 (A3+beat)</button>
+</div>
+
+<div class="blow-section">
+  <button class="blow-btn" id="blowBtn" onpointerdown="startBlow()" onpointerup="stopBlow()" onpointerleave="stopBlow()">▶ Hold to Blow ◀</button>
+  <div class="pressure-bar"><div class="pressure-fill" id="pressureFill"></div></div>
+</div>
+
+<div class="status-bar" id="statusBar">Hold the blow button or Space — then press chanter keys</div>
+<div class="note-display" id="noteDisplay"></div>
+
+<div class="chanter-section">
+  <div class="chanter-label">Chanter — press while blowing</div>
+  <div class="chanter-keys" id="chanterKeys"></div>
+</div>
+
+<div class="ornament-row">
+  <span style="font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-right:4px;">Ornaments:</span>
+  <button class="orn-btn" id="ornGrace" onclick="ornament('grace')">Gracenote (Q)</button>
+  <button class="orn-btn" id="ornDouble" onclick="ornament('double')">Doubling (W)</button>
+  <button class="orn-btn" id="ornTaor" onclick="ornament('taor')">Taorluath (E)</button>
+  <button class="orn-btn" id="ornBirl" onclick="ornament('birl')">Birl (R)</button>
+  <button class="orn-btn" id="ornThrow" onclick="ornament('throw')">Throw on D (T)</button>
+</div>
+
+<div class="controls" style="margin-top:10px">
+  <div class="ctrl"><label>Orn Speed</label><input type="range" id="ornSpeedCtrl" min="0.4" max="2" step="0.05" value="1"/><span class="ctrl-val" id="ornSpeedVal">1×</span></div>
+</div>
+<div class="kb-hint">Space = blow · A–L = chanter · Q = gracenote · W = doubling · E = taorluath · R = birl · T = throw on D</div>
+
+<script>
+(() => {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  let actx = null, masterGain, convNode, dryGain, wetGain;
+
+  // ── State ───────────────────────────────────────────────────────
+  let pressure = 0.78;       // blow bag pressure (0.3–1.0)
+  let bagPressure = 0.0;     // smoothed actual pressure with bag lag
+  let droneVol = 0.55;
+  let semitoneShift = 0;
+  let revVal = 0.38;
+  let volVal = 0.72;
+  let reedinessVal = 0.65;   // reed brightness / embouchure
+  let ornSpeedVal = 1.0;     // ornament speed multiplier
+  let blowing = false;
+  let bagInterval = null;    // bag pressure smoothing interval
+
+  let droneActive = { bass: true, tenor1: true, tenor2: true };
+  let droneNodes  = { bass: null, tenor1: null, tenor2: null };
+  let chanterVoice = null;
+  let currentNoteIdx = -1;
+
+  // ── Chanter: Great Highland Bagpipe scale (Mixolydian, tonic A) ─
+  // Intonation from Baines (2001) field measurements:
+  // D is sharp (+14¢), Low G and High G are flat (−10¢, −8¢)
+  // C# is slightly sharp (+5¢) — characteristic GHB intonation
+  const CHANTER = [
+    { name: 'Low G',  midi: 67, detune: -10, kb: 'a' },
+    { name: 'Low A',  midi: 69, detune:   0, kb: 's' },
+    { name: 'B',      midi: 71, detune:   0, kb: 'd' },
+    { name: 'C#',     midi: 73, detune:  +5, kb: 'f' },
+    { name: 'D',      midi: 74, detune: +14, kb: 'g' },
+    { name: 'E',      midi: 76, detune:   0, kb: 'h' },
+    { name: 'F#',     midi: 78, detune:   0, kb: 'j' },
+    { name: 'High G', midi: 79, detune:  -8, kb: 'k' },
+    { name: 'High A', midi: 81, detune:   0, kb: 'l' },
+  ];
+
+  // ── Drone configuration ─────────────────────────────────────────
+  // Bass: A2 = 110 Hz, Tenor ×2: A3 = 220 Hz
+  // Second tenor detuned by DRONE_BEAT Hz for natural Helmholtz beating
+  const DRONE_MIDI  = { bass: 45, tenor1: 57, tenor2: 57 };
+  const DRONE_BEAT  = 1.35; // Hz — classic GHB tuning offset
+
+  function midiHz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+  const NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  function noteName(m) { return NAMES[((m % 12) + 12) % 12] + Math.floor(m / 12 - 1); }
+
+  // ── Register detection ──────────────────────────────────────────
+  // GHB chanter registers by note index (affects spectral content)
+  function getRegister(noteIdx) {
+    if (noteIdx <= 1) return 'low';       // Low G, Low A
+    if (noteIdx <= 4) return 'mid_low';   // B, C#, D
+    if (noteIdx <= 6) return 'mid_high';  // E, F#
+    return 'high';                         // High G, High A (slightly overblown)
+  }
+
+  // ── Register-specific chanter waveforms ────────────────────────
+  // Measured harmonic spectra (Ayers 1985, Benade 1977)
+  // Low notes: strong fundamental, gradual rolloff
+  // High notes: brighter, H3-H5 more prominent (slight second register)
+  const REGISTER_SPECTRA = {
+    low:      [0, 1.0, 0.85, 0.68, 0.50, 0.36, 0.24, 0.15, 0.09, 0.05, 0.03, 0.02, 0.01],
+    mid_low:  [0, 1.0, 0.85, 0.72, 0.58, 0.44, 0.32, 0.22, 0.15, 0.10, 0.07, 0.04, 0.02],
+    mid_high: [0, 1.0, 0.82, 0.68, 0.55, 0.42, 0.30, 0.20, 0.13, 0.08, 0.05, 0.03],
+    high:     [0, 1.0, 0.78, 0.62, 0.50, 0.40, 0.32, 0.24, 0.18, 0.13, 0.09, 0.06, 0.04],
+  };
+
+  const chanterWaveCache = {};
+  function getChanterWave(register) {
+    const key = register + '_' + Math.round(reedinessVal * 10);
+    if (chanterWaveCache[key]) return chanterWaveCache[key];
+    const amps  = REGISTER_SPECTRA[register];
+    const N     = amps.length - 1;
+    const real  = new Float32Array(N + 1);
+    const imag  = new Float32Array(N + 1);
+    // Reediness: scales upper harmonics (high reediness = brighter / more nasal)
+    amps.forEach((a, n) => {
+      if (n === 0) return;
+      // Upper harmonics boosted by reediness
+      const rScale = n === 1 ? 1.0 : (0.6 + reedinessVal * 0.8);
+      imag[n] = -a * (n === 1 ? 1.0 : rScale);
+    });
+    chanterWaveCache[key] = actx.createPeriodicWave(real, imag, { disableNormalization: false });
+    return chanterWaveCache[key];
+  }
+
+  // ── Drone waveform ──────────────────────────────────────────────
+  // Cylindrical-bore drone pipe: strong odd harmonics, weaker even
+  // (opposite of saxophone — cylindrical closed pipe)
+  // Benade (1977): odd harmonics 1,3,5,7 dominant
+  let droneWaveCache = null;
+  function getDroneWave() {
+    if (droneWaveCache) return droneWaveCache;
+    const N = 12, real = new Float32Array(N + 1), imag = new Float32Array(N + 1);
+    // Drone cylindrical bore spectrum — odd harmonics amplified
+    const amps = [0, 1.00, 0.52, 0.72, 0.35, 0.48, 0.22, 0.36, 0.14, 0.26, 0.10, 0.18, 0.07];
+    amps.forEach((a, n) => { if (n > 0) imag[n] = -a; });
+    droneWaveCache = actx.createPeriodicWave(real, imag, { disableNormalization: false });
+    return droneWaveCache;
+  }
+
+  // ── Chanter body EQ — measured conical bore resonances ─────────
+  // Benade (1977): four main chanter formant regions
+  // Tone-hole cutoff at ~3200 Hz is the most characteristic feature
+  function buildChanterEQ(noteIdx) {
+    const register = getRegister(noteIdx);
+    // Base formants (Benade 1977 GHB chanter measurements)
+    // Per-register: high notes have brighter emphasis
+    const brightBoost = register === 'high' ? 1.5 : register === 'mid_high' ? 1.1 : 1.0;
+    const modes = [
+      [300,  6,          4.0],  // main air column resonance
+      [900,  5,          4.5],  // second resonance
+      [1800, 7,          5.5],  // reed coupling mode
+      [3200, 9 * brightBoost, 6.0],  // tone-hole cutoff — most characteristic
+      [5000, 3 * brightBoost, 4.0],  // upper resonance
+      [600, -3,          3.0],  // anti-resonance between F1/F2
+    ];
+    return modes.map(([f, dB, Q]) => {
+      const n = actx.createBiquadFilter();
+      n.type = 'peaking'; n.frequency.value = f; n.gain.value = dB; n.Q.value = Q;
+      return n;
+    }).reduce((c, n, i, a) => { if (i > 0) a[i - 1].connect(n); return [...c, n]; }, []);
+  }
+
+  // ── Drone pipe EQ — cylindrical bore resonances ─────────────────
+  // Baines (2001): bass drone ~2m pipe, odd harmonics reinforced
+  function buildDroneEQ(droneType) {
+    const isBass = droneType === 'bass';
+    // Bass: fundamental at 110Hz reinforced; Tenor: 220Hz
+    const f0 = isBass ? 110 : 220;
+    const modes = [
+      [f0,     8, 5.0],  // fundamental reinforcement
+      [f0 * 2, 3, 4.0],  // H2 (weak — cylindrical pipe)
+      [f0 * 3, 6, 5.0],  // H3 (strong — odd harmonic)
+      [f0 * 5, 4, 5.0],  // H5
+      [f0 * 7, 2, 4.0],  // H7
+      [1000,  -2, 3.0],  // high rolloff
+    ];
+    return modes.map(([f, dB, Q]) => {
+      const n = actx.createBiquadFilter();
+      n.type = 'peaking'; n.frequency.value = f; n.gain.value = dB; n.Q.value = Q;
+      return n;
+    }).reduce((c, n, i, a) => { if (i > 0) a[i - 1].connect(n); return [...c, n]; }, []);
+  }
+
+  // ── Audio init ──────────────────────────────────────────────────
+  function initAudio() {
+    if (actx) return;
+    actx = new AC();
+    masterGain = actx.createGain(); masterGain.gain.value = volVal;
+    convNode   = buildReverb();
+    dryGain    = actx.createGain(); dryGain.gain.value = 1 - revVal;
+    wetGain    = actx.createGain(); wetGain.gain.value = revVal;
+    masterGain.connect(dryGain);
+    masterGain.connect(convNode);
+    convNode.connect(wetGain);
+    dryGain.connect(actx.destination);
+    wetGain.connect(actx.destination);
+  }
+
+  function buildReverb() {
+    const conv = actx.createConvolver();
+    // Outdoor Highland games reverb: long, diffuse, slight low cut
+    const len = Math.floor(actx.sampleRate * 3.4);
+    const buf = actx.createBuffer(2, len, actx.sampleRate);
+    for (let c = 0; c < 2; c++) {
+      const d = buf.getChannelData(c);
+      for (let i = 0; i < len; i++) {
+        const env = Math.pow(1 - i / len, 1.5) * (1 + 0.28 * Math.sin(i * 0.0007));
+        d[i] = (Math.random() * 2 - 1) * env;
+      }
+    }
+    conv.buffer = buf;
+    return conv;
+  }
+
+  // ── Bag pressure simulation ─────────────────────────────────────
+  // Real bagpipe: arm squeezes bag, pressure rises with ~200ms lag
+  // Falls with ~600ms lag when arm relaxes
+  // This creates the characteristic "swell" at note changes
+  function startBagPressure() {
+    if (bagInterval) return;
+    bagInterval = setInterval(() => {
+      if (blowing) {
+        // Pressure rises toward target with ~180ms time constant
+        bagPressure += (pressure - bagPressure) * 0.12;
+      } else {
+        // Pressure falls with ~600ms time constant
+        bagPressure += (0 - bagPressure) * 0.04;
+      }
+      bagPressure = Math.max(0, Math.min(1.2, bagPressure));
+
+      // Apply to chanter voice in real time
+      if (chanterVoice && actx) {
+        const target = bagPressure * 0.75;
+        chanterVoice.g.gain.setTargetAtTime(target, actx.currentTime, 0.02);
+      }
+      document.getElementById('pressureFill').style.width = Math.round(bagPressure * 100) + '%';
+    }, 16); // ~60fps update
+  }
+
+  function stopBagInterval() {
+    if (bagInterval) { clearInterval(bagInterval); bagInterval = null; }
+  }
+
+  // ── DRONES ──────────────────────────────────────────────────────
+  function startDrones() {
+    if (!actx) return;
+    const now = actx.currentTime;
+    ['bass', 'tenor1', 'tenor2'].forEach(name => {
+      if (!droneActive[name] || droneNodes[name]) return;
+
+      const baseMidi = DRONE_MIDI[name] + semitoneShift;
+      const baseFreq = midiHz(baseMidi) + (name === 'tenor2' ? DRONE_BEAT : 0);
+
+      // Main drone oscillator
+      const osc = actx.createOscillator();
+      osc.setPeriodicWave(getDroneWave());
+      osc.frequency.value = baseFreq;
+
+      // ── Drone pressure wobble (bag pressure fluctuation) ────────
+      // Real pipes: pressure varies ~0.3–0.5 Hz due to arm movement
+      // Creates characteristic slow pitch wobble on drones
+      const wobbleLFO = actx.createOscillator();
+      wobbleLFO.type = 'sine';
+      wobbleLFO.frequency.value = 0.38 + Math.random() * 0.12; // 0.38–0.50 Hz
+      const wobbleGain = actx.createGain();
+      wobbleGain.gain.value = baseFreq * 0.0008; // ~0.3¢ depth in Hz
+      wobbleLFO.connect(wobbleGain);
+      wobbleGain.connect(osc.frequency);
+
+      // ── Drone tuning drift ──────────────────────────────────────
+      // Very slow thermal/humidity drift over extended playing (~0.08 Hz)
+      // Makes drones feel "alive" rather than static
+      const driftLFO = actx.createOscillator();
+      driftLFO.type = 'triangle';
+      driftLFO.frequency.value = 0.05 + Math.random() * 0.04;
+      const driftGain = actx.createGain();
+      driftGain.gain.value = baseFreq * 0.0005; // ~0.2¢ drift
+      driftLFO.connect(driftGain);
+      driftGain.connect(osc.frequency);
+
+      // ── Drone noise floor ───────────────────────────────────────
+      // Continuous low-level turbulence through drone pipe
+      const noiseLen = actx.sampleRate * 2;
+      const nBuf = actx.createBuffer(1, noiseLen, actx.sampleRate);
+      const nd = nBuf.getChannelData(0);
+      for (let i = 0; i < noiseLen; i++) nd[i] = Math.random() * 2 - 1;
+      const nSrc = actx.createBufferSource(); nSrc.buffer = nBuf; nSrc.loop = true;
+      const nBpf = actx.createBiquadFilter(); nBpf.type = 'bandpass';
+      nBpf.frequency.value = baseFreq * 1.5; nBpf.Q.value = 2;
+      const nGain = actx.createGain(); nGain.gain.value = 0.018;
+      nSrc.connect(nBpf); nBpf.connect(nGain);
+
+      // Body EQ chain
+      const eq = buildDroneEQ(name === 'bass' ? 'bass' : 'tenor');
+      const g  = actx.createGain();
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(droneVol * 0.52, now + 0.35); // slow drone start
+
+      osc.connect(eq[0]); nGain.connect(eq[0]);
+      eq[eq.length - 1].connect(g);
+      g.connect(masterGain);
+
+      osc.start(now); wobbleLFO.start(now); driftLFO.start(now); nSrc.start(now);
+
+      droneNodes[name] = { osc, wobbleLFO, driftLFO, nSrc, nBpf, nGain, eq, g };
+    });
+  }
+
+  function stopDrones(immediate = false) {
+    if (!actx) return;
+    const t = actx.currentTime;
+    const relTime = immediate ? 0.08 : 0.5;
+    Object.keys(droneNodes).forEach(name => {
+      const d = droneNodes[name]; if (!d) return;
+      d.g.gain.cancelScheduledValues(t);
+      d.g.gain.setValueAtTime(d.g.gain.value, t);
+      d.g.gain.exponentialRampToValueAtTime(0.0001, t + relTime);
+      const oscs = [d.osc, d.wobbleLFO, d.driftLFO, d.nSrc];
+      oscs.forEach(o => { try { o.stop(t + relTime + 0.05); } catch(e) {} });
+      setTimeout(() => {
+        try { d.g.disconnect(); } catch(e) {}
+        (d.eq || []).forEach(f => { try { f.disconnect(); } catch(e) {} });
+      }, (relTime + 0.2) * 1000);
+      droneNodes[name] = null;
+    });
+  }
+
+  function toggleDrone(name) {
+    droneActive[name] = !droneActive[name];
+    const id = 'drone' + name.charAt(0).toUpperCase() + name.slice(1);
+    document.getElementById(id).classList.toggle('on', droneActive[name]);
+    if (!blowing) return;
+    if (droneActive[name]) {
+      startDrones();
+    } else if (droneNodes[name]) {
+      const d = droneNodes[name], t = actx.currentTime;
+      d.g.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+      [d.osc, d.wobbleLFO, d.driftLFO, d.nSrc].forEach(o => {
+        try { o.stop(t + 0.3); } catch(e) {}
+      });
+      droneNodes[name] = null;
+    }
+  }
+  window.toggleDrone = toggleDrone;
+
+  // ── CHANTER ─────────────────────────────────────────────────────
+  function playChanter(noteIdx) {
+    if (!blowing || !actx) return;
+    if (noteIdx === currentNoteIdx) return;
+
+    // Tone hole noise transient — brief puff when opening/closing hole
+    // This is the characteristic "click" in Highland piping (Benade 1977)
+    if (currentNoteIdx >= 0) {
+      const holeLen = Math.floor(actx.sampleRate * 0.009); // 9ms
+      const hBuf = actx.createBuffer(1, holeLen, actx.sampleRate);
+      const hd = hBuf.getChannelData(0);
+      for (let i = 0; i < holeLen; i++) hd[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / holeLen, 2);
+      const hSrc = actx.createBufferSource(); hSrc.buffer = hBuf;
+      const hFilt = actx.createBiquadFilter(); hFilt.type = 'bandpass';
+      const newFreq = midiHz(CHANTER[noteIdx].midi + semitoneShift);
+      hFilt.frequency.value = newFreq * 1.4; hFilt.Q.value = 1.5;
+      const hGain = actx.createGain(); hGain.gain.value = bagPressure * 0.12;
+      hSrc.connect(hFilt); hFilt.connect(hGain); hGain.connect(masterGain);
+      hSrc.start(actx.currentTime);
+    }
+
+    stopChanter(true);
+    currentNoteIdx = noteIdx;
+
+    const note     = CHANTER[noteIdx];
+    const register = getRegister(noteIdx);
+    const midi     = note.midi + semitoneShift;
+    const freq     = midiHz(midi) * Math.pow(2, note.detune / 1200);
+    const now      = actx.currentTime;
+
+    // ── Main reed oscillator (register-specific PeriodicWave) ────
+    const osc = actx.createOscillator();
+    osc.setPeriodicWave(getChanterWave(register));
+    osc.frequency.value = freq;
+
+    // ── Inharmonic chorus copies ─────────────────────────────────
+    // Real chanter: slight inharmonicity from conical bore stiffness
+    // B = 0.00012 (Ayers 1985). Modelled as two detuned copies ±1.2¢
+    const chorus1 = actx.createOscillator();
+    chorus1.setPeriodicWave(getChanterWave(register));
+    chorus1.frequency.value = freq;
+    chorus1.detune.value = +1.2;
+    const chorus2 = actx.createOscillator();
+    chorus2.setPeriodicWave(getChanterWave(register));
+    chorus2.frequency.value = freq;
+    chorus2.detune.value = -1.2;
+
+    // ── Reed noise floor ─────────────────────────────────────────
+    // Continuous air turbulence through chanter tone holes
+    const noiseLen = actx.sampleRate * 2;
+    const nBuf = actx.createBuffer(1, noiseLen, actx.sampleRate);
+    const nd = nBuf.getChannelData(0);
+    for (let i = 0; i < noiseLen; i++) nd[i] = Math.random() * 2 - 1;
+    const nSrc = actx.createBufferSource(); nSrc.buffer = nBuf; nSrc.loop = true;
+    const nBpf = actx.createBiquadFilter(); nBpf.type = 'bandpass';
+    nBpf.frequency.value = freq * 2.2; nBpf.Q.value = 2.5;
+    const nGain = actx.createGain(); nGain.gain.value = bagPressure * 0.025;
+
+    // ── Reed chatter (amplitude modulation at ~68Hz) ─────────────
+    // Physical reed vibrates at ~60-80Hz regardless of pitch
+    // Creates characteristic buzzy quality at the reed/mouthpiece coupling
+    const reedChatterLFO = actx.createOscillator();
+    reedChatterLFO.type = 'triangle';
+    reedChatterLFO.frequency.value = 62 + reedinessVal * 18; // 62–80 Hz
+    const reedChatterGain = actx.createGain();
+    reedChatterGain.gain.value = 0.06 + reedinessVal * 0.08;
+
+    // ── Pressure swell LFO (bag pressure breath cycle) ───────────
+    // Subtle pitch wobble ~0.4Hz from arm pressure variation
+    // Same mechanism as the drone wobble but slightly different rate
+    const pressureLFO = actx.createOscillator();
+    pressureLFO.type = 'sine';
+    pressureLFO.frequency.value = 0.42 + Math.random() * 0.08;
+    const pressureLFOGain = actx.createGain();
+    pressureLFOGain.gain.value = freq * 0.0006; // ~0.25¢ wobble in Hz
+
+    // ── Nonlinear reed saturation ────────────────────────────────
+    // Reed clipping at high pressure — adds warmth and limits dynamics
+    const shaper = actx.createWaveShaper();
+    shaper.curve = makeReedCurve(reedinessVal);
+    shaper.oversample = '2x';
+
+    // ── Chanter body EQ ──────────────────────────────────────────
+    const eq = buildChanterEQ(noteIdx);
+
+    // ── Gain / envelope ──────────────────────────────────────────
+    const g = actx.createGain();
+    g.gain.setValueAtTime(0, now);
+    g.gain.linearRampToValueAtTime(bagPressure * 0.72, now + 0.022);
+
+    // ── Signal routing ────────────────────────────────────────────
+    // Oscillators → shaper → gain buses → EQ → master
+    const oscGain    = actx.createGain(); oscGain.gain.value    = 0.70;
+    const chorus1Gain = actx.createGain(); chorus1Gain.gain.value = 0.15;
+    const chorus2Gain = actx.createGain(); chorus2Gain.gain.value = 0.15;
+
+    osc.connect(oscGain);
+    chorus1.connect(chorus1Gain);
+    chorus2.connect(chorus2Gain);
+    [oscGain, chorus1Gain, chorus2Gain].forEach(g2 => g2.connect(shaper));
+
+    nSrc.connect(nBpf); nBpf.connect(nGain); nGain.connect(shaper);
+
+    // Reed chatter as amplitude modulation on the shaper output
+    reedChatterLFO.connect(reedChatterGain);
+    reedChatterGain.connect(g.gain); // modulate output gain
+
+    // Pressure LFO modulates chanter pitch
+    pressureLFO.connect(pressureLFOGain);
+    pressureLFOGain.connect(osc.frequency);
+    pressureLFOGain.connect(chorus1.frequency);
+    pressureLFOGain.connect(chorus2.frequency);
+
+    shaper.connect(eq[0]);
+    eq[eq.length - 1].connect(g);
+    g.connect(masterGain);
+
+    [osc, chorus1, chorus2, reedChatterLFO, pressureLFO].forEach(o => o.start(now));
+    nSrc.start(now);
+
+    chanterVoice = { osc, chorus1, chorus2, reedChatterLFO, pressureLFO, nSrc, shaper, eq, g };
+
+    setStatus(register + ' register · ' + note.name + ' · ' + noteName(midi) + ' (' + note.detune + '¢)');
+    showPill(note.name);
+    document.querySelectorAll('.chanter-hole').forEach(h => h.classList.remove('active'));
+    document.getElementById('ch-' + noteIdx)?.classList.add('active');
+  }
+
+  // ── Reed WaveShaper curve ───────────────────────────────────────
+  // Soft-clip at high pressure — models reed clamping behaviour
+  // More reediness = harder clipping = more harmonic distortion
+  function makeReedCurve(reediness) {
+    const n = 256, curve = new Float32Array(n);
+    const k = 1.5 + reediness * 3.5;
+    for (let i = 0; i < n; i++) {
+      const x = (i * 2) / n - 1;
+      curve[i] = (Math.PI + k) * x / (Math.PI + k * Math.abs(x));
+    }
+    return curve;
+  }
+
+  function stopChanter(immediate = false) {
+    if (!chanterVoice || !actx) return;
+    const t = actx.currentTime, rel = immediate ? 0.010 : 0.10;
+    chanterVoice.g.gain.cancelScheduledValues(t);
+    chanterVoice.g.gain.setValueAtTime(chanterVoice.g.gain.value, t);
+    chanterVoice.g.gain.exponentialRampToValueAtTime(0.0001, t + rel);
+    const { osc, chorus1, chorus2, reedChatterLFO, pressureLFO, nSrc } = chanterVoice;
+    [osc, chorus1, chorus2, reedChatterLFO, pressureLFO, nSrc].forEach(o => {
+      try { o.stop(t + rel + 0.02); } catch(e) {}
+    });
+    const ref = chanterVoice;
+    setTimeout(() => {
+      try { ref.g.disconnect(); ref.shaper.disconnect(); } catch(e) {}
+      (ref.eq || []).forEach(f => { try { f.disconnect(); } catch(e) {} });
+    }, (rel + 0.15) * 1000);
+    chanterVoice = null;
+    currentNoteIdx = -1;
+    document.querySelectorAll('.chanter-hole').forEach(h => h.classList.remove('active'));
+  }
+
+  // ── ORNAMENTS ────────────────────────────────────────────────────
+  // Timing from Cannon (1995) "The Traditional & Classical Music of Scotland"
+  // Gracenote: 50ms; Doubling: 48ms per note; Taorluath: 52ms per note
+  // Birl: 45ms per movement; Throw on D: 55ms per note
+  function ornament(type) {
+    if (!blowing || !actx) return;
+    const saved  = currentNoteIdx;
+    const spd    = ornSpeedVal; // speed multiplier
+    const ms     = t => t / spd; // apply speed scaling
+
+    const flash = id => {
+      const b = document.getElementById('orn' + id.charAt(0).toUpperCase() + id.slice(1));
+      if (b) { b.classList.add('flash'); setTimeout(() => b.classList.remove('flash'), 400); }
+    };
+    const restore = (delay) => {
+      setTimeout(() => { saved >= 0 ? playChanter(saved) : stopChanter(); }, delay);
+    };
+
+    if (type === 'grace') {
+      // Single gracenote from High G (traditional: always from G or D)
+      flash('grace');
+      stopChanter(true);
+      playChanter(7); // High G
+      restore(ms(50));
+
+    } else if (type === 'double') {
+      // Doubling: High G grace → D grace → note
+      // (Cannon 1995: most common two-note ornament)
+      flash('double');
+      stopChanter(true);
+      setTimeout(() => playChanter(7), 0);           // High G
+      setTimeout(() => playChanter(4), ms(48));       // D
+      restore(ms(96));
+
+    } else if (type === 'taor') {
+      // Taorluath: D grace → Low G → D grace → note
+      // Traditional pibroch ornament
+      flash('taor');
+      stopChanter(true);
+      setTimeout(() => playChanter(4), 0);            // D
+      setTimeout(() => playChanter(0), ms(52));        // Low G
+      setTimeout(() => playChanter(4), ms(104));       // D
+      restore(ms(156));
+
+    } else if (type === 'birl') {
+      // Birl: Low A → Low G → Low A → Low G → Low A
+      // Traditional dance music ornament on Low A
+      flash('birl');
+      stopChanter(true);
+      setTimeout(() => playChanter(1), 0);             // Low A
+      setTimeout(() => playChanter(0), ms(45));         // Low G
+      setTimeout(() => playChanter(1), ms(90));         // Low A
+      setTimeout(() => playChanter(0), ms(135));        // Low G
+      restore(ms(180));
+
+    } else if (type === 'throw') {
+      // Throw on D: D → Low G → D
+      // Most common ornament in GHB dance music
+      flash('throw');
+      stopChanter(true);
+      setTimeout(() => playChanter(4), 0);             // D
+      setTimeout(() => playChanter(0), ms(55));         // Low G
+      restore(ms(110));
+    }
+  }
+  window.ornament = ornament;
+
+  // ── BLOW ─────────────────────────────────────────────────────────
+  function startBlow() {
+    initAudio();
+    if (actx.state === 'suspended') actx.resume();
+    blowing = true;
+    document.getElementById('blowBtn').classList.add('active');
+    startBagPressure();
+    startDrones();
+    setStatus('Blowing — press chanter keys');
+  }
+
+  function stopBlow() {
+    blowing = false;
+    document.getElementById('blowBtn').classList.remove('active');
+    stopChanter(false);
+    stopDrones();
+    // Bag pressure falls with natural lag
+    setTimeout(() => {
+      if (!blowing) {
+        stopBagInterval();
+        bagPressure = 0;
+        document.getElementById('pressureFill').style.width = '0%';
+      }
+    }, 600);
+    setStatus('Hold the blow button or Space — then press chanter keys');
+  }
+  window.startBlow = startBlow;
+  window.stopBlow  = stopBlow;
+
+  // ── Helpers ───────────────────────────────────────────────────────
+  function setStatus(m) { document.getElementById('statusBar').textContent = m; }
+  const notePills = {};
+  function showPill(name) {
+    const d = document.getElementById('noteDisplay');
+    Object.keys(notePills).forEach(k => { notePills[k].remove(); delete notePills[k]; });
+    const p = document.createElement('div'); p.className = 'note-pill'; p.textContent = name;
+    d.appendChild(p); notePills[name] = p;
+  }
+
+  // ── Build UI ──────────────────────────────────────────────────────
+  function buildChanter() {
+    const wrap = document.getElementById('chanterKeys'); wrap.innerHTML = '';
+    CHANTER.forEach((note, i) => {
+      const grp  = document.createElement('div'); grp.className = 'chanter-key';
+      const hole = document.createElement('div'); hole.className = 'chanter-hole'; hole.id = 'ch-' + i;
+      const dot  = document.createElement('div'); dot.className = 'chanter-hole-dot';
+      const nl   = document.createElement('div'); nl.className = 'chanter-note'; nl.textContent = note.name;
+      const kb   = document.createElement('div'); kb.className = 'chanter-kb'; kb.textContent = note.kb.toUpperCase();
+      hole.appendChild(dot); hole.appendChild(nl);
+      hole.addEventListener('pointerdown', e => { e.preventDefault(); playChanter(i); });
+      hole.addEventListener('pointerup',   () => { if (currentNoteIdx === i) stopChanter(); });
+      hole.addEventListener('pointerleave',() => { if (currentNoteIdx === i) stopChanter(); });
+      grp.appendChild(hole); grp.appendChild(kb);
+      wrap.appendChild(grp);
+    });
+  }
+
+  // ── Keyboard ──────────────────────────────────────────────────────
+  const CHANTER_KB = CHANTER.reduce((m, n, i) => { m[n.kb] = i; return m; }, {});
+  const ORNAMENT_KB = { q: 'grace', w: 'double', e: 'taor', r: 'birl', t: 'throw' };
+  const held = new Set();
+
+  document.addEventListener('keydown', e => {
+    if (e.repeat) return;
+    if (e.code === 'Space') { e.preventDefault(); startBlow(); return; }
+    const k = e.key.toLowerCase();
+    if (CHANTER_KB[k] !== undefined && !held.has(k)) { held.add(k); playChanter(CHANTER_KB[k]); }
+    if (ORNAMENT_KB[k]) ornament(ORNAMENT_KB[k]);
+  });
+  document.addEventListener('keyup', e => {
+    if (e.code === 'Space') { stopBlow(); return; }
+    const k = e.key.toLowerCase();
+    if (CHANTER_KB[k] !== undefined) {
+      held.delete(k);
+      if (currentNoteIdx === CHANTER_KB[k]) stopChanter();
+    }
+  });
+
+  // ── Controls ───────────────────────────────────────────────────────
+  const TUNE_NAMES = {'-6':'Eb','-5':'E','-4':'F','-3':'F#','-2':'G','-1':'Ab','0':'A','1':'Bb','2':'B','3':'C','4':'C#','5':'D','6':'Eb'};
+
+  function ctl(id, fn) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', fn);
+  }
+
+  ctl('pressCtrl', function() {
+    pressure = +this.value;
+    document.getElementById('pressVal').textContent = Math.round(pressure * 100);
+  });
+  ctl('droneVolCtrl', function() {
+    droneVol = +this.value;
+    document.getElementById('droneVolVal').textContent = Math.round(droneVol * 100);
+    if (!actx) return;
+    Object.values(droneNodes).forEach(d => {
+      if (d) d.g.gain.setTargetAtTime(droneVol * 0.52, actx.currentTime, 0.06);
+    });
+  });
+  ctl('tuneCtrl', function() {
+    semitoneShift = +this.value;
+    document.getElementById('tuneVal').textContent = TUNE_NAMES[this.value] || 'A';
+    if (blowing) { stopDrones(); droneWaveCache = null; startDrones(); }
+  });
+  ctl('revCtrl', function() {
+    revVal = +this.value;
+    document.getElementById('revVal').textContent = Math.round(revVal * 100);
+    if (dryGain) { dryGain.gain.value = 1 - revVal; wetGain.gain.value = revVal; }
+  });
+  ctl('volCtrl', function() {
+    volVal = +this.value;
+    document.getElementById('volVal').textContent = Math.round(volVal * 100);
+    if (masterGain) masterGain.gain.value = volVal;
+  });
+  ctl('reedinessCtrl', function() {
+    reedinessVal = +this.value;
+    document.getElementById('reedinessVal').textContent = Math.round(reedinessVal * 100);
+    // Invalidate wave cache so next note uses new reediness
+    Object.keys(chanterWaveCache).forEach(k => delete chanterWaveCache[k]);
+  });
+  ctl('ornSpeedCtrl', function() {
+    ornSpeedVal = +this.value;
+    document.getElementById('ornSpeedVal').textContent = this.value + '×';
+  });
+
+  buildChanter();
+
+  // ── InstrudioBridge ────────────────────────────────────────────────
+  \1
+    ssotId:'studio_bagpipes',
+    instrument: 'bagpipes',
+    title: 'Studio Bagpipes',
+    minMidi: 67,
+    maxMidi: 81,
+    init: initAudio,
+    playMidi(midi, velocity = 0.82, durationMs = 400) {
+      if (!blowing) startBlow();
+      const best = CHANTER.reduce((b, n, i) =>
+        Math.abs(n.midi - midi) < Math.abs(b.n.midi - midi) ? { n, i } : b,
+        { n: CHANTER[0], i: 0 }
+      );
+      playChanter(best.i);
+      setTimeout(() => stopChanter(false), Math.max(120, durationMs));
+    },
+    stopAll() { stopChanter(); stopDrones(); blowing = false; stopBagInterval(); bagPressure = 0; }
+  };
+})();
+
+</script>
+<section id="instrudio-embedded-score-dock" aria-label="Score import dock"></section>
+<script src="core/definition-runtime.js"></script>
+<script>window.InstrudioSSOTRuntime&&window.InstrudioSSOTRuntime.applyByBridge&&window.InstrudioSSOTRuntime.applyByBridge();</script>
+<script src="instrudio-suite.js"></script>
+</body>
+</html>

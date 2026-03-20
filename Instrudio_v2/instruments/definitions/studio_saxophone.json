@@ -1,0 +1,35 @@
+{
+  "id": "studio_saxophone",
+  "slug": "saxophone",
+  "name": "Studio Saxophone",
+  "version": "1.0.0",
+  "release": "extended",
+  "page": "saxophone.html",
+  "pageTitle": "Studio Saxophone · Instrudio",
+  "headline": "Studio Saxophone",
+  "subheadline": "Expressive sax with legato, staccato, and jazz modes under shared runtime control.",
+  "category": "winds",
+  "bridgeInstrument": "saxophone",
+  "minMidi": 52,
+  "maxMidi": 88,
+  "techniques": [
+    "legato",
+    "staccato",
+    "jazz"
+  ],
+  "autoplay": {
+    "respectsManualTechnique": true,
+    "defaultTechnique": "legato",
+    "supportsLibrary": true
+  },
+  "ssotFields": [
+    "pageTitle",
+    "headline",
+    "page",
+    "bridgeInstrument",
+    "techniques",
+    "minMidi",
+    "maxMidi",
+    "release"
+  ]
+}

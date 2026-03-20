@@ -1,0 +1,28 @@
+{
+  "id": "studio_triangle",
+  "slug": "triangle",
+  "name": "Studio Triangle",
+  "version": "1.0.0",
+  "release": "extended",
+  "page": "triangle.html",
+  "pageTitle": "Studio Triangle · Instrudio",
+  "headline": "Studio Triangle",
+  "subheadline": "Precision metallic percussion voice folded into the shared definition runtime.",
+  "category": "percussion",
+  "bridgeInstrument": "triangle",
+  "minMidi": 57,
+  "maxMidi": 81,
+  "autoplay": {
+    "respectsManualTechnique": true,
+    "supportsLibrary": true
+  },
+  "ssotFields": [
+    "pageTitle",
+    "headline",
+    "page",
+    "bridgeInstrument",
+    "minMidi",
+    "maxMidi",
+    "release"
+  ]
+}

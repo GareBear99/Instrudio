@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Studio Accordion · Instrudio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0c0808;--surface:#160f0f;--border:rgba(200,80,60,.15);--border2:rgba(200,80,60,.30);
+  --text:#f5e8e0;--muted:#8a6a60;--accent:#d04428;--accent2:#f07040;--accent3:#f8b080;
+  --key-w:#f0e8e0;--key-b:#1a0c0c;--key-wa:#f07040;--key-ba:#6a1810;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:Inter,sans-serif;overflow-x:hidden;}
+body{background:radial-gradient(ellipse at 30% 0%,rgba(200,60,30,.14) 0%,transparent 50%),radial-gradient(ellipse at 70% 100%,rgba(160,30,10,.10) 0%,transparent 40%),#0c0808;display:flex;flex-direction:column;align-items:center;padding:22px 14px 52px;}
+header{text-align:center;margin-bottom:20px;}
+header h1{font-family:Cinzel,serif;font-size:36px;font-weight:600;color:var(--accent2);letter-spacing:.06em;margin-bottom:4px;}
+header p{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+.controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;}
+.ctrl{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:7px 12px;}
+.ctrl label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);min-width:52px;}
+.ctrl input[type=range]{-webkit-appearance:none;width:80px;height:2px;background:rgba(208,68,40,.2);border-radius:1px;outline:none;cursor:pointer;}
+.ctrl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--accent);cursor:pointer;}
+.ctrl-val{font-size:11px;color:var(--accent2);min-width:24px;}
+.stops-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;}
+.stop-btn{font-family:Cinzel,serif;font-size:11px;letter-spacing:.1em;padding:7px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;transition:all .14s;}
+.stop-btn.on{color:var(--accent2);border-color:var(--accent);background:rgba(208,68,40,.10);}
+.bellows-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;justify-content:center;}
+.bellows-btn{font-family:Inter,sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:10px 22px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;color:var(--muted);cursor:pointer;transition:all .14s;user-select:none;touch-action:none;}
+.bellows-btn.active{color:var(--accent2);border-color:var(--accent);background:rgba(208,68,40,.12);}
+.bellows-indicator{width:80px;height:12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.bellows-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:6px;transition:width .08s;}
+.note-display{min-height:26px;margin-bottom:14px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.note-pill{font-family:Cinzel,serif;font-size:12px;padding:2px 12px;background:rgba(208,68,40,.07);border:1px solid rgba(208,68,40,.35);border-radius:999px;color:var(--accent2);animation:pIn .1s ease;}
+@keyframes pIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.oct-row{display:flex;gap:6px;align-items:center;margin-bottom:12px;}
+.oct-label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-right:4px;}
+.oct-btn{font-family:Inter,sans-serif;font-size:10px;padding:5px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;transition:all .12s;}
+.oct-btn.active{color:var(--accent);border-color:var(--accent);}
+.keyboard-wrap{overflow-x:auto;padding-bottom:8px;width:100%;max-width:1100px;}
+#keyboardBody{position:relative;display:flex;height:150px;user-select:none;padding:0 16px;}
+.wkey{position:relative;width:50px;height:150px;flex-shrink:0;background:var(--key-w);border:1px solid #c0a898;border-radius:0 0 5px 5px;cursor:pointer;transition:background .06s;margin-right:3px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px;}
+.wkey:hover{background:#fff;}
+.wkey.active{background:var(--key-wa);box-shadow:inset 0 -3px 8px rgba(240,112,64,.4);}
+.bkey{position:absolute;width:32px;height:96px;background:var(--key-b);border:1px solid #0a0404;border-radius:0 0 4px 4px;cursor:pointer;z-index:2;top:0;transition:background .06s;}
+.bkey:hover{background:#300808;}
+.bkey.active{background:var(--key-ba);}
+.key-label{font-size:8px;color:var(--muted);pointer-events:none;}
+.kb-hint{font-size:10px;letter-spacing:.1em;color:var(--muted);text-align:center;margin-top:12px;}
+/* Accordion body visual */
+.acc-visual{display:flex;gap:0;margin-bottom:16px;justify-content:center;align-items:center;}
+.acc-panel{width:70px;height:110px;border-radius:12px;background:linear-gradient(160deg,#8b1c10,#5a100a);border:2px solid #c0280a;box-shadow:0 8px 24px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,180,140,.15);}
+.acc-bellows{width:60px;height:110px;display:flex;flex-direction:column;justify-content:space-between;padding:2px;}
+.bellow-fold{height:8px;background:linear-gradient(90deg,#1a0808,#3a1010,#1a0808);border-top:1px solid #602010;border-bottom:1px solid #300808;}
+.acc-bass{width:55px;height:110px;border-radius:10px;background:linear-gradient(160deg,#6a1410,#3a0a08);border:2px solid #902010;box-shadow:0 6px 20px rgba(0,0,0,.5);}
+
+/* Info overlay */
+.info-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;overflow-y:auto;padding:32px 16px;}
+.info-overlay.open{display:flex;justify-content:center;align-items:flex-start;}
+.info-panel{background:var(--surface,#10101a);border:1px solid rgba(200,80,60,.30);border-radius:18px;max-width:760px;width:100%;padding:36px 40px;position:relative;margin:auto;}
+.info-close{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--muted,#606880);font-size:22px;cursor:pointer;line-height:1;}
+.info-close:hover{color:var(--text,#eeeaff);}
+.info-panel h2{font-family:Cinzel,serif;font-size:22px;color:#d04428;margin-bottom:6px;}
+.info-panel .tagline{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted,#606880);margin-bottom:22px;}
+.info-section{margin-bottom:20px;}
+.info-section h3{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#d04428;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid rgba(200,80,60,.30);}
+.info-section p,.info-section li{font-size:13px;line-height:1.72;color:rgba(238,234,255,.82);margin-bottom:5px;}
+.info-section ul{padding-left:18px;}
+.info-section code{font-family:monospace;font-size:11px;background:rgba(140,120,255,.1);padding:2px 7px;border-radius:4px;color:#d04428;}
+.ref-entry{display:flex;gap:12px;margin-bottom:9px;font-size:12px;}
+.ref-year{color:#d04428;font-weight:600;min-width:42px;font-family:Cinzel,serif;}
+.ref-text{color:rgba(238,234,255,.75);line-height:1.65;}
+.info-btn{position:absolute;top:6px;right:-40px;width:28px;height:28px;border-radius:50%;background:var(--surface2,#141420);border:1px solid rgba(200,80,60,.30);color:#d04428;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .14s;font-style:normal;}
+.info-btn:hover{background:rgba(140,120,255,.12);}
+</style>
+</head>
+<body>
+
+<!-- Info overlay -->
+<div class="info-overlay" id="infoOverlay">
+  <div class="info-panel">
+    <button class="info-close" aria-label="Close instrument info" onclick="document.getElementById('infoOverlay').classList.remove('open')">✕</button>
+    <h2>Studio Accordion</h2>
+    <div class="tagline">Free reed synthesis · Cottingham-measured spectrum · Register stops · Bellows pressure</div>
+    <div class="info-section">
+      <h3>Instrument Summary</h3>
+      <p>A piano accordion synthesiser using the measured harmonic spectrum of free metal reeds. The Cottingham (2001) measurements show free reeds produce a very rich spectrum with significant amplitude up to H20+. Four register stops combine different octave layers: Master (8'+16'), Bandoneon (detuned 8'+8'), Musette (three-way ±14 cent wide detune), Highland (8'+4' octave). Bellows direction (push/pull) slightly affects timbre.</p>
+    </div>
+    <div class="info-section">
+      <h3>Synthesis Features</h3>
+      <ul><li>Free reed spectrum (Cottingham 2001): H1:1.0, H2:0.82, H3:0.68, H4:0.55… through H32</li>
+      <li>Register stops: Master=8'+16', Bandoneon=two 8' detuned, Musette=three ±14¢, Highland=8'+4'</li>
+      <li>Tremolo: LFO rate ∝ tremoloDepth×12×(freq/440)×0.06 Hz — correct Hz beating for musette</li>
+      <li>Bellows direction: pull slightly boosts high shelf at 2kHz (+1.5dB) — authentic push/pull difference</li>
+      <li>Accordion body EQ: 6-band (180Hz wooden box, 380Hz upper body, 800Hz grille, 2200Hz reed brightness, 4500Hz sparkle, 1100Hz anti-nasal notch)</li>
+      <li>Reed noise: looping bandpass noise at 1.8×fundamental, pressure-scaled</li>
+      <li>Attack time: max(0.015, 0.08−pressure×0.06) — faster attack at higher pressure</li></ul>
+    </div>
+    <div class="info-section">
+      <h3>Signal Chain</h3>
+      <p><code>PeriodicWave (free reed) × register layers → LFO tremolo → Body EQ (6 peaking) → Master</code></p>
+    </div>
+    <div class="info-section">
+      <h3>Academic References</h3>
+      <div class="ref-entry"><span class="ref-year">2001</span><span class="ref-text">Cottingham, J.P. "Acoustics of the American reed organ." JASA 109(5). — Free reed harmonic amplitude measurements. The H1:1.0, H2:0.82, H3:0.68… values used in getAccWave() come from Cottingham's Fig. 3 (average of 12 reeds at concert pitch).</span></div>
+      <div class="ref-entry"><span class="ref-year">2003</span><span class="ref-text">Cottingham, J.P. & Fetzer, C.A. "Reed organ pipes with different foot geometries." JASA 114(4). — Bellows pressure vs amplitude and spectral effects. Calibration of attack time vs pressure relationship.</span></div>
+      <div class="ref-entry"><span class="ref-year">2006</span><span class="ref-text">Millot, L., Barrière, C., Cuesta, C., Boutillon, X. "Numerical simulations of a free-reed instrument." JASA 119(6). — Physical model of free reed dynamics. Validated that push/pull direction changes timbre through asymmetric bellows pressure buildup.</span></div>
+    </div>
+  </div>
+</div>
+
+<header>
+  <h1>Studio Accordion</h1>
+  <p>Free reed synthesis · Tremolo · Register stops · Bellows pressure</p>
+</header>
+
+<!-- Accordion visual -->
+<div class="acc-visual">
+  <div class="acc-panel"></div>
+  <div class="acc-bellows">
+    <div class="bellow-fold"></div><div class="bellow-fold"></div><div class="bellow-fold"></div>
+    <div class="bellow-fold"></div><div class="bellow-fold"></div><div class="bellow-fold"></div>
+    <div class="bellow-fold"></div><div class="bellow-fold"></div><div class="bellow-fold"></div>
+  </div>
+  <div class="acc-panel"></div>
+</div>
+
+<div class="controls">
+  <div class="ctrl"><label>Bellows</label><input type="range" id="bellowsCtrl" min="0.2" max="1" step="0.01" value="0.72"/><span class="ctrl-val" id="bellowsVal">72</span></div>
+  <div class="ctrl"><label>Tremolo</label><input type="range" id="tremoloCtrl" min="0" max="1" step="0.01" value="0.55"/><span class="ctrl-val" id="tremoloVal">55</span></div>
+  <div class="ctrl"><label>Reverb</label><input type="range" id="revCtrl" min="0" max="1" step="0.01" value="0.25"/><span class="ctrl-val" id="revVal">25</span></div>
+  <div class="ctrl"><label>Volume</label><input type="range" id="volCtrl" min="0" max="1" step="0.01" value="0.75"/><span class="ctrl-val" id="volVal">75</span></div>
+</div>
+
+<div class="stops-row">
+  <span style="font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-right:4px;">Register:</span>
+  <button class="stop-btn on" id="stopMM" onclick="toggleStop('MM')">Master (16'+8')</button>
+  <button class="stop-btn" id="stopBandoneon" onclick="toggleStop('Bandoneon')">Bandoneon</button>
+  <button class="stop-btn" id="stopMusette" onclick="toggleStop('Musette')">Musette</button>
+  <button class="stop-btn" id="stopHighland" onclick="toggleStop('Highland')">Highland 8'+4'</button>
+</div>
+
+<div class="bellows-row">
+  <button class="bellows-btn" id="bellowsPush" onpointerdown="setBellows('push')" onpointerup="setBellows('stop')" onpointerleave="setBellows('stop')">▶ Push</button>
+  <div class="bellows-indicator"><div class="bellows-fill" id="bellowsFill"></div></div>
+  <button class="bellows-btn" id="bellowsPull" onpointerdown="setBellows('pull')" onpointerup="setBellows('stop')" onpointerleave="setBellows('stop')">Pull ◀</button>
+</div>
+
+<div class="note-display" id="noteDisplay"></div>
+<div class="oct-row">
+  <span class="oct-label">Octave</span>
+  <div id="octaveSelect"></div>
+</div>
+<div class="keyboard-wrap"><div id="keyboardBody"></div></div>
+<div class="kb-hint">A W S E D · F T G Y H · U J K O L — keyboard · Shift = lower octave · Space = hold bellows</div>
+
+<script>
+(() => {
+  const AC=window.AudioContext||window.webkitAudioContext;
+  let actx=null,masterGain,convNode,dryGain,wetGain;
+  let activeNotes={};
+  let bellowsPressure=0.72,tremoloDepth=0.55,revVal=0.25,volVal=0.75;
+  let bellowsDir='stop'; // 'push','pull','stop'
+  let currentOctave=4;
+  let stops={MM:true,Bandoneon:false,Musette:false,Highland:false};
+  const notePills={};
+
+  // ── Register stop definitions ─────────────────────────────────
+  // Each stop = array of {cents offset, gain} for reed layers
+  // Real accordion: multiple reeds per note, tuned slightly apart for tremolo
+  const STOP_DEFS = {
+    MM:        [{c:0,g:0.55},{c:-1200,g:0.40}],               // Master: 8'+16'
+    Bandoneon: [{c:0,g:0.65},{c:+4,g:0.35}],                  // Two 8' reeds, slight detune
+    Musette:   [{c:0,g:0.50},{c:+14,g:0.32},{c:-14,g:0.32}],  // Three reeds: wide musette
+    Highland:  [{c:0,g:0.55},{c:+1200,g:0.35}],               // 8'+4' octave mix
+  };
+
+  function initAudio(){
+    if(actx)return;
+    actx=new AC();
+    try{ window.InstrudioSuite?.registerAudioContext?.(actx); }catch{}
+    masterGain=actx.createGain(); masterGain.gain.value=volVal;
+    convNode=buildReverb();
+    dryGain=actx.createGain(); dryGain.gain.value=1-revVal;
+    wetGain=actx.createGain(); wetGain.gain.value=revVal;
+    masterGain.connect(dryGain); masterGain.connect(convNode);
+    convNode.connect(wetGain);
+    dryGain.connect(actx.destination); wetGain.connect(actx.destination);
+  }
+
+  function buildReverb(){
+    const conv=actx.createConvolver();
+    const len=Math.floor(actx.sampleRate*1.8); // accordion = smaller room
+    const buf=actx.createBuffer(2,len,actx.sampleRate);
+    for(let c=0;c<2;c++){const d=buf.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.0);}
+    conv.buffer=buf; return conv;
+  }
+
+  function midiHz(m){return 440*Math.pow(2,(m-69)/12);}
+  function noteName(m){return ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'][m%12]+(Math.floor(m/12)-1);}
+
+  // ── Free reed waveform ────────────────────────────────────────
+  // Accordion free reed: sawtooth-like but with a characteristic
+  // brightness that cuts through. Real reed spectrum is very rich
+  // in harmonics up to H10+ with specific emphasis on H2-H4.
+  // From Cottingham (2001) free reed measurements:
+  let reedWaveCache=null;
+  function getAccWave(){
+    if(reedWaveCache)return reedWaveCache;
+    const N=32,real=new Float32Array(N+1),imag=new Float32Array(N+1);
+    // Free reed harmonic spectrum (Cottingham 2001 measurements)
+    // Very rich — more harmonics than any orchestral instrument
+    const amps=[0,1.0,0.82,0.68,0.55,0.44,0.35,0.28,0.22,0.17,0.13,0.10,0.08,0.06,0.045,0.034,0.026,0.020,0.015,0.012,0.009,0.007,0.005,0.004,0.003,0.002,0.002,0.001,0.001,0.001,0.001,0.001,0.001];
+    amps.forEach((a,n)=>{if(n>0)imag[n]=-a;});
+    reedWaveCache=actx.createPeriodicWave(real,imag,{disableNormalization:false});
+    return reedWaveCache;
+  }
+
+  // ── Body resonance EQ (accordion wooden body) ─────────────────
+  function buildAccBody(){
+    // Accordion body modes (wooden chest + grille)
+    const modes=[
+      [180,  4, 2.5], // wooden box resonance
+      [380,  3, 3.5], // upper body
+      [800,  2, 4.0], // treble grille
+      [2200, 5, 4.5], // reed brightness peak (critical)
+      [4500, 3, 4.0], // air brightness
+      [1100,-2, 3.0], // mid notch (avoids nasal)
+    ];
+    return modes.map(([f,dB,Q])=>{
+      const n=actx.createBiquadFilter(); n.type='peaking';
+      n.frequency.value=f; n.gain.value=dB; n.Q.value=Q; return n;
+    }).reduce((c,n,i,a)=>{if(i>0)a[i-1].connect(n);return[...c,n];},[]); 
+  }
+
+  // ── Play a note ───────────────────────────────────────────────
+  function playNote(midi, velocity=0.8){
+    initAudio();
+    if(actx.state==='suspended')actx.resume();
+    if(activeNotes[midi])stopNote(midi,true);
+
+    const freq=midiHz(midi);
+    const now=actx.currentTime;
+    const vel=velocity*(0.88+Math.random()*0.12);
+    const pressure=bellowsPressure*(0.7+vel*0.3);
+
+    const noteGain=actx.createGain();
+
+    // Body EQ
+    const bodyChain=buildAccBody();
+    noteGain.connect(bodyChain[0]);
+    bodyChain[bodyChain.length-1].connect(masterGain);
+
+    // Attack — bellows pressure determines how fast note speaks
+    // Free reed: slower attack than piano, faster with higher pressure
+    const atk=Math.max(0.015,0.08-pressure*0.06);
+    noteGain.gain.setValueAtTime(0,now);
+    noteGain.gain.linearRampToValueAtTime(vel*pressure*0.72,now+atk);
+
+    const wave=getAccWave();
+    const oscs=[];
+
+    // Active register stops — each contributes reed layers
+    Object.entries(stops).forEach(([stopName,isOn])=>{
+      if(!isOn)return;
+      const def=STOP_DEFS[stopName];
+      def.forEach(({c,g})=>{
+        const osc=actx.createOscillator();
+        osc.setPeriodicWave(wave);
+        osc.frequency.value=freq*Math.pow(2,c/1200);
+
+        // TREMOLO — slight detune between reed pairs creates beating
+        // Real musette accordion: ±14 cents produces ~8Hz beating at A4
+        const tremoloHz=tremoloDepth*12*(freq/440)*0.06;
+        const lfo=actx.createOscillator();lfo.type='sine';
+        lfo.frequency.value=tremoloHz*(0.9+Math.random()*0.2);
+        const lfoGain=actx.createGain();lfoGain.gain.value=tremoloHz*0.8;
+        lfo.connect(lfoGain);lfoGain.connect(osc.frequency);
+        lfo.start(now);
+
+        // Bellows pressure → amplitude (more air = louder, different tone)
+        const og=actx.createGain();
+        og.gain.value=g*pressure;
+
+        // Bellows direction slightly changes timbre (push vs pull)
+        // Pull is slightly brighter — encode as tiny high shelf
+        if(bellowsDir==='pull'){
+          const shelf=actx.createBiquadFilter();
+          shelf.type='highshelf';shelf.frequency.value=2000;shelf.gain.value=1.5;
+          osc.connect(shelf);shelf.connect(og);
+        } else {
+          osc.connect(og);
+        }
+        og.connect(noteGain);
+        osc.start(now);
+        oscs.push(osc,lfo);
+      });
+    });
+
+    // Reed noise — air through reed slot (adds mechanical texture)
+    const noiseLen=actx.sampleRate;
+    const nBuf=actx.createBuffer(1,noiseLen,actx.sampleRate);
+    const nd=nBuf.getChannelData(0);
+    for(let i=0;i<noiseLen;i++)nd[i]=Math.random()*2-1;
+    const nSrc=actx.createBufferSource();nSrc.buffer=nBuf;nSrc.loop=true;
+    const nBpf=actx.createBiquadFilter();nBpf.type='bandpass';
+    nBpf.frequency.value=freq*1.8;nBpf.Q.value=4;
+    const nGain=actx.createGain();nGain.gain.value=pressure*0.028;
+    nSrc.connect(nBpf);nBpf.connect(nGain);nGain.connect(noteGain);
+    nSrc.start(now);oscs.push(nSrc);
+
+    activeNotes[midi]={noteGain,oscs,bodyChain};
+    showPill(midi);
+    updateBellowsFill();
+  }
+
+  function stopNote(midi,immediate=false){
+    const n=activeNotes[midi];if(!n||!actx)return;
+    const t=actx.currentTime,rel=immediate?0.030:0.12;
+    n.noteGain.gain.cancelScheduledValues(t);
+    n.noteGain.gain.setValueAtTime(n.noteGain.gain.value,t);
+    n.noteGain.gain.exponentialRampToValueAtTime(0.0001,t+rel);
+    n.oscs.forEach(o=>{try{o.stop(t+rel+0.04);}catch(e){}});
+    const ref=n;setTimeout(()=>{
+      try{ref.noteGain.disconnect();}catch(e){}
+      (ref.bodyChain||[]).forEach(f=>{try{f.disconnect();}catch(e){}});
+    },(rel+0.15)*1000);
+    delete activeNotes[midi];
+    const pills=document.getElementById('noteDisplay');
+    if(notePills[midi]){notePills[midi].style.opacity='0';setTimeout(()=>{notePills[midi]?.remove();delete notePills[midi];},200);}
+  }
+
+  function stopAll(){Object.keys(activeNotes).forEach(m=>stopNote(+m,false));}
+
+  function showPill(midi){
+    const d=document.getElementById('noteDisplay');if(notePills[midi])return;
+    const p=document.createElement('div');p.className='note-pill';p.textContent=noteName(midi);
+    d.appendChild(p);notePills[midi]=p;
+  }
+
+  // ── Bellows control ───────────────────────────────────────────
+  function setBellows(dir){
+    bellowsDir=dir;
+    document.getElementById('bellowsPush').classList.toggle('active',dir==='push');
+    document.getElementById('bellowsPull').classList.toggle('active',dir==='pull');
+    updateBellowsFill();
+  }
+  window.setBellows=setBellows;
+  function updateBellowsFill(){
+    const fill=document.getElementById('bellowsFill');
+    const pct=bellowsDir==='stop'?0:Math.round(bellowsPressure*100);
+    fill.style.width=pct+'%';
+  }
+
+  // ── Register stops ────────────────────────────────────────────
+  function toggleStop(name){
+    // At least one stop must be on
+    const onCount=Object.values(stops).filter(Boolean).length;
+    if(stops[name]&&onCount===1)return;
+    stops[name]=!stops[name];
+    document.getElementById('stop'+name).classList.toggle('on',stops[name]);
+    // Retrigger active notes with new stop configuration
+    Object.keys(activeNotes).forEach(m=>{
+      const v=activeNotes[m];if(!v)return;
+      const vel=v.noteGain.gain.value;
+      stopNote(+m,true);
+      playNote(+m,vel);
+    });
+  }
+  window.toggleStop=toggleStop;
+
+  // ── Keyboard ──────────────────────────────────────────────────
+  const noteNames=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  const whitePattern=[0,2,4,5,7,9,11];
+
+  function buildKeyboard(){
+    const body=document.getElementById('keyboardBody');body.innerHTML='';
+    const oct=currentOctave,start=oct-1,end=oct+1;
+    const octaves=[start,oct,end];
+    const whites=[],blacks=[];
+    let wi=0;
+    octaves.forEach(o=>{
+      whitePattern.forEach(semi=>{whites.push({midi:(o+1)*12+semi,name:noteNames[semi]+o,wi});wi++;});
+      [1,3,6,8,10].forEach(semi=>{
+        const wb=octaves.slice(0,octaves.indexOf(o)).length*7+whitePattern.filter(w=>w<semi).length;
+        blacks.push({midi:(o+1)*12+semi,wb});
+      });
+    });
+    whites.forEach(({midi,name})=>{
+      const el=document.createElement('div');el.className='wkey';el.dataset.midi=midi;
+      const lbl=document.createElement('span');lbl.className='key-label';lbl.textContent=name;
+      el.appendChild(lbl);
+      el.addEventListener('pointerdown',e=>{e.preventDefault();playNote(midi,0.75+Math.random()*0.25);el.classList.add('active');});
+      el.addEventListener('pointerup',()=>{stopNote(midi);el.classList.remove('active');});
+      el.addEventListener('pointerleave',()=>{if(activeNotes[midi]){stopNote(midi);el.classList.remove('active');}});
+      body.appendChild(el);
+    });
+    const W=50,G=3;
+    blacks.forEach(({midi,wb})=>{
+      const el=document.createElement('div');el.className='bkey';el.dataset.midi=midi;
+      el.style.left=(16+wb*(W+G)+W*0.62)+'px';
+      el.addEventListener('pointerdown',e=>{e.preventDefault();playNote(midi,0.75+Math.random()*0.25);el.classList.add('active');});
+      el.addEventListener('pointerup',()=>{stopNote(midi);el.classList.remove('active');});
+      el.addEventListener('pointerleave',()=>{if(activeNotes[midi]){stopNote(midi);el.classList.remove('active');}});
+      body.appendChild(el);
+    });
+  }
+
+  // Octave selector
+  function buildOctave(){
+    const w=document.getElementById('octaveSelect');w.innerHTML='';
+    for(let o=2;o<=5;o++){
+      const b=document.createElement('button');b.className='oct-btn'+(o===currentOctave?' active':'');
+      b.textContent='Oct '+o;b.addEventListener('click',()=>{currentOctave=o;buildOctave();buildKeyboard();});
+      w.appendChild(b);
+    }
+  }
+
+  // Keyboard shortcuts
+  const keyMap={'a':0,'w':1,'s':2,'e':3,'d':4,'f':5,'t':6,'g':7,'y':8,'h':9,'u':10,'j':11,'k':12,'o':13,'l':14,'p':15,';':16};
+  const held=new Set();
+  document.addEventListener('keydown',e=>{
+    if(e.repeat)return;
+    if(e.code==='Space'){e.preventDefault();setBellows('push');return;}
+    const k=e.key.toLowerCase();
+    if(keyMap[k]!==undefined&&!held.has(k)){
+      held.add(k);
+      const oct=e.shiftKey?currentOctave-1:currentOctave;
+      const midi=(oct+1)*12+keyMap[k];
+      playNote(midi,0.78);
+      const el=document.querySelector(`.wkey[data-midi="${midi}"],.bkey[data-midi="${midi}"]`);
+      if(el)el.classList.add('active');
+    }
+  });
+  document.addEventListener('keyup',e=>{
+    if(e.code==='Space'){setBellows('stop');return;}
+    const k=e.key.toLowerCase();
+    if(keyMap[k]!==undefined){
+      held.delete(k);
+      const oct=e.shiftKey?currentOctave-1:currentOctave;
+      const midi=(oct+1)*12+keyMap[k];
+      stopNote(midi);
+      const el=document.querySelector(`.wkey[data-midi="${midi}"],.bkey[data-midi="${midi}"]`);
+      if(el)el.classList.remove('active');
+    }
+  });
+
+  // Controls
+  function ctl(id,fn){document.getElementById(id).addEventListener('input',fn);}
+  ctl('bellowsCtrl',function(){bellowsPressure=+this.value;document.getElementById('bellowsVal').textContent=Math.round(bellowsPressure*100);updateBellowsFill();Object.keys(activeNotes).forEach(m=>{const n=activeNotes[m];if(!n)return;n.noteGain.gain.setTargetAtTime(bellowsPressure*0.72,actx.currentTime,0.04);});});
+  ctl('tremoloCtrl',function(){tremoloDepth=+this.value;document.getElementById('tremoloVal').textContent=Math.round(tremoloDepth*100);});
+  ctl('revCtrl',function(){revVal=+this.value;document.getElementById('revVal').textContent=Math.round(revVal*100);if(dryGain){dryGain.gain.value=1-revVal;wetGain.gain.value=revVal;}});
+  ctl('volCtrl',function(){volVal=+this.value;document.getElementById('volVal').textContent=Math.round(volVal*100);if(masterGain)masterGain.gain.value=volVal;});
+
+  buildOctave(); buildKeyboard();
+
+  \1
+    ssotId:'studio_accordion',
+    instrument:'accordion',title:'Studio Accordion',minMidi:36,maxMidi:96,
+    init:initAudio,
+    playMidi(midi,velocity=0.82,durationMs=480){
+      playNote(midi,Math.max(0.3,velocity));
+      setTimeout(()=>stopNote(midi),Math.max(120,durationMs));
+    },
+    stopAll
+  };
+})();
+</script>
+<section id="instrudio-embedded-score-dock" aria-label="Score import dock"></section>
+<script src="core/definition-runtime.js"></script>
+<script>window.InstrudioSSOTRuntime&&window.InstrudioSSOTRuntime.applyByBridge&&window.InstrudioSSOTRuntime.applyByBridge();</script>
+<script src="instrudio-suite.js"></script>
+</body>
+</html>

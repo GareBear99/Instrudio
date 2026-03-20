@@ -1,0 +1,28 @@
+{
+  "id": "studio_grand",
+  "slug": "piano",
+  "name": "Studio Grand",
+  "version": "1.1.0",
+  "release": "v1",
+  "page": "piano.html",
+  "pageTitle": "Studio Grand \u00b7 Instrudio",
+  "headline": "Studio Grand",
+  "subheadline": "Flagship acoustic piano for the v1 connected core.",
+  "category": "keys",
+  "bridgeInstrument": "piano",
+  "minMidi": 21,
+  "maxMidi": 108,
+  "autoplay": {
+    "respectsManualTechnique": true,
+    "supportsLibrary": true
+  },
+  "ssotFields": [
+    "pageTitle",
+    "headline",
+    "page",
+    "bridgeInstrument",
+    "minMidi",
+    "maxMidi",
+    "release"
+  ]
+}

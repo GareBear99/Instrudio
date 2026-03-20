@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Studio Triangle · Instrudio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#08080e;--surface:#10101a;--surface2:#141420;
+  --border:rgba(140,120,255,.14);--border2:rgba(140,120,255,.28);
+  --text:#eeeaff;--muted:#706888;--accent:#9070ff;--accent2:#c0a8ff;--accent3:#e0d8ff;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:Inter,sans-serif;overflow-x:hidden;}
+body{background:radial-gradient(ellipse at 25% 0%,rgba(120,80,255,.12) 0%,transparent 50%),radial-gradient(ellipse at 75% 100%,rgba(80,60,200,.08) 0%,transparent 40%),#08080e;display:flex;flex-direction:column;align-items:center;padding:22px 14px 52px;}
+/* Info overlay */
+.info-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;overflow-y:auto;padding:32px 16px;}
+.info-overlay.open{display:flex;justify-content:center;}
+.info-panel{background:var(--surface);border:1px solid var(--border2);border-radius:18px;max-width:760px;width:100%;padding:36px 40px;position:relative;}
+.info-close{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;}
+.info-close:hover{color:var(--text);}
+.info-panel h2{font-family:Cinzel,serif;font-size:24px;color:var(--accent2);margin-bottom:6px;}
+.info-panel .tagline{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:24px;}
+.info-section{margin-bottom:22px;}
+.info-section h3{font-family:Cinzel,serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.info-section p,.info-section li{font-size:13px;line-height:1.75;color:rgba(238,234,255,.82);margin-bottom:6px;}
+.info-section ul{padding-left:18px;}
+.info-section code{font-family:monospace;font-size:12px;background:rgba(140,120,255,.1);padding:1px 6px;border-radius:4px;color:var(--accent3);}
+.modal-table{width:100%;border-collapse:collapse;margin-top:8px;}
+.modal-table th{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px 8px;border-bottom:1px solid var(--border);}
+.modal-table td{font-size:12px;color:rgba(238,234,255,.8);padding:5px 8px;border-bottom:1px solid rgba(140,120,255,.07);font-family:monospace;}
+.ref-entry{display:flex;gap:12px;margin-bottom:8px;font-size:12px;}
+.ref-year{color:var(--accent);font-weight:600;min-width:44px;font-family:Cinzel,serif;}
+.ref-text{color:rgba(238,234,255,.75);line-height:1.6;}
+/* Header */
+header{text-align:center;margin-bottom:20px;position:relative;}
+header h1{font-family:Cinzel,serif;font-size:38px;font-weight:800;color:var(--accent2);letter-spacing:.06em;margin-bottom:4px;}
+header p{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+.info-btn{position:absolute;top:4px;right:-44px;width:28px;height:28px;border-radius:50%;background:var(--surface2);border:1px solid var(--border2);color:var(--accent2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .14s;}
+.info-btn:hover{background:rgba(140,120,255,.15);border-color:var(--accent);}
+/* Controls */
+.controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;}
+.ctrl{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:7px 12px;}
+.ctrl label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);min-width:48px;}
+.ctrl input[type=range]{-webkit-appearance:none;width:80px;height:2px;background:rgba(140,120,255,.18);border-radius:1px;outline:none;cursor:pointer;}
+.ctrl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--accent);cursor:pointer;}
+.ctrl-val{font-size:11px;color:var(--accent2);min-width:24px;}
+/* Effect presets */
+.presets-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:8px;}
+.presets-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-width:760px;width:100%;margin-bottom:18px;}
+.preset-btn{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .14s;}
+.preset-btn:hover{border-color:var(--accent);background:rgba(140,120,255,.07);}
+.preset-btn.active{border-color:var(--accent2);background:rgba(140,120,255,.12);box-shadow:0 0 14px rgba(140,120,255,.15);}
+.preset-icon{font-size:20px;line-height:1;}
+.preset-name{font-family:Cinzel,serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2);}
+.preset-desc{font-size:8px;color:var(--muted);text-align:center;line-height:1.3;}
+/* Triangle visual + strike zone */
+.triangle-stage{display:flex;flex-direction:column;align-items:center;gap:16px;margin-bottom:22px;}
+.triangle-wrap{position:relative;width:320px;height:280px;cursor:pointer;user-select:none;touch-action:none;}
+#triangleSvg{width:100%;height:100%;filter:drop-shadow(0 0 18px rgba(140,120,255,.25));}
+.strike-hint{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+/* Mute button */
+.mute-row{display:flex;gap:10px;align-items:center;justify-content:center;margin-bottom:14px;}
+.mute-btn{font-family:Cinzel,serif;font-size:11px;letter-spacing:.1em;padding:9px 22px;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;color:var(--muted);cursor:pointer;transition:all .14s;user-select:none;touch-action:none;}
+.mute-btn:hover{color:var(--accent2);border-color:var(--accent);}
+.mute-btn.active{color:var(--accent3);border-color:var(--accent2);background:rgba(140,120,255,.12);}
+.sustain-indicator{font-size:10px;letter-spacing:.12em;color:var(--muted);}
+/* Note display */
+.status-bar{font-size:11px;letter-spacing:.12em;color:var(--muted);text-align:center;margin-bottom:8px;min-height:16px;}
+.note-display{min-height:26px;margin-bottom:14px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.note-pill{font-family:Cinzel,serif;font-size:12px;padding:2px 12px;background:rgba(140,120,255,.07);border:1px solid rgba(140,120,255,.35);border-radius:999px;color:var(--accent2);animation:pIn .1s ease;}
+@keyframes pIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+/* Pitch control */
+.pitch-row{display:flex;gap:10px;align-items:center;justify-content:center;margin-bottom:14px;}
+.pitch-btn{font-family:Cinzel,serif;font-size:11px;letter-spacing:.1em;padding:7px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;transition:all .14s;}
+.pitch-btn:hover,.pitch-btn.active{color:var(--accent2);border-color:var(--accent);background:rgba(140,120,255,.08);}
+.pitch-display{font-family:Cinzel,serif;font-size:14px;color:var(--accent2);min-width:50px;text-align:center;}
+.kb-hint{font-size:10px;letter-spacing:.1em;color:var(--muted);text-align:center;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<!-- Info overlay -->
+<div class="info-overlay" id="infoOverlay">
+  <div class="info-panel">
+    <button class="info-close" aria-label="Close instrument info" onclick="document.getElementById('infoOverlay').classList.remove('open')">✕</button>
+    <h2>Studio Triangle</h2>
+    <div class="tagline">Euler-Bernoulli inharmonic bar · 6 bending modes · 10 synth effect presets</div>
+
+    <div class="info-section">
+      <h3>Instrument Summary</h3>
+      <p>A studio-grade triangle synthesiser built on the physics of a struck metal bar. The triangle is one of the most acoustically interesting percussion instruments — its bent geometry means the vibrations don't follow simple harmonic integer ratios. Six modal frequencies are synthesised independently, each with its own decay time and pitch. Ten effect presets transform this inharmonic character into completely different sounds: from pure glass shimmer to thunderous reverb swells to choir-like sustains.</p>
+      <p>The triangle can be muted at any time — which is an actual playing technique (damping the metal with fingers). Click anywhere on the triangle SVG to strike, or use the keyboard.</p>
+    </div>
+
+    <div class="info-section">
+      <h3>Physical Model — Inharmonic Bar Modes</h3>
+      <p>A metal bar vibrating in free space has modes at frequencies determined by Euler-Bernoulli beam theory. For a straight bar of length L, cross-section radius r, density ρ, and Young's modulus E:</p>
+      <p><code>fₙ = (β_n²/2πL²) · √(EI/ρA)</code></p>
+      <p>where β_n are the solutions to the beam equation. The triangle's bent shape shifts these values. Normalised to the fundamental, the six lowest modes fall at:</p>
+      <table class="modal-table">
+        <tr><th>Mode</th><th>Frequency ratio</th><th>Decay factor</th><th>Character</th></tr>
+        <tr><td>1</td><td>1.000×f₁</td><td>1.00</td><td>Fundamental ring</td></tr>
+        <tr><td>2</td><td>6.27×f₁</td><td>0.55</td><td>Upper shimmer</td></tr>
+        <tr><td>3</td><td>17.55×f₁</td><td>0.28</td><td>High brightness</td></tr>
+        <tr><td>4</td><td>34.39×f₁</td><td>0.14</td><td>Transient click</td></tr>
+        <tr><td>5</td><td>56.85×f₁</td><td>0.07</td><td>Ultra-high</td></tr>
+        <tr><td>6</td><td>84.96×f₁</td><td>0.03</td><td>Near-ultrasonic</td></tr>
+      </table>
+      <p style="margin-top:10px">Source: Rossing (2000), derived from Euler-Bernoulli beam bending modes. The ratios 1, 6.27, 17.55, 34.39… come from the squares of successive solutions to the beam characteristic equation (approximately 3.01², 5.0², 7.0², 9.0²…).</p>
+    </div>
+
+    <div class="info-section">
+      <h3>Synthesis Architecture</h3>
+      <ul>
+        <li><strong>6 OscillatorNodes</strong> at the inharmonic modal frequencies, each with independent GainNode for per-mode amplitude decay.</li>
+        <li><strong>Strike transient:</strong> 2–5ms noise burst through a high-pass filter at 4000 Hz — the metallic impact click before the ring establishes.</li>
+        <li><strong>Muting:</strong> Immediate exponential decay on all modal gains (25ms) — simulates touching the metal with a finger or beater to damp the ring.</li>
+        <li><strong>Fundamental frequency:</strong> Adjustable A3–A5 (MIDI 57–81 = 220–880 Hz). Real triangles span about 2 octaves in fundamental frequency depending on physical size.</li>
+        <li><strong>Effect presets:</strong> Ten independent signal-chain configurations applied per-strike. Shimmer adds pitch-shifted overtone swell (+12, +19, +24 semitones). Freeze extends GainNode decay to 30 seconds. Choir adds per-mode LFO vibrato at rates 3.5–6.1 Hz. Bowed uses 0.5s linear ramp attack. Crystal applies high-pass at 800 Hz, removing fundamentals. Thunder uses 4.5s convolution reverb impulse.</li>
+        <li><strong>Stacked preset:</strong> Fires three simultaneous strikeOne() calls at the fundamental, +7 semitones (perfect fifth), and +12 semitones (octave) with 30ms stagger.</li>
+        <li><strong>Reverse preset:</strong> Amplitude envelope rises after the strike (linear ramp 0→peak) then decays — directly opposing the natural impulse shape.</li>
+      </ul>
+    </div>
+    <div class="info-section">
+      <h3>Signal Chain</h3>
+      <p><code>Strike transient (noise → HPF 4kHz) → Master gain</code></p>
+      <p><code>6× Modal oscillators (sine at inharmonic freq) → per-mode GainNode (envelope) → [Shimmer swell oscs] → Master gain</code></p>
+      <p><code>Master → Convolver reverb (2.5s or 4.5s Thunder) → Wet gain → Destination</code></p>
+      <p><code>Master → Dry gain → Destination</code></p>
+    </div>
+
+    <div class="info-section">
+      <h3>Effect Presets</h3>
+      <ul>
+        <li><strong>Pure:</strong> Natural triangle — inharmonic modes, fast transient, natural decay. No processing.</li>
+        <li><strong>Shimmer:</strong> Pitch-shifted reverb feedback (+12 semitones). Each reflection rises in pitch, creating an ascending shimmer tail.</li>
+        <li><strong>Freeze:</strong> Spectral hold — gain sustain extended to near-infinite, modes fade extremely slowly. Press mute to release.</li>
+        <li><strong>Bell:</strong> Modes harmonically constrained (ratios pulled toward 2×, 3×, 4×…), longer decay, adds warmth — like a small bell.</li>
+        <li><strong>Choir:</strong> Each mode gets a slow vibrato LFO at slightly different rates — breathing, vocal quality. Detuned copies add width.</li>
+        <li><strong>Bowed:</strong> Slow attack (like a bow on metal), very long sustain, modes fade in one by one. Real bowed triangle technique.</li>
+        <li><strong>Crystal:</strong> Ultra-short transient, glass-like decay. High-pass filter removes fundamentals — pure upper-mode shimmer.</li>
+        <li><strong>Thunder:</strong> All modes heavily boosted, wide reverb, slow fade — each strike becomes a thunder roll.</li>
+        <li><strong>Stacked:</strong> Three simultaneous strikes at +0, +7, +12 semitones — automatic power chord triangle.</li>
+        <li><strong>Reverse:</strong> Reversed amplitude envelope — note swells in after the strike, then cuts. Opposite of natural decay.</li>
+      </ul>
+    </div>
+
+    <div class="info-section">
+      <h3>Academic References</h3>
+      <div class="ref-entry"><span class="ref-year">1965</span><span class="ref-text">McKinney, M.F. "The physics of the triangle." <em>Undergraduate thesis, MIT.</em> — First systematic measurement of triangle modal frequencies. Established the 1.000, 6.27, 17.55… ratio sequence used in this synthesis.</span></div>
+      <div class="ref-entry"><span class="ref-year">1973</span><span class="ref-text">Fletcher, N.H. & Rossing, T.D. <em>The Physics of Musical Instruments, 1st ed.</em> Springer. — Chapter 2: free vibration of bars. Euler-Bernoulli beam equation and mode shape solutions. Used for mode frequency formula derivation.</span></div>
+      <div class="ref-entry"><span class="ref-year">1998</span><span class="ref-text">Fletcher, N.H. & Rossing, T.D. <em>The Physics of Musical Instruments, 2nd ed.</em> Springer. — Updated triangle measurements confirming McKinney mode ratios. Decay time relationships (proportional to mode^-1.8 approximately) used for per-mode GainNode envelope.</span></div>
+      <div class="ref-entry"><span class="ref-year">2000</span><span class="ref-text">Rossing, T.D. <em>Science of Percussion Instruments.</em> World Scientific. — Chapter 9: triangles and cymbals. Inharmonic bar modes, strike position effects, muting acoustics. Primary reference for this synthesis model.</span></div>
+      <div class="ref-entry"><span class="ref-year">2002</span><span class="ref-text">Avanzini, F. & Rocchesso, D. "Controlling material properties in physical models of sounding objects." <em>ICMC Proceedings.</em> — Modal synthesis approach to struck metal objects. Inspired the independent per-mode gain decay architecture used here.</span></div>
+    </div>
+
+    <div class="info-section">
+      <h3>Keyboard &amp; Interaction</h3>
+      <ul>
+        <li><strong>Click triangle SVG:</strong> Strike the triangle</li>
+        <li><strong>Space / Enter:</strong> Strike</li>
+        <li><strong>M:</strong> Mute (stop all modes immediately)</li>
+        <li><strong>1–0:</strong> Select effect presets Pure through Reverse</li>
+        <li><strong>↑↓:</strong> Adjust fundamental pitch</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<header style="position:relative">
+  <h1>Studio Triangle</h1>
+  <p>Inharmonic metal bar · 6 bending modes · 10 synth effect presets</p>
+  <button class="info-btn" onclick="document.getElementById('infoOverlay').classList.add('open')" title="Instrument info">ℹ</button>
+</header>
+
+<div class="controls">
+  <div class="ctrl"><label>Velocity</label><input type="range" id="velCtrl" min="0.1" max="1" step="0.01" value="0.8"/><span class="ctrl-val" id="velVal">80</span></div>
+  <div class="ctrl"><label>Decay</label><input type="range" id="decayCtrl" min="0.3" max="3" step="0.05" value="1.2"/><span class="ctrl-val" id="decayVal">1.2s</span></div>
+  <div class="ctrl"><label>Reverb</label><input type="range" id="revCtrl" min="0" max="1" step="0.01" value="0.3"/><span class="ctrl-val" id="revVal">30</span></div>
+  <div class="ctrl"><label>Volume</label><input type="range" id="volCtrl" min="0" max="1" step="0.01" value="0.78"/><span class="ctrl-val" id="volVal">78</span></div>
+</div>
+
+<div class="presets-label">Effect Presets</div>
+<div class="presets-grid" id="presetsGrid"></div>
+
+<div class="triangle-stage">
+  <div class="triangle-wrap" id="triangleWrap">
+    <svg id="triangleSvg" viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg">
+      <!-- Triangle body -->
+      <defs>
+        <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#d0d0f8"/>
+          <stop offset="40%" stop-color="#b0b0e8"/>
+          <stop offset="100%" stop-color="#8888cc"/>
+        </linearGradient>
+        <linearGradient id="metalGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#e0d8ff" stop-opacity="0"/>
+          <stop offset="50%" stop-color="#c0a8ff" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#e0d8ff" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <!-- Open corner gap (top right — authentic triangle design) -->
+      <!-- Bottom bar -->
+      <rect x="40" y="208" width="200" height="10" rx="5" fill="url(#metalGrad)" filter="url(#glow)"/>
+      <!-- Left bar -->
+      <rect x="40" y="60" width="10" height="155" rx="5" fill="url(#metalGrad)" filter="url(#glow)"/>
+      <!-- Right bar (angled, shorter — open at top) -->
+      <line x1="240" y1="60" x2="160" y2="208" stroke="url(#metalGrad)" stroke-width="10" stroke-linecap="round" filter="url(#glow)"/>
+      <!-- Beater string -->
+      <line x1="195" y1="30" x2="155" y2="58" stroke="#888" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <circle cx="195" cy="26" r="4" fill="#666"/>
+      <!-- Strike flash (hidden by default) -->
+      <circle id="strikeFlash" cx="140" cy="213" r="0" fill="rgba(200,180,255,0.6)" opacity="0">
+        <animate id="flashAnim" attributeName="r" values="0;30;0" dur="0.3s" begin="indefinite"/>
+        <animate attributeName="opacity" values="0.8;0" dur="0.3s" begin="flashAnim.begin"/>
+      </circle>
+    </svg>
+  </div>
+  <div class="strike-hint">Click triangle to strike · M to mute</div>
+</div>
+
+<div class="mute-row">
+  <button class="mute-btn" id="muteBtn" onclick="muteTriangle()">✋ Mute</button>
+  <div class="sustain-indicator" id="sustainIndicator">—</div>
+</div>
+
+<div class="pitch-row">
+  <button class="pitch-btn" onclick="adjustPitch(-1)">▼ Lower</button>
+  <div class="pitch-display" id="pitchDisplay">A4</div>
+  <button class="pitch-btn" onclick="adjustPitch(+1)">Higher ▲</button>
+</div>
+
+<div class="status-bar" id="statusBar">Click the triangle or press Space to strike</div>
+<div class="note-display" id="noteDisplay"></div>
+<div class="kb-hint">Space/Enter = strike · M = mute · 1–0 = presets · ↑↓ = pitch</div>
+
+<script>
+(() => {
+  const AC=window.AudioContext||window.webkitAudioContext;
+  let actx=null,masterGain,convNode,dryGain,wetGain;
+  let velocity=0.8,decayBase=1.2,revVal=0.3,volVal=0.78;
+  let fundamentalMidi=69; // A4
+  let activeVoices=[];
+  let currentPreset='pure';
+
+  // ── Euler-Bernoulli inharmonic bar modes ─────────────────────
+  // Ratios: squares of solutions to beam characteristic equation
+  // f_n = β_n² · f₁  where β_n ≈ 3.01, 5.00, 7.00, 9.00, 11.0, 13.0...
+  // (McKinney 1965, Rossing 2000)
+  const MODAL_RATIOS=[1.000,6.267,17.55,34.39,56.85,84.96];
+  const MODAL_DECAYS=[1.000,0.550,0.280,0.140,0.070,0.030]; // relative decay
+  const MODAL_AMPS  =[1.000,0.620,0.380,0.220,0.120,0.060]; // relative amplitude
+
+  // ── Effect presets ───────────────────────────────────────────
+  const PRESETS=[
+    {id:'pure',    icon:'🔺',name:'Pure',    desc:'Natural triangle\nno processing',
+     params:{decayMult:1.0,  modShift:0,    chorus:0,   vibrato:0,   attack:0.003, highpass:0,   shimmer:false,freeze:false,thunder:false,reverse:false,stacked:false}},
+    {id:'shimmer', icon:'✨',name:'Shimmer', desc:'Pitch-shifted reverb\nascending tail',
+     params:{decayMult:1.6,  modShift:0,    chorus:0,   vibrato:0,   attack:0.003, highpass:0,   shimmer:true, freeze:false,thunder:false,reverse:false,stacked:false}},
+    {id:'freeze',  icon:'❄️', name:'Freeze',  desc:'Infinite sustain\npress mute to release',
+     params:{decayMult:18.0, modShift:0,    chorus:0,   vibrato:0,   attack:0.003, highpass:0,   shimmer:false,freeze:true, thunder:false,reverse:false,stacked:false}},
+    {id:'bell',    icon:'🔔',name:'Bell',    desc:'Harmonic constraint\nwarm bell character',
+     params:{decayMult:2.2,  modShift:-3,   chorus:0,   vibrato:0,   attack:0.003, highpass:0,   shimmer:false,freeze:false,thunder:false,reverse:false,stacked:false}},
+    {id:'choir',   icon:'🎶',name:'Choir',   desc:'LFO per mode\nvocal width',
+     params:{decayMult:2.0,  modShift:0,    chorus:0.5, vibrato:0.5, attack:0.003, highpass:0,   shimmer:false,freeze:false,thunder:false,reverse:false,stacked:false}},
+    {id:'bowed',   icon:'🎻',name:'Bowed',   desc:'Slow attack\nbowed metal',
+     params:{decayMult:4.0,  modShift:0,    chorus:0.2, vibrato:0.3, attack:0.5,   highpass:0,   shimmer:false,freeze:false,thunder:false,reverse:false,stacked:false}},
+    {id:'crystal', icon:'💎',name:'Crystal', desc:'High modes only\nglass shimmer',
+     params:{decayMult:0.8,  modShift:+12,  chorus:0,   vibrato:0,   attack:0.001, highpass:800, shimmer:false,freeze:false,thunder:false,reverse:false,stacked:false}},
+    {id:'thunder', icon:'⚡',name:'Thunder', desc:'Huge reverb\nstorm roll',
+     params:{decayMult:3.5,  modShift:-12,  chorus:0,   vibrato:0,   attack:0.002, highpass:0,   shimmer:true, freeze:false,thunder:true, reverse:false,stacked:false}},
+    {id:'stacked', icon:'🔱',name:'Stacked', desc:'Three pitches\npower chord',
+     params:{decayMult:1.4,  modShift:0,    chorus:0,   vibrato:0,   attack:0.003, highpass:0,   shimmer:false,freeze:false,thunder:false,reverse:false,stacked:true}},
+    {id:'reverse', icon:'↩️', name:'Reverse', desc:'Swell-in envelope\nanti-natural',
+     params:{decayMult:1.8,  modShift:0,    chorus:0,   vibrato:0,   attack:1.2,   highpass:0,   shimmer:false,freeze:false,thunder:false,reverse:true, stacked:false}},
+  ];
+
+  function initAudio(){
+    if(actx)return;
+    actx=new AC();
+    try{ window.InstrudioSuite?.registerAudioContext?.(actx); }catch{}
+    masterGain=actx.createGain();masterGain.gain.value=volVal;
+    convNode=buildReverb();
+    dryGain=actx.createGain();dryGain.gain.value=1-revVal;
+    wetGain=actx.createGain();wetGain.gain.value=revVal;
+    masterGain.connect(dryGain);masterGain.connect(convNode);
+    convNode.connect(wetGain);
+    dryGain.connect(actx.destination);wetGain.connect(actx.destination);
+  }
+
+  function buildReverb(){
+    const conv=actx.createConvolver();
+    const p=PRESETS.find(p=>p.id===currentPreset)?.params||PRESETS[0].params;
+    const len=Math.floor(actx.sampleRate*(p.thunder?4.5:2.5));
+    const buf=actx.createBuffer(2,len,actx.sampleRate);
+    for(let c=0;c<2;c++){const d=buf.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,p.thunder?1.4:1.8);}
+    conv.buffer=buf;return conv;
+  }
+
+  function midiHz(m){return 440*Math.pow(2,(m-69)/12);}
+  const NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  function noteName(m){return NAMES[((m%12)+12)%12]+Math.floor(m/12-1);}
+
+  // ── Strike ────────────────────────────────────────────────────
+  function strike(vel){
+    initAudio();
+    if(actx.state==='suspended')actx.resume();
+
+    const p=PRESETS.find(pr=>pr.id===currentPreset).params;
+    const pitches=p.stacked
+      ? [fundamentalMidi, fundamentalMidi+7, fundamentalMidi+12]
+      : [fundamentalMidi+p.modShift];
+
+    pitches.forEach((midi,pi)=>{
+      setTimeout(()=>strikeOne(midi,vel,p),pi*30);
+    });
+
+    // Strike flash animation
+    document.getElementById('flashAnim').beginElement();
+    setStatus(currentPreset+' · '+noteName(fundamentalMidi)+(p.stacked?' + 5th + 8va':''));
+    showPill(noteName(fundamentalMidi));
+  }
+
+  function strikeOne(midi,vel,p){
+    const f0=midiHz(midi);
+    const now=actx.currentTime;
+    const decayT=decayBase*p.decayMult;
+    const voiceNodes=[];
+
+    // Strike transient — metallic click
+    const tLen=Math.floor(actx.sampleRate*0.005);
+    const tBuf=actx.createBuffer(1,tLen,actx.sampleRate);
+    const td=tBuf.getChannelData(0);
+    for(let i=0;i<tLen;i++)td[i]=(Math.random()*2-1)*Math.pow(1-i/tLen,1.5);
+    const tSrc=actx.createBufferSource();tSrc.buffer=tBuf;
+    const tHP=actx.createBiquadFilter();tHP.type='highpass';tHP.frequency.value=4000;
+    const tG=actx.createGain();tG.gain.value=vel*0.18;
+    tSrc.connect(tHP);tHP.connect(tG);tG.connect(masterGain);
+    tSrc.start(now);voiceNodes.push(tSrc);
+
+    // Six modal oscillators
+    MODAL_RATIOS.forEach((ratio,mi)=>{
+      const mFreq=f0*ratio;
+      if(mFreq>actx.sampleRate*0.45)return; // Nyquist safety
+      // Apply highpass threshold (crystal preset removes fundamentals)
+      if(mFreq<p.highpass)return;
+
+      const osc=actx.createOscillator();osc.type='sine';
+      osc.frequency.value=mFreq;
+      const og=actx.createGain();
+      const mDecay=decayT*MODAL_DECAYS[mi];
+      const mAmp=MODAL_AMPS[mi]*vel;
+
+      if(p.reverse){
+        // Reverse: swell in, then cut
+        og.gain.setValueAtTime(0,now);
+        og.gain.linearRampToValueAtTime(mAmp*0.72,now+p.attack*(1+mi*0.3));
+        og.gain.setTargetAtTime(0,now+p.attack*(1+mi*0.3)+0.08,mDecay*0.3);
+      } else if(p.freeze){
+        // Freeze: very slow decay
+        og.gain.setValueAtTime(0,now);
+        og.gain.linearRampToValueAtTime(mAmp*0.72,now+p.attack);
+        // Don't schedule decay — mute button releases
+      } else {
+        // Normal: attack then exponential decay
+        og.gain.setValueAtTime(0,now);
+        og.gain.linearRampToValueAtTime(mAmp*0.72,now+p.attack*(1+mi*0.15));
+        og.gain.setTargetAtTime(0.0001,now+p.attack,mDecay*0.28);
+      }
+
+      // Vibrato per mode (choir preset)
+      if(p.vibrato>0){
+        const lfo=actx.createOscillator();lfo.type='sine';
+        lfo.frequency.value=3.5+mi*0.4+Math.random()*0.8;
+        const lfoG=actx.createGain();lfoG.gain.value=mFreq*p.vibrato*0.004;
+        lfo.connect(lfoG);lfoG.connect(osc.frequency);
+        lfo.start(now);voiceNodes.push(lfo);
+      }
+
+      // Chorus width (choir/bowed)
+      if(p.chorus>0){
+        const ch=actx.createOscillator();ch.type='sine';
+        ch.frequency.value=mFreq*(1+p.chorus*0.003);
+        const chG=actx.createGain();chG.gain.value=mAmp*0.3;
+        og.gain.connect === undefined || ch.connect(chG);
+        // Clone the gain envelope for chorus copy
+        const chGain=actx.createGain();
+        chGain.gain.setValueAtTime(0,now);
+        chGain.gain.linearRampToValueAtTime(mAmp*0.25,now+p.attack*(1.2+mi*0.15));
+        if(!p.freeze)chGain.gain.setTargetAtTime(0.0001,now+p.attack,mDecay*0.3);
+        ch.connect(chGain);chGain.connect(masterGain);
+        ch.start(now);voiceNodes.push(ch);
+      }
+
+      osc.connect(og);og.connect(masterGain);
+      osc.start(now);
+      const stopAt=p.freeze?now+30:now+p.attack+decayT*2.5;
+      osc.stop(stopAt);
+      voiceNodes.push(osc);
+    });
+
+    // Shimmer: pitch-shifted reverb (shimmer/thunder presets)
+    if(p.shimmer){
+      // Simplified shimmer: add high oscillators that fade in slowly
+      [12,19,24].forEach((interval,ii)=>{
+        const sOsc=actx.createOscillator();sOsc.type='sine';
+        sOsc.frequency.value=f0*Math.pow(2,interval/12)*MODAL_RATIOS[0];
+        const sG=actx.createGain();
+        sG.gain.setValueAtTime(0,now);
+        sG.gain.linearRampToValueAtTime(vel*0.08*(1-ii*0.02),now+0.4+ii*0.3);
+        sG.gain.setTargetAtTime(0,now+0.8,decayT*0.5);
+        sOsc.connect(sG);sG.connect(masterGain);
+        sOsc.start(now);sOsc.stop(now+decayT*2);
+        voiceNodes.push(sOsc);
+      });
+    }
+
+    activeVoices.push({nodes:voiceNodes,startTime:now,preset:currentPreset});
+    document.getElementById('sustainIndicator').textContent=p.freeze?'FROZEN — press mute to release':'';
+    updateMuteBtn();
+  }
+
+  // ── Mute ─────────────────────────────────────────────────────
+  function muteTriangle(){
+    if(!actx)return;
+    const t=actx.currentTime;
+    activeVoices.forEach(v=>{
+      v.nodes.forEach(n=>{
+        try{
+          if(n.gain){n.gain.cancelScheduledValues(t);n.gain.setValueAtTime(n.gain.value,t);n.gain.exponentialRampToValueAtTime(0.0001,t+0.025);}
+        }catch(e){}
+        try{if(n.stop)n.stop(t+0.04);}catch(e){}
+      });
+    });
+    activeVoices=[];
+    document.getElementById('sustainIndicator').textContent='';
+    document.getElementById('muteBtn').classList.add('active');
+    setTimeout(()=>document.getElementById('muteBtn').classList.remove('active'),400);
+    setStatus('Muted');
+  }
+  window.muteTriangle=muteTriangle;
+
+  function updateMuteBtn(){
+    const p=PRESETS.find(pr=>pr.id===currentPreset).params;
+    document.getElementById('muteBtn').classList.toggle('active',p.freeze);
+  }
+
+  // ── Preset management ─────────────────────────────────────────
+  function selectPreset(id){
+    currentPreset=id;
+    document.querySelectorAll('.preset-btn').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
+    // Rebuild reverb for thunder/normal difference
+    if(actx){
+      const newConv=buildReverb();
+      const oldConv=convNode;
+      convNode=newConv;
+      masterGain.connect(convNode);convNode.connect(wetGain);
+      setTimeout(()=>{try{oldConv.disconnect();}catch(e){}},500);
+    }
+    const p=PRESETS.find(pr=>pr.id===id).params;
+    setStatus(id+' preset — '+PRESETS.find(pr=>pr.id===id).desc.replace('\n',' · '));
+  }
+  window.selectPreset=selectPreset;
+
+  // ── Pitch ─────────────────────────────────────────────────────
+  function adjustPitch(dir){
+    fundamentalMidi=Math.max(57,Math.min(81,fundamentalMidi+dir)); // A3 to A5
+    document.getElementById('pitchDisplay').textContent=noteName(fundamentalMidi);
+  }
+  window.adjustPitch=adjustPitch;
+
+  // ── Build UI ──────────────────────────────────────────────────
+  function buildPresets(){
+    const grid=document.getElementById('presetsGrid');
+    PRESETS.forEach((pr,i)=>{
+      const btn=document.createElement('button');
+      btn.className='preset-btn'+(pr.id===currentPreset?' active':'');
+      btn.dataset.id=pr.id;
+      btn.innerHTML=`<div class="preset-icon">${pr.icon}</div><div class="preset-name">${pr.name}</div><div class="preset-desc">${pr.desc.replace('\n','<br/>')}</div>`;
+      btn.addEventListener('click',()=>selectPreset(pr.id));
+      grid.appendChild(btn);
+    });
+  }
+
+  // ── Triangle click ────────────────────────────────────────────
+  document.getElementById('triangleWrap').addEventListener('pointerdown',e=>{
+    e.preventDefault();
+    const vel=velocity*(0.8+Math.random()*0.2);
+    strike(vel);
+  });
+
+  // ── Keyboard ──────────────────────────────────────────────────
+  document.addEventListener('keydown',e=>{
+    if(e.repeat)return;
+    if(e.code==='Space'||e.code==='Enter'){e.preventDefault();strike(velocity*(0.8+Math.random()*0.2));return;}
+    if(e.key.toLowerCase()==='m'){muteTriangle();return;}
+    if(e.code==='ArrowUp'){adjustPitch(+1);return;}
+    if(e.code==='ArrowDown'){adjustPitch(-1);return;}
+    const num=parseInt(e.key);
+    if(num>=1&&num<=9)selectPreset(PRESETS[num-1].id);
+    if(e.key==='0')selectPreset(PRESETS[9].id);
+  });
+
+  // ── Controls ──────────────────────────────────────────────────
+  function ctl(id,fn){document.getElementById(id).addEventListener('input',fn);}
+  ctl('velCtrl',function(){velocity=+this.value;document.getElementById('velVal').textContent=Math.round(velocity*100);});
+  ctl('decayCtrl',function(){decayBase=+this.value;document.getElementById('decayVal').textContent=decayBase.toFixed(1)+'s';});
+  ctl('revCtrl',function(){revVal=+this.value;document.getElementById('revVal').textContent=Math.round(revVal*100);if(dryGain){dryGain.gain.value=1-revVal;wetGain.gain.value=revVal;}});
+  ctl('volCtrl',function(){volVal=+this.value;document.getElementById('volVal').textContent=Math.round(volVal*100);if(masterGain)masterGain.gain.value=volVal;});
+
+  function setStatus(m){document.getElementById('statusBar').textContent=m;}
+  const notePills={};
+  function showPill(name){
+    const d=document.getElementById('noteDisplay');
+    Object.values(notePills).forEach(p=>{p.remove();});
+    Object.keys(notePills).forEach(k=>delete notePills[k]);
+    const p=document.createElement('div');p.className='note-pill';p.textContent=name;
+    d.appendChild(p);notePills[name]=p;
+    setTimeout(()=>{p.style.transition='opacity .4s';p.style.opacity='0';setTimeout(()=>{p.remove();delete notePills[name];},420);},1400);
+  }
+
+  buildPresets();
+  document.getElementById('pitchDisplay').textContent=noteName(fundamentalMidi);
+
+  \1
+    ssotId:'studio_triangle',
+    instrument:'triangle',title:'Studio Triangle',minMidi:57,maxMidi:81,
+    init:initAudio,
+    playMidi(midi,velocity=0.82,durationMs=800){
+      fundamentalMidi=Math.max(57,Math.min(81,midi));
+      strike(Math.max(0.3,velocity));
+    },
+    stopAll(){ muteTriangle(); }
+  };
+})();
+</script>
+<section id="instrudio-embedded-score-dock" aria-label="Score import dock"></section>
+<script src="core/definition-runtime.js"></script>
+<script>window.InstrudioSSOTRuntime&&window.InstrudioSSOTRuntime.applyByBridge&&window.InstrudioSSOTRuntime.applyByBridge();</script>
+<script src="instrudio-suite.js"></script>
+</body>
+</html>

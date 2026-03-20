@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://instrudio.dev/schemas/instrument.schema.json",
+  "title": "Instrudio Instrument Definition",
+  "type": "object",
+  "required": [
+    "instrumentId",
+    "name",
+    "version",
+    "ui",
+    "performance",
+    "controls",
+    "presets",
+    "engines",
+    "availability",
+    "assets"
+  ],
+  "properties": {
+    "instrumentId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "ui": {
+      "type": "object",
+      "required": ["theme", "layout", "icon", "heroTitle", "info"],
+      "properties": {
+        "theme": {"type": "string"},
+        "layout": {"type": "string"},
+        "icon": {"type": "string"},
+        "heroTitle": {"type": "string"},
+        "info": {
+          "type": "object",
+          "required": ["short", "long"],
+          "properties": {
+            "short": {"type": "string"},
+            "long": {"type": "string"}
+          }
+        }
+      }
+    },
+    "performance": {
+      "type": "object",
+      "required": ["noteRange", "polyphony", "defaultVelocity", "supportsSustain"],
+      "properties": {
+        "noteRange": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"type": "string"}
+        },
+        "polyphony": {"type": "integer", "minimum": 1},
+        "defaultVelocity": {"type": "integer", "minimum": 1, "maximum": 127},
+        "supportsSustain": {"type": "boolean"}
+      }
+    },
+    "controls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["controlId", "label", "type", "default"],
+        "properties": {
+          "controlId": {"type": "string"},
+          "label": {"type": "string"},
+          "type": {"type": "string", "enum": ["knob", "slider", "toggle", "select"]},
+          "default": {},
+          "min": {"type": "number"},
+          "max": {"type": "number"},
+          "step": {"type": "number"},
+          "options": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "subscriptionRequired": {"type": "boolean"}
+        }
+      }
+    },
+    "presets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["presetId", "name", "values"],
+        "properties": {
+          "presetId": {"type": "string"},
+          "name": {"type": "string"},
+          "values": {"type": "object"},
+          "tier": {"type": "string", "enum": ["free", "premium"]}
+        }
+      }
+    },
+    "engines": {
+      "type": "object",
+      "required": ["web", "plugin", "mobile"],
+      "properties": {
+        "web": {"type": "object"},
+        "plugin": {"type": "object"},
+        "mobile": {"type": "object"}
+      }
+    },
+    "availability": {
+      "type": "object",
+      "required": ["web", "plugin", "mobile", "subscriptionFeatures"],
+      "properties": {
+        "web": {"type": "boolean"},
+        "plugin": {"type": "boolean"},
+        "mobile": {"type": "boolean"},
+        "subscriptionFeatures": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "assets": {
+      "type": "object",
+      "required": ["icon", "heroImage", "previewAudio"],
+      "properties": {
+        "icon": {"type": "string"},
+        "heroImage": {"type": "string"},
+        "previewAudio": {"type": "string"}
+      }
+    }
+  }
+}

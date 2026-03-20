@@ -1,0 +1,28 @@
+{
+  "id": "celestial_harp",
+  "slug": "harp",
+  "name": "Celestial Harp",
+  "version": "1.1.0",
+  "release": "v1",
+  "page": "harp.html",
+  "pageTitle": "Celestial Harp \u00b7 Instrudio",
+  "headline": "Celestial Harp",
+  "subheadline": "Cinematic concert harp for the v1 connected core.",
+  "category": "strings",
+  "bridgeInstrument": "harp",
+  "minMidi": 24,
+  "maxMidi": 70,
+  "autoplay": {
+    "respectsManualTechnique": true,
+    "supportsLibrary": true
+  },
+  "ssotFields": [
+    "pageTitle",
+    "headline",
+    "page",
+    "bridgeInstrument",
+    "minMidi",
+    "maxMidi",
+    "release"
+  ]
+}

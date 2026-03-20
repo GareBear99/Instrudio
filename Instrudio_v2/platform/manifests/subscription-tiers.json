@@ -1,0 +1,15 @@
+{
+  "free": {
+    "webDemo": true,
+    "pluginBridge": false,
+    "externalMidi": false,
+    "cloudUpdates": false
+  },
+  "pro_mobile_099": {
+    "priceUsdMonthly": 0.99,
+    "webDemo": true,
+    "pluginBridge": true,
+    "externalMidi": true,
+    "cloudUpdates": true
+  }
+}

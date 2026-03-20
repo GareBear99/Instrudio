@@ -1,0 +1,28 @@
+{
+  "id": "studio_accordion",
+  "slug": "accordion",
+  "name": "Studio Accordion",
+  "version": "1.0.0",
+  "release": "extended",
+  "page": "accordion.html",
+  "pageTitle": "Studio Accordion · Instrudio",
+  "headline": "Studio Accordion",
+  "subheadline": "Responsive reed accordion with connected-play metadata under the shared runtime.",
+  "category": "reeds",
+  "bridgeInstrument": "accordion",
+  "minMidi": 36,
+  "maxMidi": 96,
+  "autoplay": {
+    "respectsManualTechnique": true,
+    "supportsLibrary": true
+  },
+  "ssotFields": [
+    "pageTitle",
+    "headline",
+    "page",
+    "bridgeInstrument",
+    "minMidi",
+    "maxMidi",
+    "release"
+  ]
+}

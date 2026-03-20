@@ -1,0 +1,35 @@
+{
+  "id": "studio_bongos",
+  "slug": "bongo",
+  "name": "Studio Bongos",
+  "version": "1.1.0",
+  "release": "v1",
+  "page": "bongo.html",
+  "pageTitle": "Studio Bongos \u00b7 Instrudio",
+  "headline": "Studio Bongos",
+  "subheadline": "Punchy hand percussion pair for the v1 connected core.",
+  "category": "percussion",
+  "bridgeInstrument": "bongo",
+  "minMidi": 36,
+  "maxMidi": 88,
+  "techniques": [
+    "open",
+    "mute",
+    "slap"
+  ],
+  "autoplay": {
+    "respectsManualTechnique": true,
+    "defaultTechnique": "open",
+    "supportsLibrary": true
+  },
+  "ssotFields": [
+    "pageTitle",
+    "headline",
+    "page",
+    "bridgeInstrument",
+    "techniques",
+    "minMidi",
+    "maxMidi",
+    "release"
+  ]
+}

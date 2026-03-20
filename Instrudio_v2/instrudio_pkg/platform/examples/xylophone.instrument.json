@@ -1,0 +1,128 @@
+{
+  "instrumentId": "xylophone",
+  "name": "Xylophone",
+  "version": "1.0.0",
+  "category": "percussion-melodic",
+  "ui": {
+    "theme": "amber-wood",
+    "layout": "bars-horizontal",
+    "icon": "/assets/instruments/xylophone/icon.png",
+    "heroTitle": "Concert Xylophone",
+    "info": {
+      "short": "A bright, wood-toned mallet instrument for melodic play.",
+      "long": "Instrudio Xylophone is the canonical first instrument for the shared platform. It is designed to prove schema-driven web, plugin, and mobile parity while remaining simple to test and visually obvious to control."
+    }
+  },
+  "performance": {
+    "noteRange": ["C4", "C7"],
+    "polyphony": 8,
+    "defaultVelocity": 100,
+    "supportsSustain": false
+  },
+  "controls": [
+    {
+      "controlId": "master-volume",
+      "label": "Master Volume",
+      "type": "slider",
+      "default": 0.85,
+      "min": 0,
+      "max": 1,
+      "step": 0.01,
+      "subscriptionRequired": false
+    },
+    {
+      "controlId": "reverb",
+      "label": "Reverb",
+      "type": "knob",
+      "default": 0.18,
+      "min": 0,
+      "max": 1,
+      "step": 0.01,
+      "subscriptionRequired": false
+    },
+    {
+      "controlId": "mallet-hardness",
+      "label": "Mallet Hardness",
+      "type": "slider",
+      "default": 0.55,
+      "min": 0,
+      "max": 1,
+      "step": 0.01,
+      "subscriptionRequired": true
+    },
+    {
+      "controlId": "stage-width",
+      "label": "Stage Width",
+      "type": "knob",
+      "default": 0.5,
+      "min": 0,
+      "max": 1,
+      "step": 0.01,
+      "subscriptionRequired": true
+    }
+  ],
+  "presets": [
+    {
+      "presetId": "concert-bright",
+      "name": "Concert Bright",
+      "tier": "free",
+      "values": {
+        "master-volume": 0.88,
+        "reverb": 0.22,
+        "mallet-hardness": 0.7,
+        "stage-width": 0.55
+      }
+    },
+    {
+      "presetId": "toy-soft",
+      "name": "Toy Soft",
+      "tier": "free",
+      "values": {
+        "master-volume": 0.72,
+        "reverb": 0.1,
+        "mallet-hardness": 0.32,
+        "stage-width": 0.35
+      }
+    },
+    {
+      "presetId": "hall-premium",
+      "name": "Hall Premium",
+      "tier": "premium",
+      "values": {
+        "master-volume": 0.9,
+        "reverb": 0.4,
+        "mallet-hardness": 0.66,
+        "stage-width": 0.8
+      }
+    }
+  ],
+  "engines": {
+    "web": {
+      "engineId": "tonejs-xylophone-v1",
+      "supportsVisualGlow": true
+    },
+    "plugin": {
+      "engineId": "juce-xylophone-v1",
+      "supportsMidiOut": true
+    },
+    "mobile": {
+      "engineId": "ios-xylophone-v1",
+      "supportsRemoteControl": true
+    }
+  },
+  "availability": {
+    "web": true,
+    "plugin": true,
+    "mobile": true,
+    "subscriptionFeatures": [
+      "remote-plugin-link",
+      "external-midi-mode",
+      "premium-presets"
+    ]
+  },
+  "assets": {
+    "icon": "/assets/instruments/xylophone/icon.png",
+    "heroImage": "/assets/instruments/xylophone/hero.png",
+    "previewAudio": "/assets/instruments/xylophone/preview.mp3"
+  }
+}

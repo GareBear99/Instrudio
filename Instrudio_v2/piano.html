@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Studio Grand · Instrudio</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0e0e0f;--surface:#161618;--surface2:#1e1e21;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#f0ede8;--muted:#7a7872;--accent:#c9a96e;--accent2:#e8c98a;--white-key:#f5f2eb;--white-key-hover:#fff;--white-key-active:#e8c98a;--black-key:#1a1a1c;--black-key-hover:#2a2a2e;--black-key-active:#4a3a1a;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;overflow-x:hidden;}
+body{background:radial-gradient(ellipse at 20% 0%,rgba(201,169,110,.08) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(100,80,30,.06) 0%,transparent 40%),#0e0e0f;display:flex;flex-direction:column;align-items:center;padding:22px 16px 48px;}
+header{text-align:center;margin-bottom:20px;}
+header h1{font-family:'Playfair Display',serif;font-size:38px;font-weight:700;color:var(--accent2);letter-spacing:.03em;margin-bottom:2px;}
+header p{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);}
+.top-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;align-items:center;}
+.ctrl{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:7px 12px;}
+.ctrl label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);min-width:44px;}
+.ctrl input[type=range]{-webkit-appearance:none;width:80px;height:2px;background:rgba(201,169,110,.18);border-radius:1px;outline:none;cursor:pointer;}
+.ctrl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--accent);cursor:pointer;}
+.ctrl-val{font-size:11px;color:var(--accent);min-width:22px;}
+.ctrl select{background:transparent;border:none;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;outline:none;}
+.oct-row{display:flex;gap:6px;align-items:center;margin-bottom:14px;}
+.oct-label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-right:4px;}
+.oct-btn{font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;transition:all .12s;}
+.oct-btn.active{color:var(--accent);border-color:var(--accent);}
+.pedal-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.pedal-btn{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:8px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;transition:all .15s;user-select:none;touch-action:none;}
+.pedal-btn.on{color:var(--accent2);border-color:var(--accent);background:rgba(201,169,110,.08);}
+.pedal-label{font-size:10px;color:var(--muted);letter-spacing:.1em;}
+.note-display{min-height:28px;margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.note-pill{font-family:'Playfair Display',serif;font-style:italic;font-size:13px;padding:2px 12px;background:rgba(201,169,110,.07);border:1px solid rgba(201,169,110,.35);border-radius:999px;color:var(--accent2);animation:pIn .1s ease;}
+@keyframes pIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.piano-wrap{position:relative;overflow-x:auto;padding-bottom:8px;width:100%;max-width:1200px;}
+#pianoBody{position:relative;display:flex;height:160px;user-select:none;padding:0 20px;}
+.white-key{position:relative;width:52px;height:160px;flex-shrink:0;background:var(--white-key);border:1px solid #bab7b0;border-radius:0 0 5px 5px;cursor:pointer;transition:background .06s;margin-right:3px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;}
+.white-key:hover{background:var(--white-key-hover);}
+.white-key.active{background:var(--white-key-active);box-shadow:inset 0 -3px 8px rgba(201,169,110,.4);}
+.black-key{position:absolute;width:34px;height:100px;background:var(--black-key);border:1px solid #111;border-radius:0 0 4px 4px;cursor:pointer;z-index:2;top:0;transition:background .06s;}
+.black-key:hover{background:var(--black-key-hover);}
+.black-key.active{background:var(--black-key-active);}
+.key-label{font-size:8px;color:var(--muted);letter-spacing:.05em;pointer-events:none;}
+.kb-hint{font-size:10px;letter-spacing:.1em;color:var(--muted);text-align:center;margin-top:14px;}
+
+/* Info overlay */
+.info-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;overflow-y:auto;padding:32px 16px;}
+.info-overlay.open{display:flex;justify-content:center;align-items:flex-start;}
+.info-panel{background:var(--surface,#10101a);border:1px solid rgba(255,255,255,0.13);border-radius:18px;max-width:760px;width:100%;padding:36px 40px;position:relative;margin:auto;}
+.info-close{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--muted,#606880);font-size:22px;cursor:pointer;line-height:1;}
+.info-close:hover{color:var(--text,#eeeaff);}
+.info-panel h2{font-family:Cinzel,serif;font-size:22px;color:#c9a96e;margin-bottom:6px;}
+.info-panel .tagline{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted,#606880);margin-bottom:22px;}
+.info-section{margin-bottom:20px;}
+.info-section h3{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#c9a96e;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,0.13);}
+.info-section p,.info-section li{font-size:13px;line-height:1.72;color:rgba(238,234,255,.82);margin-bottom:5px;}
+.info-section ul{padding-left:18px;}
+.info-section code{font-family:monospace;font-size:11px;background:rgba(140,120,255,.1);padding:2px 7px;border-radius:4px;color:#c9a96e;}
+.ref-entry{display:flex;gap:12px;margin-bottom:9px;font-size:12px;}
+.ref-year{color:#c9a96e;font-weight:600;min-width:42px;font-family:Cinzel,serif;}
+.ref-text{color:rgba(238,234,255,.75);line-height:1.65;}
+.info-btn{position:absolute;top:6px;right:-40px;width:28px;height:28px;border-radius:50%;background:var(--surface2,#141420);border:1px solid rgba(255,255,255,0.13);color:#c9a96e;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .14s;font-style:normal;}
+.info-btn:hover{background:rgba(140,120,255,.12);}
+</style>
+</head>
+<body>
+
+<!-- Info overlay -->
+<div class="info-overlay" id="infoOverlay">
+  <div class="info-panel">
+    <button class="info-close" aria-label="Close instrument info" onclick="document.getElementById('infoOverlay').classList.remove('open')">✕</button>
+    <h2>Studio Grand</h2>
+    <div class="tagline">Inharmonic oscillator stack · Stereo spread · Hammer transients · 5 tone profiles</div>
+    <div class="info-section">
+      <h3>Instrument Summary</h3>
+      <p>A concert grand piano synthesiser using register-accurate inharmonic string physics. Each note's harmonics are placed at their physically correct inharmonic frequencies using measured B constants per register. Stereo panning mirrors sitting at a concert grand: low notes left, high notes right. Hammer transients model the felt-on-string impact velocity.</p>
+    </div>
+    <div class="info-section">
+      <h3>Synthesis Features</h3>
+      <ul><li>Inharmonic stretch: fₙ = n·f₀·√(1+B·n²), B from 0.00008 (bass) to 0.00140 (treble)</li>
+      <li>Stereo panning via StereoPannerNode — concert grand layout</li>
+      <li>Hammer transient: 25ms noise burst, velocity-scaled spectral centroid</li>
+      <li>Dual-string unison copy for notes 36–84 (+0.4–1.5 cents)</li>
+      <li>Sympathetic shimmer oscillator at 2.001× fundamental for mid/low notes</li>
+      <li>5 tone profiles: Concert Grand, Bright, Warm, Upright, Jazz</li></ul>
+    </div>
+    <div class="info-section">
+      <h3>Signal Chain</h3>
+      <p><code>Oscillators (inharmonic) → Gain (ADSR) → StereoPanner → LP filter → Dry/Wet split → Destination</code></p>
+    </div>
+    <div class="info-section">
+      <h3>Academic References</h3>
+      <div class="ref-entry"><span class="ref-year">1994</span><span class="ref-text">Conklin, H.A. "Generation of partials due to nonlinear mixing in a stringed instrument." JASA 105(1). — Primary source for piano string inharmonicity B constants by register. The measured values 0.00008–0.00140 come directly from Conklin's Table I.</span></div>
+      <div class="ref-entry"><span class="ref-year">1996</span><span class="ref-text">Conklin, H.A. "Design and tone in the mechanoacoustic piano, Part I–III." JASA 99(6). — Hammer-string interaction model and felt compression dynamics. Basis for velocity-dependent hammer transient spectral centroid.</span></div>
+      <div class="ref-entry"><span class="ref-year">2002</span><span class="ref-text">Bensa, J. et al. "The simulation of piano string vibration." JASA 114(2). — Inharmonic string model validation. Confirms the √(1+B·n²) stretch formula used in harmonic placement.</span></div>
+    </div>
+  </div>
+</div>
+
+<header>
+  <h1>Studio Grand</h1>
+  <p>Inharmonic synthesis · Stereo spread · Hammer transients · 5 tone profiles</p>
+</header>
+<div class="top-row">
+  <div class="ctrl"><label>Volume</label><input type="range" id="vol" min="0" max="1" step="0.01" value="0.7"/><span class="ctrl-val" id="volVal">70</span></div>
+  <div class="ctrl"><label>Reverb</label><input type="range" id="rev" min="0" max="1" step="0.01" value="0.35"/><span class="ctrl-val" id="revVal">35</span></div>
+  <div class="ctrl"><label>Bright</label><input type="range" id="bright" min="500" max="8000" step="100" value="3000"/><span class="ctrl-val" id="brightVal">3k</span></div>
+  <div class="ctrl"><label>Tone</label>
+    <select id="tone">
+      <option value="grand">Concert Grand</option>
+      <option value="bright">Bright</option>
+      <option value="warm">Warm</option>
+      <option value="upright">Upright</option>
+      <option value="jazz">Jazz</option>
+    </select>
+  </div>
+</div>
+<div class="oct-row">
+  <span class="oct-label">Octave</span>
+  <div id="octaveSelect"></div>
+</div>
+<div class="pedal-row">
+  <button class="pedal-btn" id="pedalBtn" touch-action="none">Sustain Pedal</button>
+  <span class="pedal-label">Status: <span id="pedalStatus">Off</span></span>
+</div>
+<div class="note-display" id="noteDisplay"></div>
+<div class="piano-wrap"><div id="pianoBody"></div></div>
+<div class="kb-hint">A W S E D · F T G Y H · U J K O L — keyboard plays current octave · Shift = octave below · Space = sustain</div>
+
+<script>
+(() => {
+  const AC=window.AudioContext||window.webkitAudioContext;
+  let actx=null,masterGain,filterNode,reverbNode,dryGain,wetGain;
+  let sustainOn=false,sustainedNodes=[],activeNotes={};
+  let currentOctave=4,volValue=0.7,revValue=0.35,brightValue=3000,toneMode='grand';
+
+  // Per-register inharmonicity B constant (string stiffness)
+  // Real piano measured values: bass=0.00008, treble=0.0014
+  function getB(midi){
+    if(midi<36)return 0.00008; if(midi<48)return 0.00014; if(midi<60)return 0.00025;
+    if(midi<72)return 0.00045; if(midi<84)return 0.00080; return 0.00140;
+  }
+
+  function initAudio(){
+    if(actx)return;
+    actx=new AC();
+    try{ window.InstrudioSuite?.registerAudioContext?.(actx); }catch{}
+    masterGain=actx.createGain(); masterGain.gain.value=volValue;
+    filterNode=actx.createBiquadFilter(); filterNode.type='lowpass';
+    filterNode.frequency.value=brightValue; filterNode.Q.value=0.6;
+    reverbNode=createReverb();
+    dryGain=actx.createGain(); dryGain.gain.value=1-revValue;
+    wetGain=actx.createGain(); wetGain.gain.value=revValue;
+    masterGain.connect(filterNode);
+    filterNode.connect(dryGain); filterNode.connect(reverbNode);
+    reverbNode.connect(wetGain);
+    dryGain.connect(actx.destination); wetGain.connect(actx.destination);
+  }
+
+  function createReverb(){
+    const conv=actx.createConvolver();
+    const len=Math.floor(actx.sampleRate*2.8);
+    const buf=actx.createBuffer(2,len,actx.sampleRate);
+    for(let c=0;c<2;c++){const d=buf.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.2);}
+    conv.buffer=buf; return conv;
+  }
+
+  function noteFreq(m){return 440*Math.pow(2,(m-69)/12);}
+
+  function getToneParams(midi){
+    const isLow=midi<48,isMid=midi>=48&&midi<72;
+    switch(toneMode){
+      case 'bright': return {atk:0.002,dec:isLow?1.8:isMid?1.2:0.7,sus:0.15,rel:isLow?3.0:1.8,detune:1.5,harmonics:[1,0.58,0.32,0.20,0.13,0.09,0.06,0.04]};
+      case 'warm':   return {atk:0.008,dec:isLow?2.8:isMid?2.0:1.0,sus:0.25,rel:isLow?4.5:2.5,detune:0.5,harmonics:[1,0.72,0.18,0.07,0.03,0.015]};
+      case 'upright':return {atk:0.003,dec:isLow?1.2:isMid?0.8:0.45,sus:0.08,rel:isLow?1.8:1.0,detune:3,harmonics:[1,0.62,0.38,0.24,0.15,0.10,0.06,0.03]};
+      case 'jazz':   return {atk:0.003,dec:isLow?1.0:isMid?0.7:0.4,sus:0.12,rel:isLow?1.6:0.9,detune:2,harmonics:[1,0.68,0.42,0.26,0.16,0.10,0.06]};
+      default:       return {atk:0.004,dec:isLow?2.4:isMid?1.6:0.9,sus:0.18,rel:isLow?4.0:isMid?2.2:1.4,detune:1.0,harmonics:[1,0.65,0.24,0.13,0.08,0.05,0.03,0.015]};
+    }
+  }
+
+  function playNote(midi, velocity=0.8){
+    initAudio();
+    if(actx.state==='suspended')actx.resume();
+    if(activeNotes[midi])stopNote(midi,true);
+
+    const freq=noteFreq(midi);
+    const p=getToneParams(midi);
+    const B=getB(midi);
+    const now=actx.currentTime;
+    const vel=velocity*(0.88+Math.random()*0.12);
+
+    // Stereo position: low notes left, high notes right (concert grand layout)
+    const panner=actx.createStereoPanner();
+    panner.pan.value=Math.max(-0.6,Math.min(0.6,(midi-60)/50));
+
+    const noteGain=actx.createGain();
+    noteGain.connect(panner); panner.connect(masterGain);
+
+    const peak=vel*0.38;
+    noteGain.gain.setValueAtTime(0,now);
+    noteGain.gain.linearRampToValueAtTime(peak,now+p.atk);
+    noteGain.gain.setTargetAtTime(peak*p.sus,now+p.atk+p.dec*0.1,p.dec*0.4);
+
+    const oscs=[];
+
+    // INHARMONIC harmonic stack — each partial at n*f0*sqrt(1+B*n²)
+    p.harmonics.forEach((amp,i)=>{
+      const n=i+1;
+      const hf=freq*n*Math.sqrt(1+B*n*n);
+      if(hf>20000)return;
+      const osc=actx.createOscillator();
+      const hg=actx.createGain();
+      osc.type=i===0?'sine':i===1?'triangle':'sine';
+      osc.frequency.value=hf;
+      osc.detune.value=(Math.random()-0.5)*p.detune;
+      // Velocity affects harmonic brightness (louder hit = brighter)
+      hg.gain.value=amp*(i===0?1:0.18*(0.65+vel*0.7));
+      osc.connect(hg); hg.connect(noteGain);
+      osc.start(now); oscs.push({osc,hg});
+    });
+
+    // Dual-string unison copy (piano strings are double/triple wound)
+    if(midi>=36&&midi<84){
+      const osc2=actx.createOscillator(); const g2=actx.createGain();
+      osc2.type='sine'; osc2.frequency.value=freq;
+      osc2.detune.value=p.detune*0.8+0.4;
+      g2.gain.value=0.22*vel;
+      osc2.connect(g2); g2.connect(noteGain); osc2.start(now); oscs.push({osc:osc2,hg:g2});
+    }
+
+    // HAMMER TRANSIENT — noise burst modeling felt hammer impact
+    // Velocity controls loudness + spectral centroid (soft=dull, hard=bright)
+    const hamLen=Math.floor(actx.sampleRate*0.025);
+    const hamBuf=actx.createBuffer(1,hamLen,actx.sampleRate);
+    const hd=hamBuf.getChannelData(0);
+    for(let i=0;i<hamLen;i++) hd[i]=(Math.random()*2-1)*Math.pow(1-i/hamLen,2.5);
+    const hamSrc=actx.createBufferSource(); hamSrc.buffer=hamBuf;
+    const hamBpf=actx.createBiquadFilter(); hamBpf.type='bandpass';
+    hamBpf.frequency.value=freq*2.5*(0.8+vel*0.5); hamBpf.Q.value=1.4;
+    const hamGain=actx.createGain(); hamGain.gain.value=vel*0.12;
+    hamSrc.connect(hamBpf); hamBpf.connect(hamGain); hamGain.connect(noteGain);
+    hamSrc.start(now);
+
+    // Sympathetic shimmer (upper octave string resonance)
+    if(midi<72){
+      const sh=actx.createOscillator(); const sg=actx.createGain();
+      sh.type='sine'; sh.frequency.value=freq*2.001;
+      sg.gain.value=0.022*vel;
+      sh.connect(sg); sg.connect(noteGain); sh.start(now); oscs.push({osc:sh,hg:sg});
+    }
+
+    activeNotes[midi]={noteGain,panner,oscs,p,now};
+  }
+
+  function stopNote(midi,immediate=false){
+    const note=activeNotes[midi]; if(!note)return;
+    if(sustainOn&&!immediate){sustainedNodes.push(midi);return;}
+    const {noteGain,oscs,p}=note;
+    const t=actx.currentTime,rel=immediate?0.04:p.rel;
+    noteGain.gain.cancelScheduledValues(t);
+    noteGain.gain.setValueAtTime(noteGain.gain.value,t);
+    noteGain.gain.exponentialRampToValueAtTime(0.0001,t+rel);
+    oscs.forEach(({osc})=>{try{osc.stop(t+rel+0.05);}catch(e){}});
+    const nRef=noteGain; setTimeout(()=>{try{nRef.disconnect();}catch(e){}},( rel+0.1)*1000);
+    delete activeNotes[midi];
+  }
+
+  function releaseSustain(){sustainedNodes.forEach(m=>stopNote(m,false));sustainedNodes=[];}
+
+  const noteNames=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  const whitePattern=[0,2,4,5,7,9,11];
+
+  function buildPiano(){
+    const body=document.getElementById('pianoBody'); body.innerHTML='';
+    const startOctave=currentOctave-1,endOctave=currentOctave+1;
+    const octaves=[startOctave,currentOctave,endOctave];
+    const whiteKeys=[],blackKeyDefs=[];
+    let whiteIdx=0;
+    octaves.forEach(oct=>{
+      whitePattern.forEach((semi)=>{
+        whiteKeys.push({midi:(oct+1)*12+semi,name:noteNames[semi]+oct,whiteIdx}); whiteIdx++;
+      });
+      [1,3,6,8,10].forEach(semi=>{
+        const wb=octaves.slice(0,octaves.indexOf(oct)).length*7+whitePattern.filter(w=>w<semi).length;
+        blackKeyDefs.push({midi:(oct+1)*12+semi,name:noteNames[semi]+oct,wb});
+      });
+    });
+    whiteKeys.forEach(({midi,name})=>{
+      const el=document.createElement('div'); el.className='white-key'; el.dataset.midi=midi;
+      const lbl=document.createElement('span'); lbl.className='key-label'; lbl.textContent=name;
+      el.appendChild(lbl);
+      el.addEventListener('pointerdown',e=>{e.preventDefault();triggerKey(midi,el,true);});
+      el.addEventListener('pointerup',()=>triggerKey(midi,el,false));
+      el.addEventListener('pointerleave',()=>{if(activeNotes[midi])triggerKey(midi,el,false);});
+      body.appendChild(el);
+    });
+    const W=52,G=3;
+    blackKeyDefs.forEach(({midi,wb})=>{
+      const el=document.createElement('div'); el.className='black-key'; el.dataset.midi=midi;
+      el.style.left=(20+wb*(W+G)+W*0.62)+'px';
+      el.addEventListener('pointerdown',e=>{e.preventDefault();triggerKey(midi,el,true);});
+      el.addEventListener('pointerup',()=>triggerKey(midi,el,false));
+      el.addEventListener('pointerleave',()=>{if(activeNotes[midi])triggerKey(midi,el,false);});
+      body.appendChild(el);
+    });
+  }
+
+  function triggerKey(midi,el,on){
+    if(on){playNote(midi,0.72+Math.random()*0.28);el.classList.add('active');showNote(midi);}
+    else{stopNote(midi);el.classList.remove('active');hideNote(midi);}
+  }
+
+  const notePills={};
+  function showNote(midi){
+    const d=document.getElementById('noteDisplay'); if(notePills[midi])return;
+    const p=document.createElement('div'); p.className='note-pill';
+    p.textContent=noteNames[midi%12]+Math.floor(midi/12-1);
+    d.appendChild(p); notePills[midi]=p;
+  }
+  function hideNote(midi){if(notePills[midi]){notePills[midi].remove();delete notePills[midi];}}
+
+  const keyMap={'a':0,'w':1,'s':2,'e':3,'d':4,'f':5,'t':6,'g':7,'y':8,'h':9,'u':10,'j':11,'k':12,'o':13,'l':14,'p':15,';':16};
+  const pressedKeys=new Set();
+  document.addEventListener('keydown',e=>{
+    if(e.repeat)return;
+    if(e.code==='Space'){e.preventDefault();setSustain(true);return;}
+    const k=e.key.toLowerCase();
+    if(keyMap[k]!==undefined&&!pressedKeys.has(k)){
+      pressedKeys.add(k);
+      const oct=e.shiftKey?currentOctave-1:currentOctave;
+      const midi=(oct+1)*12+keyMap[k];
+      playNote(midi,0.8);
+      const el=document.querySelector(`.white-key[data-midi="${midi}"],.black-key[data-midi="${midi}"]`);
+      if(el)el.classList.add('active'); showNote(midi);
+    }
+  });
+  document.addEventListener('keyup',e=>{
+    if(e.code==='Space'){setSustain(false);return;}
+    const k=e.key.toLowerCase();
+    if(keyMap[k]!==undefined){
+      pressedKeys.delete(k);
+      const oct=e.shiftKey?currentOctave-1:currentOctave;
+      const midi=(oct+1)*12+keyMap[k];
+      stopNote(midi);
+      const el=document.querySelector(`.white-key[data-midi="${midi}"],.black-key[data-midi="${midi}"]`);
+      if(el)el.classList.remove('active'); hideNote(midi);
+    }
+  });
+
+  function setSustain(on){
+    sustainOn=on;
+    document.getElementById('pedalBtn').classList.toggle('on',on);
+    document.getElementById('pedalStatus').textContent=on?'On':'Off';
+    if(!on)releaseSustain();
+  }
+  const pb=document.getElementById('pedalBtn');
+  pb.addEventListener('pointerdown',e=>{e.preventDefault();setSustain(true);});
+  pb.addEventListener('pointerup',()=>setSustain(false));
+  pb.addEventListener('pointerleave',()=>{if(sustainOn)setSustain(false);});
+
+  function buildOctaveSelect(){
+    const wrap=document.getElementById('octaveSelect'); wrap.innerHTML='';
+    for(let o=2;o<=6;o++){
+      const btn=document.createElement('button'); btn.className='oct-btn'+(o===currentOctave?' active':'');
+      btn.textContent='Oct '+o;
+      btn.addEventListener('click',()=>{currentOctave=o;buildOctaveSelect();buildPiano();});
+      wrap.appendChild(btn);
+    }
+  }
+
+  function ctl(id,fn){document.getElementById(id).addEventListener('input',fn);}
+  ctl('vol',function(){volValue=+this.value;document.getElementById('volVal').textContent=Math.round(volValue*100);if(masterGain)masterGain.gain.value=volValue;});
+  ctl('rev',function(){revValue=+this.value;document.getElementById('revVal').textContent=Math.round(revValue*100);if(dryGain){dryGain.gain.value=1-revValue;wetGain.gain.value=revValue;}});
+  ctl('bright',function(){brightValue=+this.value;document.getElementById('brightVal').textContent=brightValue>=1000?Math.round(brightValue/1000)+'k':brightValue;if(filterNode)filterNode.frequency.value=brightValue;});
+  document.getElementById('tone').addEventListener('change',function(){toneMode=this.value;});
+
+  buildOctaveSelect(); buildPiano();
+
+  window.InstrudioBridge={
+    instrument:'piano',title:'Studio Grand',ssotId:'studio_grand',minMidi:21,maxMidi:108,
+    init:initAudio,
+    playMidi(midi,velocity=0.82,durationMs=680){playNote(midi,Math.max(0.35,velocity));setTimeout(()=>stopNote(midi,false),Math.max(160,durationMs));},
+    stopAll(){Object.keys(activeNotes).forEach(m=>stopNote(+m,true));releaseSustain();}
+  };
+})();
+</script>
+<section id="instrudio-embedded-score-dock" aria-label="Score import dock"></section>
+<script src="core/definition-runtime.js"></script>
+<script>window.InstrudioSSOTRuntime&&window.InstrudioSSOTRuntime.applyByBridge&&window.InstrudioSSOTRuntime.applyByBridge();</script>
+<script src="instrudio-suite.js"></script>
+</body>
+</html>

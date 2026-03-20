@@ -1,0 +1,17 @@
+{
+  "contractVersion": "1.0.0",
+  "bridgeName": "Instrudio Plugin Bridge",
+  "events": [
+    "note-on",
+    "note-off",
+    "control-change",
+    "preset-load",
+    "transport-play",
+    "transport-stop"
+  ],
+  "requiredFields": {
+    "note-on": ["instrumentId", "note", "velocity", "timestamp"],
+    "control-change": ["instrumentId", "controlId", "value", "timestamp"],
+    "preset-load": ["instrumentId", "presetId", "timestamp"]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "version": "1.0.0",
+  "freeFeatures": [
+    "instrument-browsing",
+    "demo-play",
+    "limited-song-library"
+  ],
+  "subscriberFeatures": [
+    "plugin-link",
+    "external-midi-mode",
+    "premium-presets",
+    "full-mobile-instrument-access",
+    "priority-update-channel"
+  ],
+  "billingTarget": {
+    "currency": "USD",
+    "amount": 0.99,
+    "period": "month"
+  }
+}

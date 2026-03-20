@@ -1,0 +1,35 @@
+{
+  "id": "studio_violin",
+  "slug": "violin",
+  "name": "Studio Violin",
+  "version": "1.1.0",
+  "release": "v1",
+  "page": "violin.html",
+  "pageTitle": "Studio Violin \u00b7 Instrudio",
+  "headline": "Studio Violin",
+  "subheadline": "Reference bowed string instrument for the v1 connected core.",
+  "category": "strings",
+  "bridgeInstrument": "violin",
+  "minMidi": 55,
+  "maxMidi": 100,
+  "techniques": [
+    "bow",
+    "pizz",
+    "col"
+  ],
+  "autoplay": {
+    "respectsManualTechnique": true,
+    "defaultTechnique": "bow",
+    "supportsLibrary": true
+  },
+  "ssotFields": [
+    "pageTitle",
+    "headline",
+    "page",
+    "bridgeInstrument",
+    "techniques",
+    "minMidi",
+    "maxMidi",
+    "release"
+  ]
+}

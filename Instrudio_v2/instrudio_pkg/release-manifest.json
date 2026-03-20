@@ -1,0 +1,138 @@
+{
+  "name": "Instrudio Electro Studio",
+  "version": "v2.8.0",
+  "entrypoint": "index.html",
+  "fallback_entrypoint": "404.html",
+  "instrument_count": 10,
+  "features": [
+    "MusicXML import",
+    "audio unlock helpers",
+    "drag and drop score dock",
+    "escape-to-close overlays",
+    "full 10-instrument ssot definition coverage",
+    "homepage info buttons on every card",
+    "homepage launcher",
+    "keyboard shortcuts",
+    "manual technique preserving autoplay for violin and bongos",
+    "manual technique preserving autoplay for violin, bongos, and saxophone",
+    "note-text import",
+    "runtime toasts",
+    "score console",
+    "v1 ssot definition runtime"
+  ],
+  "files": [
+    {
+      "name": "404.html",
+      "bytes": 28183
+    },
+    {
+      "name": "CHANGELOG.md",
+      "bytes": 3397
+    },
+    {
+      "name": "DEPLOYMENT.md",
+      "bytes": 830
+    },
+    {
+      "name": "Instrudio_Score_Example.notes",
+      "bytes": 153
+    },
+    {
+      "name": "LICENSE",
+      "bytes": 1067
+    },
+    {
+      "name": "QA_CHECKLIST.md",
+      "bytes": 1071
+    },
+    {
+      "name": "README.md",
+      "bytes": 2676
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "bytes": 3877
+    },
+    {
+      "name": "accordion.html",
+      "bytes": 27999
+    },
+    {
+      "name": "bagpipes.html",
+      "bytes": 50435
+    },
+    {
+      "name": "bongo.html",
+      "bytes": 32925
+    },
+    {
+      "name": "guitar.html",
+      "bytes": 39806
+    },
+    {
+      "name": "harmonica.html",
+      "bytes": 28464
+    },
+    {
+      "name": "harp.html",
+      "bytes": 39995
+    },
+    {
+      "name": "index.html",
+      "bytes": 28183
+    },
+    {
+      "name": "instrudio-suite.js",
+      "bytes": 33461
+    },
+    {
+      "name": "piano.html",
+      "bytes": 23153
+    },
+    {
+      "name": "release-manifest.json",
+      "bytes": 2476
+    },
+    {
+      "name": "saxophone.html",
+      "bytes": 40500
+    },
+    {
+      "name": "triangle.html",
+      "bytes": 35343
+    },
+    {
+      "name": "violin.html",
+      "bytes": 55938
+    }
+  ],
+  "platformBlueprintVersion": "1.1.0",
+  "includesPlatformSSOT": true,
+  "entrypoints": {
+    "web": "index.html",
+    "catalog": "platform/shared/instrument-catalog.json",
+    "manifest": "release-manifest.json"
+  },
+  "ssot_core_release": "v1",
+  "ssot_core_instruments": [
+    "studio_grand",
+    "studio_violin",
+    "celestial_harp",
+    "studio_bongos"
+  ],
+  "ssot_manifest": "core/v1-ssot-manifest.json",
+  "ssot_runtime": "core/definition-runtime.js",
+  "ssot_core_version": "1.2.0",
+  "ssot_all_instruments": [
+    "studio_grand",
+    "studio_violin",
+    "celestial_harp",
+    "studio_bongos",
+    "studio_accordion",
+    "studio_bagpipes",
+    "studio_guitar",
+    "studio_harmonica",
+    "studio_saxophone",
+    "studio_triangle"
+  ]
+}

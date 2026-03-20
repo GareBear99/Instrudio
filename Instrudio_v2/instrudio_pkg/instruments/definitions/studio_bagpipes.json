@@ -1,0 +1,28 @@
+{
+  "id": "studio_bagpipes",
+  "slug": "bagpipes",
+  "name": "Studio Bagpipes",
+  "version": "1.0.0",
+  "release": "extended",
+  "page": "bagpipes.html",
+  "pageTitle": "Studio Bagpipes · Instrudio",
+  "headline": "Studio Bagpipes",
+  "subheadline": "Drone-driven chanter instrument with shared page identity and range authority.",
+  "category": "winds",
+  "bridgeInstrument": "bagpipes",
+  "minMidi": 67,
+  "maxMidi": 81,
+  "autoplay": {
+    "respectsManualTechnique": true,
+    "supportsLibrary": true
+  },
+  "ssotFields": [
+    "pageTitle",
+    "headline",
+    "page",
+    "bridgeInstrument",
+    "minMidi",
+    "maxMidi",
+    "release"
+  ]
+}

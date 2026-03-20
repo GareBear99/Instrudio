@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://instrudio.dev/schemas/release-manifest.schema.json",
+  "title": "Instrudio Release Manifest",
+  "type": "object",
+  "required": [
+    "manifestVersion",
+    "platformVersion",
+    "releasedAt",
+    "channels",
+    "minimumClientVersions",
+    "instrumentVersions",
+    "changedAssets"
+  ],
+  "properties": {
+    "manifestVersion": {"type": "string"},
+    "platformVersion": {"type": "string"},
+    "releasedAt": {"type": "string"},
+    "channels": {
+      "type": "object",
+      "properties": {
+        "stable": {"type": "string"},
+        "beta": {"type": "string"}
+      }
+    },
+    "minimumClientVersions": {
+      "type": "object",
+      "required": ["web", "plugin", "mobile"],
+      "properties": {
+        "web": {"type": "string"},
+        "plugin": {"type": "string"},
+        "mobile": {"type": "string"}
+      }
+    },
+    "instrumentVersions": {
+      "type": "object",
+      "additionalProperties": {"type": "string"}
+    },
+    "changedAssets": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "featureFlags": {
+      "type": "object",
+      "additionalProperties": {"type": "boolean"}
+    }
+  }
+}

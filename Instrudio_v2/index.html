@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Instrudio Studio Bongos is a static bongo-themed browser instrument suite with 10 playable instruments, score import, autoplay songs, and homepage info panels." />
+<meta name="theme-color" content="#171008" />
+<title>Instrudio Studio Bongos Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#0d0905;--bg2:#1a1108;--panel:rgba(22,14,8,.90);--panel2:rgba(30,18,10,.92);--text:#f5e5cf;--muted:#8d6540;--line:rgba(240,187,118,.12);--glow:rgba(240,187,118,.14);--accent:#cf9550;--accent2:#f0bb76;--gold:#f0bb76;--good:#98ffd5;--gold3:#ffe2b0;}*{box-sizing:border-box;margin:0;padding:0}html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,sans-serif;overflow-x:hidden}body{background:radial-gradient(circle at 15% 10%, rgba(180,100,30,.24), transparent 32%),radial-gradient(circle at 84% 18%, rgba(255,180,90,.12), transparent 28%),radial-gradient(circle at 50% 100%, rgba(80,40,8,.38), transparent 45%),linear-gradient(180deg,#171008 0%,#0d0905 100%);}#bg{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.75}.wrap{position:relative;z-index:1;width:min(1240px,calc(100% - 32px));margin:0 auto;padding:28px 0 48px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px}.brand{display:flex;align-items:center;gap:14px}.logo{width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 32% 28%, #f8dcb6 0%, #edcda5 42%, #bb7d46 61%, #6b3719 76%, #2e1408 100%);box-shadow:0 0 30px rgba(240,187,118,.16), inset 0 0 24px rgba(255,255,255,.05);position:relative;border:1px solid rgba(255,225,180,.12)}.logo:before,.logo:after{content:"";position:absolute;border-radius:50%}.logo:before{inset:7px;border:2px solid rgba(255,235,205,.18)}.logo:after{inset:15px;border:1px dashed rgba(120,75,30,.28)}.brand-copy h1{font-family:Cinzel,serif;font-size:clamp(26px,4vw,48px);letter-spacing:.13em;line-height:1;font-weight:600;color:var(--accent2);text-shadow:0 0 36px rgba(240,187,118,.24)}.brand-copy p{margin-top:6px;color:var(--muted);letter-spacing:.22em;text-transform:uppercase;font-size:12px}.badge{padding:12px 16px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,rgba(55,31,16,.9),rgba(30,17,10,.95));color:var(--gold);font-size:12px;letter-spacing:.18em;text-transform:uppercase;box-shadow:0 12px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.03)}.hero{display:grid;grid-template-columns:1.25fr .9fr;gap:24px;align-items:stretch;margin-bottom:26px}.hero-card,.side-card,.suite-card,.foot-card{border:1px solid var(--line);background:linear-gradient(180deg,rgba(26,16,9,.9),rgba(18,11,6,.96));border-radius:22px;box-shadow:0 26px 70px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.02) inset;backdrop-filter:blur(12px)}.hero-card{padding:28px 28px 24px;position:relative;overflow:hidden}.hero-card:before{content:"";position:absolute;width:560px;height:560px;right:-140px;top:-290px;background:radial-gradient(circle, rgba(255,220,160,.08), transparent 44%);pointer-events:none}.kicker{color:var(--good);font-size:11px;letter-spacing:.24em;text-transform:uppercase;margin-bottom:16px}.hero-card h2{font-family:Cinzel,serif;font-size:clamp(28px,4.5vw,58px);line-height:1.02;letter-spacing:.08em;max-width:12ch;margin-bottom:16px;color:var(--accent2)}.hero-card p{color:#ead9bf;font-size:16px;line-height:1.7;max-width:62ch}.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}.cta,.ghost{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 18px;border-radius:14px;text-decoration:none;font-weight:700;letter-spacing:.06em;transition:.18s ease;text-transform:uppercase;font-size:12px}.cta{color:#201208;background:linear-gradient(135deg,var(--accent),var(--gold3));box-shadow:0 0 24px rgba(240,187,118,.18)}.cta:hover{transform:translateY(-1px);box-shadow:0 10px 34px rgba(240,187,118,.24)}.ghost{color:var(--text);border:1px solid var(--line);background:rgba(255,255,255,.03)}.ghost:hover{background:rgba(255,255,255,.06);transform:translateY(-1px)}.side-card{padding:22px;display:grid;gap:16px}.side-top{padding:18px;border:1px solid rgba(240,187,118,.08);border-radius:18px;background:linear-gradient(180deg,rgba(55,31,16,.9),rgba(30,17,10,.95))}.side-top h3{font-family:Cinzel,serif;font-size:18px;letter-spacing:.12em;margin-bottom:10px;color:var(--gold2)}.side-top p{color:var(--muted);line-height:1.65;font-size:14px}.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.stat{padding:16px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015))}.stat b{display:block;font-family:Cinzel,serif;font-size:24px;margin-bottom:4px;color:var(--gold)}.stat span{font-size:12px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase}.section-title{margin:8px 0 16px;color:var(--muted);letter-spacing:.24em;text-transform:uppercase;font-size:12px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-bottom:22px}.suite-card{padding:18px;position:relative;overflow:hidden;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.suite-card:hover{transform:translateY(-3px);border-color:rgba(240,187,118,.24);box-shadow:0 24px 70px rgba(0,0,0,.42),0 0 28px rgba(240,187,118,.08)}.card-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.instrument{display:flex;align-items:center;gap:12px}.icon{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;font-size:26px;border:1px solid rgba(240,187,118,.12);background:linear-gradient(180deg,rgba(55,31,16,.9),rgba(30,17,10,.95));box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}.instrument h3{font-family:Cinzel,serif;font-size:20px;letter-spacing:.08em;color:var(--gold2)}.tag{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03)}.suite-card p{color:#ead9bf;line-height:1.68;font-size:14px;min-height:72px}.feature-row{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 16px}.pill{padding:8px 10px;border-radius:999px;font-size:12px;color:var(--muted);border:1px solid rgba(240,187,118,.08);background:rgba(255,255,255,.025)}.card-actions{display:flex;gap:10px;flex-wrap:wrap}.card-link{flex:1;min-width:150px;text-decoration:none;padding:13px 14px;border-radius:14px;color:var(--text);border:1px solid var(--line);background:rgba(255,255,255,.03);text-align:center;font-weight:700}.card-link.primary{background:linear-gradient(135deg,rgba(207,149,80,.18),rgba(240,187,118,.16))}.card-link:hover{background:rgba(255,255,255,.07)}.info-btn{flex:0 0 auto;min-width:120px}.info-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px;z-index:30;background:rgba(0,0,0,.88);backdrop-filter:blur(10px)}.info-overlay.open{display:flex}.info-modal{width:min(760px,100%);max-height:min(86vh,900px);overflow:auto;border-radius:22px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(26,16,9,.98),rgba(18,11,6,.98));box-shadow:0 28px 90px rgba(0,0,0,.55);padding:24px}.info-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}.info-head h3{font-family:Cinzel,serif;font-size:clamp(22px,3vw,34px);letter-spacing:.08em;color:var(--gold2)}.info-close{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer}.info-copy p{color:#ead9bf;line-height:1.72;margin-bottom:12px}.info-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}.info-list div{border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03);padding:14px}.info-list b{display:block;color:var(--gold);margin-bottom:6px;font-size:12px;letter-spacing:.14em;text-transform:uppercase}@media (max-width:760px){.info-list{grid-template-columns:1fr}.card-actions{flex-direction:column}.info-btn{width:100%}}.foot-card{padding:20px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}.foot-card p{color:var(--muted);line-height:1.7}.mini-links{display:flex;gap:10px;flex-wrap:wrap}.mini-links a{text-decoration:none;color:var(--text);padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03)}.mini-links a:hover{background:rgba(255,255,255,.07)}@media (max-width:980px){.hero{grid-template-columns:1fr}}@media (max-width:760px){.topbar{flex-direction:column;align-items:flex-start}.grid{grid-template-columns:1fr}.brand-copy p,.badge,.section-title{letter-spacing:.14em}.hero-card,.side-card,.suite-card,.foot-card{border-radius:22px}}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <div class="brand-copy">
+        <h1>Instrudio Studio Bongos</h1>
+        <p>Warm percussive launch suite</p>
+      </div>
+    </div>
+    <div class="badge">10 instruments · bongo theme · v2.8.1</div>
+  </div>
+
+  <section class="hero">
+    <div class="hero-card">
+      <div class="kicker">Launchpad</div>
+      <h2>Play the full electro studio.</h2>
+      <p>
+        Welcome to <strong>Instrudio Studio Bongos</strong> — a branded homepage for your playable instrument collection.
+        Jump directly into Guitar, Harp, Piano, Violin, Bongos, Saxophone, Accordion, Harmonica, Bagpipes, and Triangle from one clean landing hub, with each card opening its dedicated instrument page.
+      </p>
+      <div class="cta-row">
+        <a class="cta" href="piano.html">Open Studio Grand</a>
+        <a class="ghost" href="#suite">Browse Instruments</a>
+      </div>
+    </div>
+
+    <div class="side-card">
+      <div class="side-top">
+        <h3>Suite Identity</h3>
+        <p>
+          A unified homepage built around the <strong>Instrudio</strong> brand, packaged so the whole studio can be dropped into GitHub or hosted as a static site.
+        </p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat"><b>10</b><span>Playable instruments</span></div>
+        <div class="stat"><b>1</b><span>Landing homepage</span></div>
+        <div class="stat"><b>HTML</b><span>Simple static deploy</span></div>
+        <div class="stat"><b>ZIP</b><span>Ready package</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-title" id="suite">Instruments</div>
+
+  <section class="grid">
+    <article class="suite-card">
+      <div class="card-top">
+        <div class="instrument">
+          <div class="icon">🎸</div>
+          <div><h3>Guitar</h3></div>
+        </div>
+        <div class="tag">String Lab</div>
+      </div>
+      <p>Interactive fretboard with chord flow, inharmonic string synthesis, acoustic body resonances, sympathetic string coupling, and 4 body types.</p>
+      <div class="feature-row">
+        <span class="pill">Frets</span><span class="pill">Chords</span><span class="pill">Strumming</span><span class="pill">Body EQ</span>
+      </div>
+      <div class="card-actions">
+        <a class="card-link primary" href="guitar.html">Open Guitar</a>
+        <button class="card-link info-btn" type="button" data-info-id="guitar">Info</button>
+      </div>
+    </article>
+
+    <article class="suite-card">
+      <div class="card-top">
+        <div class="instrument">
+          <div class="icon">🪶</div>
+          <div><h3>Harp</h3></div>
+        </div>
+        <div class="tag">Celestial</div>
+      </div>
+      <p>47-string concert harp with inharmonic decay, per-harmonic overtone envelope, sympathetic resonance, soundboard body EQ, and a 7-pedal tuning system.</p>
+      <div class="feature-row">
+        <span class="pill">47 Strings</span><span class="pill">Pedals</span><span class="pill">Glissando</span><span class="pill">Particles</span>
+      </div>
+      <div class="card-actions">
+        <a class="card-link primary" href="harp.html">Open Harp</a>
+        <button class="card-link info-btn" type="button" data-info-id="harp">Info</button>
+      </div>
+    </article>
+
+    <article class="suite-card">
+      <div class="card-top">
+        <div class="instrument">
+          <div class="icon">🎹</div>
+          <div><h3>Piano</h3></div>
+        </div>
+        <div class="tag">Studio Grand</div>
+      </div>
+      <p>Inharmonic string synthesis with per-register stiffness constants, stereo spread, hammer transients, sustain pedal, and 5 tone profiles.</p>
+      <div class="feature-row">
+        <span class="pill">Inharmonic</span><span class="pill">Stereo</span><span class="pill">Sustain</span><span class="pill">5 Tones</span>
+      </div>
+      <div class="card-actions">
+        <a class="card-link primary" href="piano.html">Open Piano</a>
+        <button class="card-link info-btn" type="button" data-info-id="piano">Info</button>
+      </div>
+    </article>
+
+    <article class="suite-card">
+      <div class="card-top">
+        <div class="instrument">
+          <div class="icon">🎻</div>
+          <div><h3>Violin</h3></div>
+        </div>
+        <div class="tag">Bowed Engine</div>
+      </div>
+      <p>Full physical modelling — Helmholtz waveform, Stradivari body resonances, sympathetic strings, H2 correction, inharmonicity chorus, and continuous pitch glide.</p>
+      <div class="feature-row">
+        <span class="pill">Helmholtz</span><span class="pill">Pizzicato</span><span class="pill">Expression</span><span class="pill">Scales</span>
+      </div>
+      <div class="card-actions">
+        <a class="card-link primary" href="violin.html">Open Violin</a>
+        <button class="card-link info-btn" type="button" data-info-id="violin">Info</button>
+      </div>
+    </article>
+
+    <article class="suite-card">
+      <div class="card-top">
+        <div class="instrument">
+          <div class="icon">🥁</div>
+          <div><h3>Bongos</h3></div>
+        </div>
+        <div class="tag">Membrane</div>
+      </div>
+      <p>Circular membrane physics using Bessel function modal ratios. Strike position, rim shot detection, kill-on-retrigger, and three articulation modes.</p>
+      <div class="feature-row">
+        <span class="pill">Bessel Modes</span><span class="pill">Open</span><span class="pill">Mute</span><span class="pill">Slap</span>
+      </div>
+      <div class="card-actions">
+        <a class="card-link primary" href="bongo.html">Open Bongos</a>
+        <button class="card-link info-btn" type="button" data-info-id="bongo">Info</button>
+      </div>
+    </article>
+
+    <article class="suite-card">
+      <div class="card-top">
+        <div class="instrument">
+          <div class="icon">🎷</div>
+          <div><h3>Saxophone</h3></div>
+        </div>
+        <div class="tag">Reed Engine</div>
+      </div>
+      <p>PeriodicWave reed synthesis with correct odd-harmonic bore acoustics, portamento glide, formant EQ per character, vibrato, growl, and breath pressure control.</p>
+      <div class="feature-row">
+        <span class="pill">Reed Wave</span><span class="pill">Portamento</span><span class="pill">Formant</span><span class="pill">Growl</span>
+      </div>
+      <div class="card-actions">
+        <a class="card-link primary" href="saxophone.html">Open Saxophone</a>
+        <button class="card-link info-btn" type="button" data-info-id="saxophone">Info</button>
+      </div>
+    </article>
+
+    <article class="suite-card">
+      <div class="card-top">
+        <div class="instrument"><div class="icon">🪗</div><div><h3>Accordion</h3></div></div>
+        <div class="tag">Bellows</div>
+      </div>
+      <p>Bellows-driven reed engine with left-hand bass support, right-hand melody response, air-pressure dynamics, and rich folk/cabaret voicing.</p>
+      <div class="feature-row"><span class="pill">Bellows</span><span class="pill">Bass Buttons</span><span class="pill">Reeds</span><span class="pill">Folk Tone</span></div>
+      <div class="card-actions"><a class="card-link primary" href="accordion.html">Open Accordion</a><button class="card-link info-btn" type="button" data-info-id="accordion">Info</button></div>
+    </article>
+
+    <article class="suite-card">
+      <div class="card-top">
+        <div class="instrument"><div class="icon">🎵</div><div><h3>Harmonica</h3></div></div>
+        <div class="tag">Pocket Reed</div>
+      </div>
+      <p>Responsive draw/blow phrasing with expressive bends, compact melodic range, grit-friendly reed tone, and fast lead-friendly note response.</p>
+      <div class="feature-row"><span class="pill">Draw/Blow</span><span class="pill">Bends</span><span class="pill">Lead</span><span class="pill">Blues Tone</span></div>
+      <div class="card-actions"><a class="card-link primary" href="harmonica.html">Open Harmonica</a><button class="card-link info-btn" type="button" data-info-id="harmonica">Info</button></div>
+    </article>
+
+    <article class="suite-card">
+      <div class="card-top">
+        <div class="instrument"><div class="icon">🎼</div><div><h3>Bagpipes</h3></div></div>
+        <div class="tag">Highland</div>
+      </div>
+      <p>Great Highland Bagpipe — 9-note Mixolydian chanter, three continuous drones, ornaments, micro-intonation, PeriodicWave double-reed synthesis.</p>
+      <div class="feature-row"><span class="pill">Chanter</span><span class="pill">3 Drones</span><span class="pill">Ornaments</span><span class="pill">Mixolydian</span></div>
+      <div class="card-actions"><a class="card-link primary" href="bagpipes.html">Open Bagpipes</a><button class="card-link info-btn" type="button" data-info-id="bagpipes">Info</button></div>
+    </article>
+
+    <article class="suite-card">
+      <div class="card-top">
+        <div class="instrument"><div class="icon">🔺</div><div><h3>Triangle</h3></div></div>
+        <div class="tag">Inharmonic</div>
+      </div>
+      <p>Euler-Bernoulli inharmonic bar with 6 bending modes and 10 synth effect presets — Pure, Shimmer, Freeze, Bell, Choir, Bowed, Crystal, Thunder, Stacked, Reverse.</p>
+      <div class="feature-row"><span class="pill">6 Modes</span><span class="pill">10 Presets</span><span class="pill">Mute</span><span class="pill">FX Stack</span></div>
+      <div class="card-actions"><a class="card-link primary" href="triangle.html">Open Triangle</a><button class="card-link info-btn" type="button" data-info-id="triangle">Info</button></div>
+    </article>
+  </section>
+
+  <section class="foot-card">
+    <p>
+      Package includes <strong>index.html</strong> as the homepage plus all ten instrument pages and the shared suite engine.
+      Drop the folder onto static hosting or GitHub Pages and the clickable landing page routes to each instrument directly, with built-in score launching and per-card info buttons.
+    </p>
+    <div class="mini-links">
+      <a href="guitar.html">Guitar</a>
+      <a href="harp.html">Harp</a>
+      <a href="piano.html">Piano</a>
+      <a href="violin.html">Violin</a>
+      <a href="bongo.html">Bongos</a>
+      <a href="saxophone.html">Saxophone</a>
+      <a href="accordion.html">Accordion</a>
+      <a href="harmonica.html">Harmonica</a>
+      <a href="bagpipes.html">Bagpipes</a>
+      <a href="triangle.html">Triangle</a>
+    </div>
+  </section>
+</div>
+<div class="info-overlay" id="infoOverlay" aria-hidden="true">
+  <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+    <div class="info-head">
+      <div>
+        <div class="kicker">Instrument Info</div>
+        <h3 id="infoTitle">Instrument Overview</h3>
+      </div>
+      <button class="info-close" type="button" id="infoClose">Close</button>
+    </div>
+    <div class="info-copy" id="infoCopy"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const INFO_CONTENT = {
+    guitar:{title:'Guitar', intro:'A playable guitar lab focused on string feel, chord movement, and resonant body tone.', blocks:[['Play style','Frets, chord flow, strumming, and register-aware body response.'],['Best for','Pop, acoustic sketches, arpeggios, and quick songwriting ideas.'],['Page extras','Use the silent score dock to autoplay built-in songs or import note text and MusicXML.'],['Why open it','Fastest route for harmony testing and chord-led arranging.']]},
+    harp:{title:'Harp', intro:'A shimmering concert-harp page built for glissandos, cinematic voicings, and overtone-rich plucks.', blocks:[['Play style','47-string feel, pedal-based harmony color, and resonant sparkle.'],['Best for','Ambient intros, fantasy cues, elegant classical phrases, and layered runs.'],['Page extras','Works well with autoplay pieces like Canon in D and note imports for sweeping passages.'],['Why open it','Great when you want immediate “celestial” texture without setup friction.']]},
+    piano:{title:'Piano', intro:'The studio grand page is the flagship all-rounder for note entry, arrangement testing, and melody writing.', blocks:[['Play style','Inharmonic string tone, sustain pedal feel, stereo spread, and multiple tone profiles.'],['Best for','Composing, sight-reading imports, and general-purpose playback from the homepage console.'],['Page extras','Strongest default target for imported scores and autoplay demo songs.'],['Why open it','Most versatile page in the package for quickly hearing almost any note material.']]},
+    violin:{title:'Violin', intro:'A bowed-engine page aimed at expressive melodic lines, glide, and physical-model style solo phrasing.', blocks:[['Play style','Helmholtz-inspired bowing, vibrato/expression, pizzicato support, and lyrical motion.'],['Best for','Lead melodies, emotional themes, and expressive classical phrases.'],['Page extras','Autoplay songs can shift into violin-friendly ranges automatically through the shared engine.'],['Why open it','Best melodic showcase page when you want character instead of just note playback.']]},
+    bongo:{title:'Bongos', intro:'A percussion page centered on membrane response, strike placement, and rhythmic articulation.', blocks:[['Play style','Open, mute, and slap-style hit behavior with compact rhythmic response.'],['Best for','Rhythm sketches, Latin grooves, percussive layers, and timing ideas.'],['Page extras','The shared score dock can still drive note events here for rhythmic reinterpretation.'],['Why open it','Good for testing groove energy and playful rhythmic arrangements.']]},
+    saxophone:{title:'Saxophone', intro:'A reed-synth page tuned for legato motion, character tone, and expressive lead phrasing.', blocks:[['Play style','Portamento, formant shaping, growl, vibrato, and pressure-style expression.'],['Best for','Jazz-pop leads, cinematic solos, and warm melodic hooks.'],['Page extras','Built-in songs can transpose into sax-friendly ranges from the launch console.'],['Why open it','Opens up a more human-sounding lead compared with the keyboard-first pages.']]},
+    accordion:{title:'Accordion', intro:'A bellows-driven page with folk energy, reed body, and left/right-hand character.', blocks:[['Play style','Bellows movement feel, melody lead, and bass/chord support color.'],['Best for','Folk, cabaret, street-performance moods, and punchy melodic accompaniment.'],['Page extras','Use imported scores or built-in songs for quick pseudo-ensemble textures.'],['Why open it','Adds a very different timbral identity to the suite and helps the package feel broad, not repetitive.']]},
+    harmonica:{title:'Harmonica', intro:'A compact reed page for bends, draw/blow phrasing, and quick lead lines.', blocks:[['Play style','Lead-friendly response with bluesy bends and compact melodic punch.'],['Best for','Blues hooks, folk leads, country color, and simple expressive melody takes.'],['Page extras','Works well from homepage song-launching when you want a lighter, more intimate solo voice.'],['Why open it','Fast character instrument that keeps the suite feeling playful and varied.']]},
+    bagpipes:{title:'Bagpipes', intro:'A highland-focused page with chanter playing, drones, and ornament-minded melodic color.', blocks:[['Play style','Continuous drone support, chanter-led melody, and traditional-flavored tuning color.'],['Best for','Ceremonial themes, folk drama, bold drones, and unique melodic texture.'],['Page extras','The score dock lets you reinterpret imported melodies through a drone-backed voice.'],['Why open it','Distinctive timbre that instantly expands the suite’s palette.']]},
+    triangle:{title:'Triangle', intro:'An advanced metallic page that pushes far beyond a simple percussion hit into FX-rich inharmonic sound design.', blocks:[['Play style','Six mode shapes, ten effect-style presets, and metallic shimmer/freeze character.'],['Best for','FX accents, modern sound design, bright textures, and experimental melodic sparkle.'],['Page extras','One of the most stylized pages in the package, especially with autoplay and imported material.'],['Why open it','Shows the suite is not just orchestral staples — it can get weird and premium too.']]}
+  };
+
+  const c = document.getElementById('bg');
+  const ctx = c.getContext('2d');
+  let w=0,h=0,dpr=Math.min(window.devicePixelRatio||1,2);
+  const pts = Array.from({length: 85}, () => ({
+    x: Math.random(),
+    y: Math.random(),
+    r: Math.random()*2.2 + 0.5,
+    dx:(Math.random()-0.5)*0.00035,
+    dy:(Math.random()-0.5)*0.00035,
+    a: Math.random()*0.6 + 0.15
+  }));
+
+  function resize(){
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    w=window.innerWidth; h=window.innerHeight;
+    c.width=w*dpr; c.height=h*dpr; c.style.width=w+'px'; c.style.height=h+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    for(const p of pts){
+      p.x += p.dx; p.y += p.dy;
+      if(p.x<0||p.x>1) p.dx*=-1;
+      if(p.y<0||p.y>1) p.dy*=-1;
+      const x=p.x*w, y=p.y*h;
+      const g=ctx.createRadialGradient(x,y,0,x,y,p.r*18);
+      g.addColorStop(0, `rgba(180,220,255,${p.a})`);
+      g.addColorStop(1, 'rgba(180,220,255,0)');
+      ctx.fillStyle=g;
+      ctx.beginPath(); ctx.arc(x,y,p.r*18,0,Math.PI*2); ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+
+  function openInfo(id){
+    const data=INFO_CONTENT[id];
+    if(!data) return;
+    document.getElementById('infoTitle').textContent=data.title;
+    document.getElementById('infoCopy').innerHTML=`<p>${data.intro}</p><div class="info-list">${data.blocks.map(([h,b])=>`<div><b>${h}</b><span>${b}</span></div>`).join('')}</div>`;
+    const overlay=document.getElementById('infoOverlay');
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden','false');
+    document.body.style.overflow='hidden';
+  }
+  function closeInfo(){
+    const overlay=document.getElementById('infoOverlay');
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden','true');
+    document.body.style.overflow='';
+  }
+
+  window.addEventListener('resize', resize, {passive:true});
+  resize(); draw();
+
+  document.querySelectorAll('[data-info-id]').forEach(btn=>btn.addEventListener('click', ()=>openInfo(btn.dataset.infoId)));
+  document.getElementById('infoClose').addEventListener('click', closeInfo);
+  document.getElementById('infoOverlay').addEventListener('click', e=>{ if(e.target.id==='infoOverlay') closeInfo(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeInfo(); });
+})();
+</script>
+</body>
+</html>

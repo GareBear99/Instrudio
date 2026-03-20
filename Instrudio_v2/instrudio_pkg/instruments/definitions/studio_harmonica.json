@@ -1,0 +1,28 @@
+{
+  "id": "studio_harmonica",
+  "slug": "harmonica",
+  "name": "Studio Harmonica",
+  "version": "1.0.0",
+  "release": "extended",
+  "page": "harmonica.html",
+  "pageTitle": "Studio Harmonica · Instrudio",
+  "headline": "Studio Harmonica",
+  "subheadline": "Pocket reed instrument with canonical range and page metadata in SSOT.",
+  "category": "reeds",
+  "bridgeInstrument": "harmonica",
+  "minMidi": 60,
+  "maxMidi": 96,
+  "autoplay": {
+    "respectsManualTechnique": true,
+    "supportsLibrary": true
+  },
+  "ssotFields": [
+    "pageTitle",
+    "headline",
+    "page",
+    "bridgeInstrument",
+    "minMidi",
+    "maxMidi",
+    "release"
+  ]
+}

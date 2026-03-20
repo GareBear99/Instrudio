@@ -1,0 +1,65 @@
+{
+  "catalogVersion": "1.0.0",
+  "instruments": [
+    {
+      "id": "guitar",
+      "page": "guitar.html",
+      "pluginTarget": "Instrudio.Guitar",
+      "mobileEnabled": true
+    },
+    {
+      "id": "harp",
+      "page": "harp.html",
+      "pluginTarget": "Instrudio.Harp",
+      "mobileEnabled": true
+    },
+    {
+      "id": "piano",
+      "page": "piano.html",
+      "pluginTarget": "Instrudio.Piano",
+      "mobileEnabled": true
+    },
+    {
+      "id": "violin",
+      "page": "violin.html",
+      "pluginTarget": "Instrudio.Violin",
+      "mobileEnabled": true
+    },
+    {
+      "id": "bongo",
+      "page": "bongo.html",
+      "pluginTarget": "Instrudio.Bongo",
+      "mobileEnabled": true
+    },
+    {
+      "id": "saxophone",
+      "page": "saxophone.html",
+      "pluginTarget": "Instrudio.Saxophone",
+      "mobileEnabled": true
+    },
+    {
+      "id": "accordion",
+      "page": "accordion.html",
+      "pluginTarget": "Instrudio.Accordion",
+      "mobileEnabled": true
+    },
+    {
+      "id": "harmonica",
+      "page": "harmonica.html",
+      "pluginTarget": "Instrudio.Harmonica",
+      "mobileEnabled": true
+    },
+    {
+      "id": "bagpipes",
+      "page": "bagpipes.html",
+      "pluginTarget": "Instrudio.Bagpipes",
+      "mobileEnabled": true
+    },
+    {
+      "id": "triangle",
+      "page": "triangle.html",
+      "pluginTarget": "Instrudio.Triangle",
+      "mobileEnabled": true
+    }
+  ]
+}

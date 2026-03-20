@@ -1,0 +1,17 @@
+{
+  "platformVersion": "0.1.0-alpha",
+  "rules": [
+    {
+      "instrumentId": "xylophone",
+      "webMin": "2.4.0",
+      "pluginMin": "0.1.0",
+      "mobileMin": "0.1.0"
+    },
+    {
+      "instrumentId": "violin",
+      "webMin": "2.4.0",
+      "pluginMin": "0.2.0",
+      "mobileMin": "0.2.0"
+    }
+  ]
+}

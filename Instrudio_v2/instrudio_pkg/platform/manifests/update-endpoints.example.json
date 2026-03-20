@@ -1,0 +1,6 @@
+{
+  "manifestUrl": "https://example.com/instrudio/release-manifest.json",
+  "catalogUrl": "https://example.com/instrudio/instrument-catalog.json",
+  "entitlementUrl": "https://example.com/instrudio/entitlements/validate",
+  "pluginBridgeUrl": "wss://localhost:17844/instrudio-bridge"
+}

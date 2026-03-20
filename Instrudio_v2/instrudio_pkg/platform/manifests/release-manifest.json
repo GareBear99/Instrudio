@@ -1,0 +1,30 @@
+{
+  "manifestVersion": "1.0.0",
+  "platformVersion": "0.1.0-alpha",
+  "releasedAt": "2026-03-20T00:00:00Z",
+  "channels": {
+    "stable": "0.1.0-alpha",
+    "beta": "0.2.0-beta"
+  },
+  "minimumClientVersions": {
+    "web": "2.4.0",
+    "plugin": "0.1.0",
+    "mobile": "0.1.0"
+  },
+  "instrumentVersions": {
+    "xylophone": "1.0.0",
+    "violin": "0.9.0",
+    "piano": "0.9.0",
+    "bongo": "0.8.0"
+  },
+  "changedAssets": [
+    "/assets/instruments/xylophone/icon.png",
+    "/assets/instruments/xylophone/hero.png",
+    "/assets/instruments/xylophone/preview.mp3"
+  ],
+  "featureFlags": {
+    "mobileRemoteBridge": true,
+    "premiumPresets": true,
+    "externalMidiMode": true
+  }
+}
