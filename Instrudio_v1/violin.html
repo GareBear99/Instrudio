@@ -81,7 +81,7 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
 <!-- Info overlay -->
 <div class="info-overlay" id="infoOverlay">
   <div class="info-panel">
-    <button class="info-close" onclick="document.getElementById('infoOverlay').classList.remove('open')">✕</button>
+    <button class="info-close" aria-label="Close instrument info" onclick="document.getElementById('infoOverlay').classList.remove('open')">✕</button>
     <h2>Studio Violin</h2>
     <div class="tagline">Helmholtz bowed string · H2 correction · Stradivari body EQ · Sympathetic resonance · Physical modelling</div>
     <div class="info-section">
@@ -198,6 +198,7 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
   function initAudio(){
     if(actx)return;
     actx=new AC();
+    try{ window.InstrudioSuite?.registerAudioContext?.(actx); }catch{}
 
     // STEREO output — violin sounds more natural in stereo
     masterL=actx.createGain(); masterL.gain.value=volVal*0.7;

@@ -67,7 +67,7 @@ header p{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(
 <!-- Info overlay -->
 <div class="info-overlay" id="infoOverlay">
   <div class="info-panel">
-    <button class="info-close" onclick="document.getElementById('infoOverlay').classList.remove('open')">✕</button>
+    <button class="info-close" aria-label="Close instrument info" onclick="document.getElementById('infoOverlay').classList.remove('open')">✕</button>
     <h2>Studio Grand</h2>
     <div class="tagline">Inharmonic oscillator stack · Stereo spread · Hammer transients · 5 tone profiles</div>
     <div class="info-section">
@@ -143,6 +143,7 @@ header p{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(
   function initAudio(){
     if(actx)return;
     actx=new AC();
+    try{ window.InstrudioSuite?.registerAudioContext?.(actx); }catch{}
     masterGain=actx.createGain(); masterGain.gain.value=volValue;
     filterNode=actx.createBiquadFilter(); filterNode.type='lowpass';
     filterNode.frequency.value=brightValue; filterNode.Q.value=0.6;

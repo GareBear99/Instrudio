@@ -84,7 +84,7 @@ header p{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(-
 <!-- Info overlay -->
 <div class="info-overlay" id="infoOverlay">
   <div class="info-panel">
-    <button class="info-close" onclick="document.getElementById('infoOverlay').classList.remove('open')">✕</button>
+    <button class="info-close" aria-label="Close instrument info" onclick="document.getElementById('infoOverlay').classList.remove('open')">✕</button>
     <h2>Studio Triangle</h2>
     <div class="tagline">Euler-Bernoulli inharmonic bar · 6 bending modes · 10 synth effect presets</div>
 
@@ -281,6 +281,7 @@ header p{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(-
   function initAudio(){
     if(actx)return;
     actx=new AC();
+    try{ window.InstrudioSuite?.registerAudioContext?.(actx); }catch{}
     masterGain=actx.createGain();masterGain.gain.value=volVal;
     convNode=buildReverb();
     dryGain=actx.createGain();dryGain.gain.value=1-revVal;

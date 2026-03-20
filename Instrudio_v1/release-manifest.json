@@ -1,7 +1,7 @@
 {
   "name": "Instrudio Electro Studio",
-  "version": "2.2.0",
-  "build_date_utc": "2026-03-20T05:34:11Z",
+  "version": "2.3.0",
+  "build_date_utc": "2026-03-20T05:56:26Z",
   "status": "production-ready static release",
   "entrypoint": "index.html",
   "instrument_count": 10,
@@ -10,7 +10,9 @@
     "note-text import",
     "homepage launch console",
     "per-page score dock",
-    "info modals"
+    "homepage info modals",
+    "runtime feedback toasts",
+    "audio unlock helpers"
   ],
   "files": [
     {
@@ -20,8 +22,13 @@
     },
     {
       "name": "CHANGELOG.md",
-      "bytes": 552,
-      "sha256": "ca3462911100d8d804c9bf307fdac5f06c702ec2caf433627adb6339868c892c"
+      "bytes": 1180,
+      "sha256": "4f09a1b6d06348431d83cbe675cb40d0f953c9ed1b6cac86fd9910dcc2bbae94"
+    },
+    {
+      "name": "DEPLOYMENT.md",
+      "bytes": 747,
+      "sha256": "ad3c513247161e66f4737a06e3acfa33cbb865b9e33550344a2259d128955834"
     },
     {
       "name": "Instrudio_Score_Example.notes",
@@ -29,39 +36,49 @@
       "sha256": "d2b777da0f65e19112423875dfde2f39841208fb327e5344e97f7a45981255d6"
     },
     {
+      "name": "QA_CHECKLIST.md",
+      "bytes": 848,
+      "sha256": "96900824db7c8dc4eccf761b48c705c78617107c14197b372279993381c173ed"
+    },
+    {
       "name": "README.md",
-      "bytes": 2763,
-      "sha256": "1b5655b3d0ca02032a18bc42942905f35aecec9176559579938dced2929aa1ea"
+      "bytes": 4531,
+      "sha256": "c48fe0400c12245d77432596c5344dc2acb7716ca6a14f101a534a166945430b"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "bytes": 1366,
+      "sha256": "7d7bf8df83169d9430ac8f58debfa682959bdfd068ab9d3cb0ccac32a9d27d4a"
     },
     {
       "name": "accordion.html",
-      "bytes": 27699,
-      "sha256": "84fa922e2d5d0f65e1a9217c8cd7dc57435c58517551221136d30603d612face"
+      "bytes": 27805,
+      "sha256": "ed3df6da637578b3920672b5ee2c0073c0ea7c2347cd5382d9fac15fe3dab624"
     },
     {
       "name": "bagpipes.html",
-      "bytes": 50209,
-      "sha256": "ebe39e2e79330fbd035101f1ae1fbb3dec5f8285b7a9262b9fe2b6587e640e7c"
+      "bytes": 50244,
+      "sha256": "dce8f87668a98e2f0f3cc3be0e850a63a56bdcb637c11a13d62ee76ea0301ad4"
     },
     {
       "name": "bongo.html",
-      "bytes": 32309,
-      "sha256": "8500168392c8835ed442e9f5eb73662ca533b4a499ca686d3b4999653fd1fc80"
+      "bytes": 32415,
+      "sha256": "9cd2a3fdbcdd70b796080b171a00869400e60e879c9c401f8b88268685f9c03c"
     },
     {
       "name": "guitar.html",
-      "bytes": 39582,
-      "sha256": "421c04c85a6821efcb26eb8e8fd68ad4f71c26a20d03648452fcc465637d2066"
+      "bytes": 39617,
+      "sha256": "ba49af7461d2075b59f01f56c3bb962a52e9b9b828d0062fab2010b7d7bc7c58"
     },
     {
       "name": "harmonica.html",
-      "bytes": 28164,
-      "sha256": "49672f65c2a9c7e33ce819c2f34010009027f656e2ad423b032bbb478b732ad7"
+      "bytes": 28270,
+      "sha256": "39d775395be86450152a2cc8ab24ea2eeeba2b3e7d7a86312dd67c07de7d8f27"
     },
     {
       "name": "harp.html",
-      "bytes": 39765,
-      "sha256": "4e635d99773845ba56c10c133196da31c2bb7227cd2249a1386f6fae9dbf86ba"
+      "bytes": 39800,
+      "sha256": "e602f90b1087cf6f0c59dcf0b9bb1077cc092beda2b90853b3e5cff35deca771"
     },
     {
       "name": "index.html",
@@ -70,28 +87,33 @@
     },
     {
       "name": "instrudio-suite.js",
-      "bytes": 25071,
-      "sha256": "900d7de9ae7fce23d2f42e41d67edad077c06350a129353d3de88d55f6967c01"
+      "bytes": 31242,
+      "sha256": "af5fedd65883e4352e69d397a1447885ea63fc71ccf3b6af765dc3a22d879e9d"
     },
     {
       "name": "piano.html",
-      "bytes": 22840,
-      "sha256": "1b86eb4daf7c88669fb285f37f15ae1e02ce054252996727c9b5d83cf4232bf9"
+      "bytes": 22946,
+      "sha256": "c862c1c26126bdd39c95e6ab3ff04f5743ebd33a146a8153abfbca0d4c933491"
+    },
+    {
+      "name": "release-manifest.json",
+      "bytes": 2743,
+      "sha256": "ea8114b56890aafbe4d8b10a2d0dfca73cf67b896471eb0c1f6166d9383a4e48"
     },
     {
       "name": "saxophone.html",
-      "bytes": 39974,
-      "sha256": "bbc682d57352034476a1e3bb0b32f01bffde974d025874e476ce039d2a49e4e0"
+      "bytes": 40009,
+      "sha256": "617ca4403e80c9f7ff22822a3d47acc8b50fc7af40ff2ab374ce142603b732f9"
     },
     {
       "name": "triangle.html",
-      "bytes": 35044,
-      "sha256": "8867f9cdce9f9a27b1ee79991a1609844ad01582cdb7918a6aabdc0715d90bdf"
+      "bytes": 35150,
+      "sha256": "6cbe3ebd8d067a199382201ee3d256832a0901d260f7f4537c5cad76ec9d9467"
     },
     {
       "name": "violin.html",
-      "bytes": 55331,
-      "sha256": "8406c5a7300088a19ebd834f934c955a52b43ed0da57fe8671fbb16bea26e9ab"
+      "bytes": 55437,
+      "sha256": "bee0244efa2d4db5198ee20e1fc2fd8bd08f6d30805aa7ef78a061fdf8ce87aa"
     }
   ]
 }
