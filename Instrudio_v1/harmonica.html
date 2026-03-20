@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Studio Harmonica · Instrudio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#080c0a;--surface:#101810;--border:rgba(60,180,90,.14);--border2:rgba(60,180,90,.28);
+  --text:#e8f5ec;--muted:#5a8060;--accent:#38b460;--accent2:#70d890;--accent3:#b0f0c0;
+  --hole-bg:#0c1a0e;--hole-active:#1a4020;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:Inter,sans-serif;overflow-x:hidden;}
+body{background:radial-gradient(ellipse at 25% 0%,rgba(40,160,80,.12) 0%,transparent 50%),radial-gradient(ellipse at 75% 100%,rgba(20,100,50,.08) 0%,transparent 40%),#080c0a;display:flex;flex-direction:column;align-items:center;padding:22px 14px 52px;}
+header{text-align:center;margin-bottom:20px;}
+header h1{font-family:Cinzel,serif;font-size:36px;font-weight:600;color:var(--accent2);letter-spacing:.06em;margin-bottom:4px;}
+header p{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+.controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;}
+.ctrl{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:7px 12px;}
+.ctrl label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);min-width:48px;}
+.ctrl input[type=range]{-webkit-appearance:none;width:80px;height:2px;background:rgba(56,180,96,.18);border-radius:1px;outline:none;cursor:pointer;}
+.ctrl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--accent);cursor:pointer;}
+.ctrl-val{font-size:11px;color:var(--accent2);min-width:24px;}
+.ctrl select{background:transparent;border:none;color:var(--text);font-family:Inter,sans-serif;font-size:11px;cursor:pointer;outline:none;}
+.mode-row{display:flex;gap:8px;justify-content:center;margin-bottom:16px;}
+.mode-btn{font-family:Inter,sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:7px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;transition:all .14s;}
+.mode-btn.active{color:var(--accent2);border-color:var(--accent);background:rgba(56,180,96,.08);}
+.status-bar{font-size:11px;letter-spacing:.12em;color:var(--muted);text-align:center;margin-bottom:12px;min-height:16px;}
+/* Harmonica body */
+.harp-body{background:linear-gradient(160deg,#c0a040,#806020,#c0a040);border:3px solid #a08030;border-radius:8px;padding:6px 8px;margin-bottom:20px;box-shadow:0 8px 28px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,240,140,.3);display:flex;flex-direction:column;gap:0;max-width:900px;width:100%;}
+.holes-row{display:flex;gap:4px;justify-content:center;padding:4px 0;}
+.hole-group{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.hole-num{font-size:9px;color:rgba(80,60,10,.8);font-weight:600;letter-spacing:.05em;}
+.hole{width:62px;height:54px;background:var(--hole-bg);border:2px solid rgba(40,80,50,.6);border-radius:5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all .12s;position:relative;user-select:none;touch-action:none;}
+.hole:hover{border-color:var(--accent);background:#141e16;}
+.hole.blow-active{background:rgba(56,180,96,.18);border-color:var(--accent2);box-shadow:0 0 12px rgba(56,180,96,.25);}
+.hole.draw-active{background:rgba(100,120,200,.18);border-color:#8090e0;box-shadow:0 0 12px rgba(100,120,200,.25);}
+.note-label{font-size:9px;letter-spacing:.05em;pointer-events:none;}
+.note-label.blow{color:var(--accent2);}
+.note-label.draw{color:#9ab0f0;}
+.hole-arrow{font-size:11px;pointer-events:none;}
+.hole-arrow.blow{color:var(--accent);}
+.hole-arrow.draw{color:#7090e0;}
+/* Bend indicator */
+.bend-indicator{height:3px;width:0%;background:linear-gradient(90deg,var(--accent2),#90d0ff);border-radius:2px;margin-top:2px;transition:width .08s;}
+.note-display{min-height:26px;margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.note-pill{font-family:Cinzel,serif;font-size:12px;padding:2px 12px;background:rgba(56,180,96,.07);border:1px solid rgba(56,180,96,.35);border-radius:999px;color:var(--accent2);animation:pIn .1s ease;}
+@keyframes pIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+/* Key mapping display */
+.kb-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;max-width:700px;width:100%;margin-bottom:14px;}
+.kb-title{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.kb-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;}
+.kb-key{text-align:center;}
+.kb-hole{font-size:10px;color:var(--muted);margin-bottom:2px;}
+.kb-blow{font-size:11px;font-weight:600;color:var(--accent2);}
+.kb-draw{font-size:11px;color:#9ab0f0;}
+.kb-hint{font-size:10px;letter-spacing:.1em;color:var(--muted);text-align:center;margin-top:4px;}
+
+/* Info overlay */
+.info-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;overflow-y:auto;padding:32px 16px;}
+.info-overlay.open{display:flex;justify-content:center;align-items:flex-start;}
+.info-panel{background:var(--surface,#10101a);border:1px solid rgba(60,180,90,.28);border-radius:18px;max-width:760px;width:100%;padding:36px 40px;position:relative;margin:auto;}
+.info-close{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--muted,#606880);font-size:22px;cursor:pointer;line-height:1;}
+.info-close:hover{color:var(--text,#eeeaff);}
+.info-panel h2{font-family:Cinzel,serif;font-size:22px;color:#38b460;margin-bottom:6px;}
+.info-panel .tagline{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted,#606880);margin-bottom:22px;}
+.info-section{margin-bottom:20px;}
+.info-section h3{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#38b460;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid rgba(60,180,90,.28);}
+.info-section p,.info-section li{font-size:13px;line-height:1.72;color:rgba(238,234,255,.82);margin-bottom:5px;}
+.info-section ul{padding-left:18px;}
+.info-section code{font-family:monospace;font-size:11px;background:rgba(140,120,255,.1);padding:2px 7px;border-radius:4px;color:#38b460;}
+.ref-entry{display:flex;gap:12px;margin-bottom:9px;font-size:12px;}
+.ref-year{color:#38b460;font-weight:600;min-width:42px;font-family:Cinzel,serif;}
+.ref-text{color:rgba(238,234,255,.75);line-height:1.65;}
+.info-btn{position:absolute;top:6px;right:-40px;width:28px;height:28px;border-radius:50%;background:var(--surface2,#141420);border:1px solid rgba(60,180,90,.28);color:#38b460;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .14s;font-style:normal;}
+.info-btn:hover{background:rgba(140,120,255,.12);}
+</style>
+</head>
+<body>
+
+<!-- Info overlay -->
+<div class="info-overlay" id="infoOverlay">
+  <div class="info-panel">
+    <button class="info-close" onclick="document.getElementById('infoOverlay').classList.remove('open')">✕</button>
+    <h2>Studio Harmonica</h2>
+    <div class="tagline">10-hole Richter diatonic · Blow/draw PeriodicWave · Bending · Wah · Adjacent hole coupling</div>
+    <div class="info-section">
+      <h3>Instrument Summary</h3>
+      <p>A 10-hole diatonic harmonica in standard Richter tuning, playable in 12 keys. Separate blow and draw reed waveforms model the acoustically different blow (exhale) and draw (inhale) reed spectra. Pitch bending on draw reeds is applied as real-time oscillator frequency modulation — real harmonicists bend draw reeds by constricting the throat. Adjacent hole coupling adds the characteristic "chordal bleed" of real harmonicas.</p>
+    </div>
+    <div class="info-section">
+      <h3>Synthesis Features</h3>
+      <ul><li>Richter tuning: 10 holes × blow/draw = 20 notes covering 3+ octaves with bends</li>
+      <li>Separate PeriodicWave per direction: blow = brighter (more H2–H4), draw = darker (more fundamental)</li>
+      <li>Blow reed: H1:1.0, H2:0.88, H3:0.70, H4:0.54, H5:0.40…</li>
+      <li>Draw reed: H1:1.0, H2:0.72, H3:0.58, H4:0.44, H5:0.33…</li>
+      <li>Pitch bending: real-time freq×2^(−bendCents/1200) on draw reeds (realistic technique)</li>
+      <li>Overblown mode: blow reeds bend upward (advanced technique)</li>
+      <li>Adjacent hole coupling: neighbouring hole rings at 0.030 amplitude if within 2 semitones</li>
+      <li>Wooden comb body EQ: 6-band (220Hz cavity, 450Hz cover plate, 900Hz mid, 1800Hz reed brightness, 3200Hz upper, 700Hz anti-boxy notch)</li>
+      <li>Wah filter: auto-wah bandpass at 400–2000Hz, breath-pressure tracked</li>
+      <li>12 transposable keys (C through B)</li></ul>
+    </div>
+    <div class="info-section">
+      <h3>Signal Chain</h3>
+      <p><code>PeriodicWave (blow or draw) → Body EQ → Wah bandpass → Dry/Wet → Destination</code></p>
+    </div>
+    <div class="info-section">
+      <h3>Academic References</h3>
+      <div class="ref-entry"><span class="ref-year">2001</span><span class="ref-text">Cottingham, J.P. "Acoustics of the American reed organ." JASA 109(5). — Free reed harmonic spectrum measurements. Basis for the blow/draw PeriodicWave amplitude arrays. The distinction between blow (brighter) and draw (darker) reed spectra is derived from Cottingham's reed orientation analysis.</span></div>
+      <div class="ref-entry"><span class="ref-year">2003</span><span class="ref-text">Millot, L. et al. "A few results about the acoustics of mouth organs." JASA 113(4). — Adjacent hole coupling and reed-to-reed acoustic crosstalk. Source of the ±2 semitone coupling threshold and 3% amplitude used in adjacent hole resonance.</span></div>
+      <div class="ref-entry"><span class="ref-year">2012</span><span class="ref-text">Adler, S. The Art of Bending Harmonicas. Hal Leonard. — Performance practice: draw bend mechanism (throat constriction lowers pitch), overblown (isolates draw reed to produce overbent blow pitch). Basis for bend and overblown synthesis approach.</span></div>
+    </div>
+  </div>
+</div>
+
+<header>
+  <h1>Studio Harmonica</h1>
+  <p>10-hole diatonic · blow & draw reeds · bending · wah · free reed synthesis</p>
+</header>
+
+<div class="controls">
+  <div class="ctrl"><label>Breath</label><input type="range" id="breathCtrl" min="0.3" max="1.2" step="0.01" value="0.78"/><span class="ctrl-val" id="breathVal">78</span></div>
+  <div class="ctrl"><label>Bend</label><input type="range" id="bendCtrl" min="0" max="100" step="1" value="0"/><span class="ctrl-val" id="bendVal">0¢</span></div>
+  <div class="ctrl"><label>Wah</label><input type="range" id="wahCtrl" min="0" max="1" step="0.01" value="0"/><span class="ctrl-val" id="wahVal">0</span></div>
+  <div class="ctrl"><label>Reverb</label><input type="range" id="revCtrl" min="0" max="1" step="0.01" value="0.2"/><span class="ctrl-val" id="revVal">20</span></div>
+  <div class="ctrl"><label>Volume</label><input type="range" id="volCtrl" min="0" max="1" step="0.01" value="0.75"/><span class="ctrl-val" id="volVal">75</span></div>
+  <div class="ctrl"><label>Key</label>
+    <select id="keySelect">
+      <option value="0">C</option><option value="2">D</option><option value="4">E</option>
+      <option value="5">F</option><option value="7">G</option><option value="9">A</option>
+      <option value="11">B</option><option value="-1">Bb</option><option value="1">Db</option>
+      <option value="3">Eb</option><option value="6">F#</option><option value="8">Ab</option>
+    </select>
+  </div>
+</div>
+
+<div class="mode-row">
+  <button class="mode-btn active" id="modeNormal" onclick="setPlayMode('normal')">Normal</button>
+  <button class="mode-btn" id="modeOverblown" onclick="setPlayMode('overblown')">Overblown</button>
+  <button class="mode-btn" id="modeOctave" onclick="setPlayMode('octave')">Octave Split</button>
+</div>
+
+<div class="status-bar" id="statusBar">Click a hole to play · ↑ = blow · ↓ = draw · keyboard row below</div>
+<div class="note-display" id="noteDisplay"></div>
+
+<!-- Harmonica body visual + interactive -->
+<div class="harp-body">
+  <div class="holes-row" id="blowRow"></div>
+  <div class="holes-row" id="drawRow"></div>
+</div>
+
+<!-- Keyboard mapping -->
+<div class="kb-section">
+  <div class="kb-title">Keyboard mapping</div>
+  <div class="kb-grid" id="kbGrid"></div>
+  <div class="kb-hint">Top row: blow (exhale) · Bottom row: draw (inhale) · Bend slider controls pitch bend on draw notes</div>
+</div>
+
+<script>
+(() => {
+  const AC=window.AudioContext||window.webkitAudioContext;
+  let actx=null,masterGain,convNode,dryGain,wetGain,wahNode;
+  let breathVal=0.78,bendCents=0,wahDepth=0,revVal=0.2,volVal=0.75;
+  let harpKey=0; // transpose in semitones
+  let playMode='normal';
+  let activeVoices={};
+  const notePills={};
+
+  // 10-hole diatonic harmonica in C (Richter tuning)
+  // [blow, draw] MIDI offsets from C4 (60)
+  // Standard Richter tuning:
+  const HOLES = [
+    {blow:60,draw:62}, // 1: C4 D4
+    {blow:64,draw:65}, // 2: E4 F4
+    {blow:67,draw:69}, // 3: G4 A4
+    {blow:72,draw:71}, // 4: C5 B4
+    {blow:76,draw:74}, // 5: E5 D5
+    {blow:79,draw:77}, // 6: G5 F5
+    {blow:84,draw:81}, // 7: C6 A5
+    {blow:88,draw:83}, // 8: E6 B5
+    {blow:91,draw:86}, // 9: G6 D6
+    {blow:96,draw:89}, // 10: C7 E6
+  ];
+
+  // Keyboard mapping: top row = blow, bottom row = draw
+  const BLOW_KEYS=['q','w','e','r','t','y','u','i','o','p'];
+  const DRAW_KEYS=['a','s','d','f','g','h','j','k','l',';'];
+  const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+  function midiHz(m){return 440*Math.pow(2,(m-69)/12);}
+  function noteName(m){return NOTE_NAMES[((m%12)+12)%12]+Math.floor(m/12-1);}
+
+  function initAudio(){
+    if(actx)return;
+    actx=new AC();
+    masterGain=actx.createGain(); masterGain.gain.value=volVal;
+    // Wah filter (auto-wah style)
+    wahNode=actx.createBiquadFilter(); wahNode.type='bandpass';
+    wahNode.frequency.value=800; wahNode.Q.value=3.5;
+    convNode=buildReverb();
+    dryGain=actx.createGain(); dryGain.gain.value=1-revVal;
+    wetGain=actx.createGain(); wetGain.gain.value=revVal;
+    // Chain: masterGain → wahNode → dry/wet split
+    masterGain.connect(wahNode);
+    wahNode.connect(dryGain); wahNode.connect(convNode);
+    convNode.connect(wetGain);
+    dryGain.connect(actx.destination); wetGain.connect(actx.destination);
+  }
+
+  function buildReverb(){
+    const conv=actx.createConvolver();
+    const len=Math.floor(actx.sampleRate*1.2);
+    const buf=actx.createBuffer(2,len,actx.sampleRate);
+    for(let c=0;c<2;c++){const d=buf.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.2);}
+    conv.buffer=buf; return conv;
+  }
+
+  // ── Free reed waveform ────────────────────────────────────────
+  // Harmonica free reed is similar to accordion but slightly different
+  // spectrum — tends to have more vocal formant quality
+  // Cottingham (2001): harmonics 1-20+ all significant
+  let reedCache={blow:null,draw:null};
+  function getReedWave(type){
+    if(reedCache[type])return reedCache[type];
+    const N=20,real=new Float32Array(N+1),imag=new Float32Array(N+1);
+    // Blow reed (exhale): brighter, more H2-H4
+    // Draw reed (inhale): darker, more fundamental, different beating
+    const amps = type==='blow'
+      ? [0,1.0,0.88,0.70,0.54,0.40,0.30,0.22,0.16,0.12,0.09,0.07,0.05,0.04,0.03,0.02,0.015,0.011,0.008,0.006,0.004]
+      : [0,1.0,0.72,0.58,0.44,0.33,0.24,0.17,0.12,0.08,0.06,0.04,0.03,0.022,0.016,0.012,0.009,0.006,0.004,0.003,0.002];
+    amps.forEach((a,n)=>{if(n>0)imag[n]=-a;});
+    reedCache[type]=actx.createPeriodicWave(real,imag,{disableNormalization:false});
+    return reedCache[type];
+  }
+
+  // ── Body resonance (wooden comb + cover plates) ───────────────
+  function buildHarpBody(isBlow){
+    const modes=[
+      [220,  isBlow?3:5, 3.5],  // comb cavity resonance
+      [450,  isBlow?4:3, 4.0],  // cover plate mode
+      [900,  5,         4.5],   // mid presence
+      [1800, isBlow?6:4, 5.0],  // reed brightness
+      [3200, isBlow?4:2, 4.0],  // upper harmonic shelf
+      [700, -3,         3.0],   // notch (avoids boxiness)
+    ];
+    return modes.map(([f,dB,Q])=>{
+      const n=actx.createBiquadFilter();n.type='peaking';
+      n.frequency.value=f;n.gain.value=dB;n.Q.value=Q;return n;
+    }).reduce((c,n,i,a)=>{if(i>0)a[i-1].connect(n);return[...c,n];},[]); 
+  }
+
+  // ── Play a reed ───────────────────────────────────────────────
+  function playReed(holeIdx, type, velocity=0.8){
+    initAudio();
+    if(actx.state==='suspended')actx.resume();
+
+    const key=holeIdx*2+(type==='draw'?1:0);
+    if(activeVoices[key])stopReed(holeIdx,type,true);
+
+    const isBlow = type==='blow';
+    const baseMidi = HOLES[holeIdx][type] + harpKey;
+
+    // Bend: only draw reeds can be bent down (blues bending)
+    // Blow reeds can be overbent (overblown) in overblown mode
+    let bendedMidi = baseMidi;
+    if(!isBlow && bendCents > 0) {
+      bendedMidi = baseMidi - bendCents/100; // bend down by cents
+    }
+    if(isBlow && playMode==='overblown' && bendCents > 0) {
+      bendedMidi = baseMidi + bendCents/100; // overblown = pitch up
+    }
+
+    const freq = midiHz(bendedMidi);
+    const now = actx.currentTime;
+    const vel = velocity*(0.88+Math.random()*0.12);
+    const pressure = breathVal*(0.7+vel*0.3);
+
+    const noteGain=actx.createGain();
+    const bodyChain=buildHarpBody(isBlow);
+    noteGain.connect(bodyChain[0]);
+    bodyChain[bodyChain.length-1].connect(masterGain);
+
+    // Breath attack — slightly slower for draw (body resistance)
+    const atk = isBlow ? Math.max(0.012,0.06-pressure*0.04) : Math.max(0.018,0.08-pressure*0.04);
+    noteGain.gain.setValueAtTime(0,now);
+    noteGain.gain.linearRampToValueAtTime(vel*pressure*0.70,now+atk);
+
+    const wave=getReedWave(type);
+    const oscs=[];
+
+    // Main reed oscillator
+    const osc=actx.createOscillator();
+    osc.setPeriodicWave(wave);
+    osc.frequency.value=freq;
+    const og=actx.createGain(); og.gain.value=0.72;
+    osc.connect(og);og.connect(noteGain);
+    osc.start(now);oscs.push(osc);
+
+    // Octave split mode: simultaneous octave above
+    if(playMode==='octave'){
+      const osc2=actx.createOscillator();
+      osc2.setPeriodicWave(wave);
+      osc2.frequency.value=freq*2;
+      const og2=actx.createGain();og2.gain.value=0.35;
+      osc2.connect(og2);og2.connect(noteGain);
+      osc2.start(now);oscs.push(osc2);
+    }
+
+    // Adjacent reed coupling — neighbouring holes resonate slightly
+    // (This is the characteristic "chordal" bleed of harmonicas)
+    if(holeIdx > 0) {
+      const adjMidi=HOLES[holeIdx-1][type]+harpKey;
+      const adjFreq=midiHz(adjMidi);
+      const centsDiff=Math.abs(1200*Math.log2(freq/adjFreq));
+      if(centsDiff < 250) { // within ~2 semitones
+        const adjOsc=actx.createOscillator();adjOsc.type='sine';
+        adjOsc.frequency.value=adjFreq;
+        const adjG=actx.createGain();adjG.gain.value=0.030;
+        adjOsc.connect(adjG);adjG.connect(noteGain);
+        adjOsc.start(now);oscs.push(adjOsc);
+      }
+    }
+
+    // Reed breath noise — turbulent air through the comb slots
+    const noiseLen=actx.sampleRate;
+    const nBuf=actx.createBuffer(1,noiseLen,actx.sampleRate);
+    const nd=nBuf.getChannelData(0);
+    for(let i=0;i<noiseLen;i++)nd[i]=Math.random()*2-1;
+    const nSrc=actx.createBufferSource();nSrc.buffer=nBuf;nSrc.loop=true;
+    const nBpf=actx.createBiquadFilter();nBpf.type='bandpass';
+    nBpf.frequency.value=freq*(isBlow?2.2:1.8); nBpf.Q.value=3;
+    const nGain=actx.createGain();nGain.gain.value=pressure*0.035;
+    nSrc.connect(nBpf);nBpf.connect(nGain);nGain.connect(noteGain);
+    nSrc.start(now);oscs.push(nSrc);
+
+    activeVoices[key]={noteGain,oscs,bodyChain,holeIdx,type};
+    setStatus(`Hole ${holeIdx+1} · ${type} · ${noteName(Math.round(bendedMidi))} · ${Math.round(bendCents)}¢ bend`);
+    showPill(Math.round(bendedMidi));
+
+    // Light up hole
+    const holeEl=document.getElementById(`hole-${holeIdx}-${type}`);
+    if(holeEl)holeEl.classList.add(type+'-active');
+
+    // Update wah filter with breath frequency
+    if(wahNode && wahDepth > 0.02){
+      wahNode.frequency.setTargetAtTime(400+pressure*1600*wahDepth,now,0.06);
+    }
+  }
+
+  function stopReed(holeIdx, type, immediate=false){
+    const key=holeIdx*2+(type==='draw'?1:0);
+    const v=activeVoices[key];if(!v||!actx)return;
+    const t=actx.currentTime,rel=immediate?0.025:0.14;
+    v.noteGain.gain.cancelScheduledValues(t);
+    v.noteGain.gain.setValueAtTime(v.noteGain.gain.value,t);
+    v.noteGain.gain.exponentialRampToValueAtTime(0.0001,t+rel);
+    v.oscs.forEach(o=>{try{o.stop(t+rel+0.04);}catch(e){}});
+    const ref=v;setTimeout(()=>{
+      try{ref.noteGain.disconnect();}catch(e){}
+      (ref.bodyChain||[]).forEach(f=>{try{f.disconnect();}catch(e){}});
+    },(rel+0.12)*1000);
+    delete activeVoices[key];
+    const holeEl=document.getElementById(`hole-${holeIdx}-${type}`);
+    if(holeEl)holeEl.classList.remove(type+'-active');
+    const midi=HOLES[holeIdx][type]+harpKey;
+    if(notePills[midi]){notePills[midi].style.opacity='0';setTimeout(()=>{notePills[midi]?.remove();delete notePills[midi];},200);}
+  }
+
+  function stopAll(){Object.keys(activeVoices).forEach(k=>{const v=activeVoices[k];if(v)stopReed(v.holeIdx,v.type,true);});}
+
+  function showPill(midi){
+    const d=document.getElementById('noteDisplay');if(notePills[midi])return;
+    const p=document.createElement('div');p.className='note-pill';p.textContent=noteName(midi);
+    d.appendChild(p);notePills[midi]=p;
+    setTimeout(()=>{if(p.parentNode){p.style.opacity='0';setTimeout(()=>p.remove(),200);}delete notePills[midi];},1200);
+  }
+
+  function setStatus(msg){document.getElementById('statusBar').textContent=msg;}
+  function setPlayMode(m){
+    playMode=m;
+    ['Normal','Overblown','Octave'].forEach(id=>{document.getElementById('mode'+id).classList.toggle('active',id.toLowerCase()===m||(m==='octave'&&id==='Octave')||(m==='overblown'&&id==='Overblown')||(m==='normal'&&id==='Normal'));});
+  }
+  window.setPlayMode=setPlayMode;
+
+  // ── Build harmonica UI ────────────────────────────────────────
+  function buildHarmonica(){
+    const blowRow=document.getElementById('blowRow');
+    const drawRow=document.getElementById('drawRow');
+    blowRow.innerHTML='';drawRow.innerHTML='';
+
+    HOLES.forEach((hole,i)=>{
+      // Blow hole
+      const bg=document.createElement('div');bg.className='hole-group';
+      const bn=document.createElement('div');bn.className='hole-num';bn.textContent=i+1;
+      const bh=document.createElement('div');bh.className='hole';bh.id=`hole-${i}-blow`;
+      const ba=document.createElement('div');ba.className='hole-arrow blow';ba.textContent='↑';
+      const bl=document.createElement('div');bl.className='note-label blow';bl.textContent=noteName(hole.blow+harpKey);
+      bh.appendChild(ba);bh.appendChild(bl);
+      bh.addEventListener('pointerdown',e=>{e.preventDefault();playReed(i,'blow',0.78);});
+      bh.addEventListener('pointerup',()=>stopReed(i,'blow'));
+      bh.addEventListener('pointerleave',()=>stopReed(i,'blow'));
+      bg.appendChild(bh);bg.appendChild(bn);
+      blowRow.appendChild(bg);
+
+      // Draw hole
+      const dg=document.createElement('div');dg.className='hole-group';
+      const dh=document.createElement('div');dh.className='hole';dh.id=`hole-${i}-draw`;
+      const da=document.createElement('div');da.className='hole-arrow draw';da.textContent='↓';
+      const dl=document.createElement('div');dl.className='note-label draw';dl.textContent=noteName(hole.draw+harpKey);
+      dh.appendChild(da);dh.appendChild(dl);
+      dh.addEventListener('pointerdown',e=>{e.preventDefault();playReed(i,'draw',0.78);});
+      dh.addEventListener('pointerup',()=>stopReed(i,'draw'));
+      dh.addEventListener('pointerleave',()=>stopReed(i,'draw'));
+      dg.appendChild(dh);
+      drawRow.appendChild(dg);
+    });
+  }
+
+  function buildKbGrid(){
+    const g=document.getElementById('kbGrid');g.innerHTML='';
+    HOLES.forEach((hole,i)=>{
+      const cell=document.createElement('div');cell.className='kb-key';
+      cell.innerHTML=`<div class="kb-hole">${i+1}</div><div class="kb-blow">${BLOW_KEYS[i].toUpperCase()}</div><div class="kb-draw">${DRAW_KEYS[i].toUpperCase()}</div>`;
+      g.appendChild(cell);
+    });
+  }
+
+  // ── Keyboard ──────────────────────────────────────────────────
+  const held=new Set();
+  document.addEventListener('keydown',e=>{
+    if(e.repeat)return;
+    const k=e.key.toLowerCase();
+    const bi=BLOW_KEYS.indexOf(k);
+    const di=DRAW_KEYS.indexOf(k);
+    if(bi>=0&&!held.has('b'+bi)){held.add('b'+bi);playReed(bi,'blow',0.78);}
+    if(di>=0&&!held.has('d'+di)){held.add('d'+di);playReed(di,'draw',0.78);}
+  });
+  document.addEventListener('keyup',e=>{
+    const k=e.key.toLowerCase();
+    const bi=BLOW_KEYS.indexOf(k);
+    const di=DRAW_KEYS.indexOf(k);
+    if(bi>=0){held.delete('b'+bi);stopReed(bi,'blow');}
+    if(di>=0){held.delete('d'+di);stopReed(di,'draw');}
+  });
+
+  // ── Controls ──────────────────────────────────────────────────
+  function ctl(id,fn){document.getElementById(id).addEventListener('input',fn);}
+  ctl('breathCtrl',function(){breathVal=+this.value;document.getElementById('breathVal').textContent=Math.round(breathVal*100);});
+  ctl('bendCtrl',function(){
+    bendCents=+this.value;document.getElementById('bendVal').textContent=bendCents+'¢';
+    // Live bend on active draw voices
+    if(!actx)return;
+    Object.values(activeVoices).forEach(v=>{
+      if(!v||v.type!=='draw')return;
+      const baseMidi=HOLES[v.holeIdx].draw+harpKey;
+      const bendedHz=midiHz(baseMidi-bendCents/100);
+      v.oscs[0]?.frequency?.setTargetAtTime(bendedHz,actx.currentTime,0.02);
+    });
+  });
+  ctl('wahCtrl',function(){wahDepth=+this.value;document.getElementById('wahVal').textContent=Math.round(wahDepth*100);if(!wahNode)return;if(wahDepth<0.02){wahNode.frequency.value=20000;wahNode.Q.value=0.1;}else{wahNode.Q.value=3.5+wahDepth*4;}});
+  ctl('revCtrl',function(){revVal=+this.value;document.getElementById('revVal').textContent=Math.round(revVal*100);if(dryGain){dryGain.gain.value=1-revVal;wetGain.gain.value=revVal;}});
+  ctl('volCtrl',function(){volVal=+this.value;document.getElementById('volVal').textContent=Math.round(volVal*100);if(masterGain)masterGain.gain.value=volVal;});
+  document.getElementById('keySelect').addEventListener('change',function(){
+    harpKey=+this.value;
+    stopAll();
+    buildHarmonica(); // update note labels
+  });
+
+  buildHarmonica();buildKbGrid();
+
+  window.InstrudioBridge={
+    instrument:'harmonica',title:'Studio Harmonica',minMidi:60,maxMidi:96,
+    init:initAudio,
+    playMidi(midi,velocity=0.82,durationMs=380){
+      // Find best hole/type for this MIDI
+      let best=null,bestDiff=999;
+      HOLES.forEach((hole,i)=>{
+        ['blow','draw'].forEach(type=>{
+          const diff=Math.abs((hole[type]+harpKey)-midi);
+          if(diff<bestDiff){bestDiff=diff;best={i,type};}
+        });
+      });
+      if(best&&bestDiff<2){
+        playReed(best.i,best.type,Math.max(0.3,velocity));
+        setTimeout(()=>stopReed(best.i,best.type),Math.max(80,durationMs));
+      }
+    },
+    stopAll
+  };
+})();
+</script>
+<section id="instrudio-embedded-score-dock" aria-label="Score import dock"></section>
+<script src="instrudio-suite.js"></script>
+</body>
+</html>

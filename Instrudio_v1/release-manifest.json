@@ -1,0 +1,97 @@
+{
+  "name": "Instrudio Electro Studio",
+  "version": "2.2.0",
+  "build_date_utc": "2026-03-20T05:34:11Z",
+  "status": "production-ready static release",
+  "entrypoint": "index.html",
+  "instrument_count": 10,
+  "supports": [
+    "MusicXML import",
+    "note-text import",
+    "homepage launch console",
+    "per-page score dock",
+    "info modals"
+  ],
+  "files": [
+    {
+      "name": ".nojekyll",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "CHANGELOG.md",
+      "bytes": 552,
+      "sha256": "ca3462911100d8d804c9bf307fdac5f06c702ec2caf433627adb6339868c892c"
+    },
+    {
+      "name": "Instrudio_Score_Example.notes",
+      "bytes": 153,
+      "sha256": "d2b777da0f65e19112423875dfde2f39841208fb327e5344e97f7a45981255d6"
+    },
+    {
+      "name": "README.md",
+      "bytes": 2763,
+      "sha256": "1b5655b3d0ca02032a18bc42942905f35aecec9176559579938dced2929aa1ea"
+    },
+    {
+      "name": "accordion.html",
+      "bytes": 27699,
+      "sha256": "84fa922e2d5d0f65e1a9217c8cd7dc57435c58517551221136d30603d612face"
+    },
+    {
+      "name": "bagpipes.html",
+      "bytes": 50209,
+      "sha256": "ebe39e2e79330fbd035101f1ae1fbb3dec5f8285b7a9262b9fe2b6587e640e7c"
+    },
+    {
+      "name": "bongo.html",
+      "bytes": 32309,
+      "sha256": "8500168392c8835ed442e9f5eb73662ca533b4a499ca686d3b4999653fd1fc80"
+    },
+    {
+      "name": "guitar.html",
+      "bytes": 39582,
+      "sha256": "421c04c85a6821efcb26eb8e8fd68ad4f71c26a20d03648452fcc465637d2066"
+    },
+    {
+      "name": "harmonica.html",
+      "bytes": 28164,
+      "sha256": "49672f65c2a9c7e33ce819c2f34010009027f656e2ad423b032bbb478b732ad7"
+    },
+    {
+      "name": "harp.html",
+      "bytes": 39765,
+      "sha256": "4e635d99773845ba56c10c133196da31c2bb7227cd2249a1386f6fae9dbf86ba"
+    },
+    {
+      "name": "index.html",
+      "bytes": 27935,
+      "sha256": "a1b795c10ed4d7643bff6fbbcde41e1ddd99cb1ad1ebd34b1fe00bdd6df56ea1"
+    },
+    {
+      "name": "instrudio-suite.js",
+      "bytes": 25071,
+      "sha256": "900d7de9ae7fce23d2f42e41d67edad077c06350a129353d3de88d55f6967c01"
+    },
+    {
+      "name": "piano.html",
+      "bytes": 22840,
+      "sha256": "1b86eb4daf7c88669fb285f37f15ae1e02ce054252996727c9b5d83cf4232bf9"
+    },
+    {
+      "name": "saxophone.html",
+      "bytes": 39974,
+      "sha256": "bbc682d57352034476a1e3bb0b32f01bffde974d025874e476ce039d2a49e4e0"
+    },
+    {
+      "name": "triangle.html",
+      "bytes": 35044,
+      "sha256": "8867f9cdce9f9a27b1ee79991a1609844ad01582cdb7918a6aabdc0715d90bdf"
+    },
+    {
+      "name": "violin.html",
+      "bytes": 55331,
+      "sha256": "8406c5a7300088a19ebd834f934c955a52b43ed0da57fe8671fbb16bea26e9ab"
+    }
+  ]
+}

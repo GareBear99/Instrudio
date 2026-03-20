@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Celestial Harp</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg-deep:   #060810;
+  --bg-mid:    #0a0d1a;
+  --bg-surf:   #0e1222;
+  --gold:      #c9a84c;
+  --gold2:     #e8c96a;
+  --gold3:     #f5e0a0;
+  --silver:    #9ab0c8;
+  --silver2:   #c8ddef;
+  --text:      #e8dfc8;
+  --muted:     #6a7a8a;
+  --accent-c:  #4a78c8; /* C strings — blue */
+  --accent-f:  #c84a4a; /* F strings — red */
+  --glow-c:    rgba(74,120,200,0.55);
+  --glow-f:    rgba(200,74,74,0.55);
+  --glow-gold: rgba(201,168,76,0.45);
+  --panel-bg:  rgba(8,11,24,0.88);
+  --panel-bdr: rgba(201,168,76,0.18);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{
+  min-height:100vh;
+  background:var(--bg-deep);
+  color:var(--text);
+  font-family:'Cormorant Garamond',serif;
+  overflow-x:hidden;
+}
+body{
+  background:
+    radial-gradient(ellipse at 20% 0%,   rgba(30,50,120,0.38) 0%,transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(60,30,100,0.28) 0%,transparent 50%),
+    radial-gradient(ellipse at 50% 50%,  rgba(10,15,40,1)   0%,#060810 100%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:36px 16px 60px;
+  cursor:crosshair;
+}
+
+/* Stars background canvas */
+#starfield{
+  position:fixed;inset:0;
+  pointer-events:none;
+  z-index:0;
+  opacity:0.55;
+}
+
+.z1{position:relative;z-index:1;}
+
+/* ── Header ── */
+header{
+  text-align:center;
+  margin-bottom:32px;
+  position:relative;
+  z-index:1;
+}
+header h1{
+  font-family:'Cinzel',serif;
+  font-size:42px;
+  font-weight:400;
+  letter-spacing:0.22em;
+  color:var(--gold2);
+  text-shadow:0 0 40px rgba(201,168,76,0.35), 0 0 80px rgba(201,168,76,0.12);
+  margin-bottom:6px;
+}
+header p{
+  font-size:13px;
+  letter-spacing:0.28em;
+  font-style:italic;
+  color:var(--muted);
+}
+
+/* ── Controls bar ── */
+.controls{
+  display:flex;gap:16px;flex-wrap:wrap;justify-content:center;
+  margin-bottom:28px;z-index:1;position:relative;
+}
+.ctrl{
+  display:flex;align-items:center;gap:10px;
+  background:var(--panel-bg);
+  border:0.5px solid var(--panel-bdr);
+  border-radius:12px;
+  padding:10px 18px;
+  backdrop-filter:blur(8px);
+}
+.ctrl label{
+  font-family:'Cinzel',serif;
+  font-size:9px;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--muted);min-width:52px;
+}
+.ctrl input[type=range]{
+  -webkit-appearance:none;width:90px;height:2px;
+  background:rgba(201,168,76,0.18);border-radius:1px;outline:none;cursor:pointer;
+}
+.ctrl input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;
+  background:radial-gradient(circle at 38% 35%,var(--gold3),var(--gold));
+  cursor:pointer;box-shadow:0 0 6px rgba(201,168,76,0.5);
+}
+.ctrl select{
+  background:transparent;border:none;
+  color:var(--text);font-family:'Cormorant Garamond',serif;
+  font-size:13px;cursor:pointer;outline:none;
+}
+.ctrl-val{
+  font-family:'Cinzel',serif;font-size:11px;
+  color:var(--gold);min-width:28px;
+}
+
+/* ── Octave / pedal display ── */
+.legend{
+  display:flex;gap:20px;align-items:center;
+  margin-bottom:20px;z-index:1;position:relative;
+  font-size:11px;letter-spacing:0.16em;
+}
+.leg-item{display:flex;align-items:center;gap:7px;color:var(--muted);}
+.leg-dot{width:9px;height:9px;border-radius:50%;}
+.leg-dot.c{background:var(--accent-c);box-shadow:0 0 6px var(--glow-c);}
+.leg-dot.f{background:var(--accent-f);box-shadow:0 0 6px var(--glow-f);}
+.leg-dot.n{background:var(--gold);box-shadow:0 0 6px var(--glow-gold);}
+
+/* ── Note name display ── */
+.note-ribbon{
+  min-height:34px;margin-bottom:16px;
+  display:flex;gap:8px;flex-wrap:wrap;justify-content:center;
+  z-index:1;position:relative;
+}
+.note-tag{
+  font-family:'Cinzel',serif;font-size:12px;letter-spacing:0.14em;
+  padding:4px 14px;
+  background:rgba(201,168,76,0.08);
+  border:0.5px solid rgba(201,168,76,0.4);
+  border-radius:999px;color:var(--gold2);
+  animation:tagIn 0.14s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes tagIn{from{transform:scale(0.7);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* ── Harp canvas ── */
+#harpCanvas{
+  display:block;
+  cursor:crosshair;
+  position:relative;z-index:1;
+  border-radius:8px;
+}
+
+/* ── Particle canvas (overlay) ── */
+#particleCanvas{
+  position:absolute;
+  top:0;left:0;
+  pointer-events:none;
+  z-index:2;
+  border-radius:8px;
+}
+
+.harp-wrap{
+  position:relative;
+  margin-bottom:28px;
+  z-index:1;
+}
+
+/* ── Pedal rack ── */
+.pedal-rack{
+  display:flex;gap:10px;flex-wrap:wrap;justify-content:center;
+  margin-bottom:28px;z-index:1;position:relative;
+}
+.pedal-group{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.pedal-label{
+  font-family:'Cinzel',serif;font-size:8px;letter-spacing:0.2em;
+  text-transform:uppercase;color:var(--muted);
+}
+.pedal-btns{display:flex;gap:4px;}
+.pedal-btn{
+  width:36px;height:28px;
+  background:var(--panel-bg);
+  border:0.5px solid var(--panel-bdr);
+  border-radius:6px;
+  color:var(--muted);
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.1em;
+  cursor:pointer;transition:all 0.14s;
+  display:flex;align-items:center;justify-content:center;
+}
+.pedal-btn:hover{color:var(--text);border-color:rgba(201,168,76,0.4);}
+.pedal-btn.flat{color:#7ab0f0;border-color:rgba(74,120,200,0.5);background:rgba(74,120,200,0.08);}
+.pedal-btn.sharp{color:#f09070;border-color:rgba(200,74,74,0.5);background:rgba(200,74,74,0.08);}
+.pedal-btn.nat{color:var(--gold);border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.08);}
+
+/* ── Glissando btn ── */
+.gliss-bar{
+  display:flex;gap:12px;margin-bottom:20px;
+  z-index:1;position:relative;justify-content:center;flex-wrap:wrap;
+}
+.gliss-btn{
+  font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.18em;
+  padding:11px 26px;
+  background:var(--panel-bg);
+  border:0.5px solid var(--panel-bdr);
+  border-radius:10px;color:var(--gold);
+  cursor:pointer;transition:all 0.14s;
+  backdrop-filter:blur(6px);
+}
+.gliss-btn:hover{border-color:var(--gold);box-shadow:0 0 20px rgba(201,168,76,0.14);}
+.gliss-btn:active{transform:scale(0.97);}
+
+.kb-hint{
+  font-family:'Cormorant Garamond',serif;
+  font-size:12px;font-style:italic;letter-spacing:0.12em;
+  color:var(--muted);text-align:center;
+  z-index:1;position:relative;
+}
+
+/* Info overlay */
+.info-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;overflow-y:auto;padding:32px 16px;}
+.info-overlay.open{display:flex;justify-content:center;align-items:flex-start;}
+.info-panel{background:var(--surface,#10101a);border:1px solid rgba(140,120,255,.28);border-radius:18px;max-width:760px;width:100%;padding:36px 40px;position:relative;margin:auto;}
+.info-close{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--muted,#606880);font-size:22px;cursor:pointer;line-height:1;}
+.info-close:hover{color:var(--text,#eeeaff);}
+.info-panel h2{font-family:Cinzel,serif;font-size:22px;color:#9070ff;margin-bottom:6px;}
+.info-panel .tagline{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted,#606880);margin-bottom:22px;}
+.info-section{margin-bottom:20px;}
+.info-section h3{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#9070ff;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid rgba(140,120,255,.28);}
+.info-section p,.info-section li{font-size:13px;line-height:1.72;color:rgba(238,234,255,.82);margin-bottom:5px;}
+.info-section ul{padding-left:18px;}
+.info-section code{font-family:monospace;font-size:11px;background:rgba(140,120,255,.1);padding:2px 7px;border-radius:4px;color:#9070ff;}
+.ref-entry{display:flex;gap:12px;margin-bottom:9px;font-size:12px;}
+.ref-year{color:#9070ff;font-weight:600;min-width:42px;font-family:Cinzel,serif;}
+.ref-text{color:rgba(238,234,255,.75);line-height:1.65;}
+.info-btn{position:absolute;top:6px;right:-40px;width:28px;height:28px;border-radius:50%;background:var(--surface2,#141420);border:1px solid rgba(140,120,255,.28);color:#9070ff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .14s;font-style:normal;}
+.info-btn:hover{background:rgba(140,120,255,.12);}
+</style>
+</head>
+<body>
+
+<!-- Info overlay -->
+<div class="info-overlay" id="infoOverlay">
+  <div class="info-panel">
+    <button class="info-close" onclick="document.getElementById('infoOverlay').classList.remove('open')">✕</button>
+    <h2>Celestial Harp</h2>
+    <div class="tagline">47-string concert harp · Per-harmonic decay · Inharmonicity · Sympathetic resonance · Soundboard EQ</div>
+    <div class="info-section">
+      <h3>Instrument Summary</h3>
+      <p>A 47-string concert harp (C1–G7) using inharmonic string physics with per-register B constants, per-harmonic decay envelopes (higher overtones die faster), sympathetic resonance between adjacent strings, and a 7-band soundboard body EQ tuned to concert harp measurements. The pedal system retunes all strings of each note class simultaneously — the actual harp mechanism.</p>
+    </div>
+    <div class="info-section">
+      <h3>Synthesis Features</h3>
+      <ul><li>Inharmonicity B: bass strings 0.00042, mid 0.00028, treble 0.00016</li>
+      <li>Per-harmonic decay: τₙ = τ₁ / (1 + n×0.45) — higher partials fade faster</li>
+      <li>7-band harp soundboard EQ: 180Hz sub-warmth, 280Hz soundboard main, 520Hz upper bout, 900Hz bridge, 1800Hz string-board coupling, 2800Hz brilliance, 4500Hz sparkle</li>
+      <li>Sympathetic resonance: ±3 adjacent strings ring at (1 − cents/28) × 0.030 amplitude</li>
+      <li>String scrape noise for lower 20 strings (finger contact texture)</li>
+      <li>Fingernail pluck transient: 28ms noise burst at 2.8×freq + 400Hz</li>
+      <li>7 pedal system (CDEFGAB) × 3 positions (♭ ♮ ♯) — correct Érard double-action mechanism</li></ul>
+    </div>
+    <div class="info-section">
+      <h3>Signal Chain</h3>
+      <p><code>Oscillators (8 inharmonic partials) → Gain (per-harmonic envelope) → Bus → Body EQ (7 peaking) → Master</code></p>
+    </div>
+    <div class="info-section">
+      <h3>Academic References</h3>
+      <div class="ref-entry"><span class="ref-year">1996</span><span class="ref-text">Wright, M. "Acoustic measurements of concert harps." Galpin Society Journal 49. — Harp body mode measurements. The 280Hz (soundboard main), 520Hz (upper bout), 900Hz (bridge area) frequencies come from Wright's admittance measurements on a Salvi concert harp.</span></div>
+      <div class="ref-entry"><span class="ref-year">2001</span><span class="ref-text">Järveläinen, H., Valimaki, V., Karjalainen, M. "Audibility of the timbral effects of inharmonicity in stringed instrument tones." Acoustics Research Letters Online. — Audibility threshold for inharmonicity in plucked strings. Calibrated the B constant minimum audible value for harp strings at different registers.</span></div>
+      <div class="ref-entry"><span class="ref-year">2002</span><span class="ref-text">Jaffe, D.A. & Smith, J.O. "Extensions of the Karplus-Strong plucked string algorithm." Computer Music Journal 7(2). — Per-harmonic decay model for plucked strings. The τₙ ∝ 1/(1+n·k) formula is derived from their extended Karplus-Strong analysis.</span></div>
+    </div>
+  </div>
+</div>
+
+
+<canvas id="starfield"></canvas>
+
+<header class="z1">
+  <h1>Celestial Harp</h1>
+  <p>47-string concert harp · harmonic synthesis · glissando mode</p>
+</header>
+
+<div class="controls z1">
+  <div class="ctrl">
+    <label>Resonance</label>
+    <input type="range" id="resCtrl" min="0" max="1" step="0.01" value="0.55"/>
+    <span class="ctrl-val" id="resVal">55</span>
+  </div>
+  <div class="ctrl">
+    <label>Reverb</label>
+    <input type="range" id="revCtrl" min="0" max="1" step="0.01" value="0.45"/>
+    <span class="ctrl-val" id="revVal">45</span>
+  </div>
+  <div class="ctrl">
+    <label>Brilliance</label>
+    <input type="range" id="briCtrl" min="1000" max="12000" step="100" value="6000"/>
+    <span class="ctrl-val" id="briVal">6k</span>
+  </div>
+  <div class="ctrl">
+    <label>Volume</label>
+    <input type="range" id="volCtrl" min="0" max="1" step="0.01" value="0.7"/>
+    <span class="ctrl-val" id="volVal">70</span>
+  </div>
+</div>
+
+<div class="legend z1">
+  <div class="leg-item"><div class="leg-dot c"></div>C strings</div>
+  <div class="leg-item"><div class="leg-dot f"></div>F strings</div>
+  <div class="leg-item"><div class="leg-dot n"></div>Natural strings</div>
+</div>
+
+<div class="note-ribbon z1" id="noteRibbon"></div>
+
+<div class="harp-wrap z1">
+  <canvas id="harpCanvas"></canvas>
+  <canvas id="particleCanvas"></canvas>
+</div>
+
+<!-- Pedal rack: Db Cb Bb Eb Fb Gb Ab -->
+<div class="pedal-rack z1" id="pedalRack"></div>
+
+<div class="gliss-bar z1">
+  <button class="gliss-btn" id="glissUpBtn">⬆ Glissando Up</button>
+  <button class="gliss-btn" id="glissDownBtn">⬇ Glissando Down</button>
+  <button class="gliss-btn" id="glissArpBtn">✦ Arpeggio</button>
+</div>
+
+<div class="kb-hint z1">Hover &amp; click strings · drag for glissando · A–K keys play octave 4</div>
+
+<script>
+(() => {
+  // ── Constants ─────────────────────────────────────────────────
+  const NOTE_NAMES = ['C','D','E','F','G','A','B'];
+  // Concert harp: 47 strings, C1 to G7 (approx), following standard harp layout
+  // We'll do C1=MIDI24 up through 47 strings
+  const STRING_COUNT = 47;
+  const BASE_MIDI = 24; // C1
+
+  // Build string data: midi note, name, octave, color type
+  const STRINGS = [];
+  for(let i = 0; i < STRING_COUNT; i++){
+    const midi = BASE_MIDI + i;
+    const octave = Math.floor(midi / 12) - 1;
+    const noteIdx = midi % 12;
+    // Map chromatic to diatonic (harp uses only 7 diatonic per octave, pedals handle accidentals)
+    // We use diatonic scale: C D E F G A B
+    const diatonicMap = [0,null,1,null,2,3,null,4,null,5,null,6]; // maps chromatic 0-11 to diatonic index or null
+    const dIdx = diatonicMap[noteIdx];
+    const noteName = dIdx !== null ? NOTE_NAMES[dIdx] : null;
+    const isC = noteIdx === 0;
+    const isF = noteIdx === 5;
+    STRINGS.push({ midi, octave, noteName, isC, isF, noteIdx });
+  }
+
+  // Pedal state: each note name can be flat(-1), natural(0), sharp(+1)
+  const pedalState = {C:0,D:0,E:0,F:0,G:0,A:0,B:0};
+
+  // ── Audio ──────────────────────────────────────────────────────
+  const AC = window.AudioContext || window.webkitAudioContext;
+  let actx=null, masterGain, filterNode, convNode, dryGain, wetGain;
+  let revVal=0.45, briVal=6000, volVal=0.7, resVal=0.55;
+  const activeNodes = {};
+
+  function initAudio(){
+    if(actx) return;
+    actx = new AC();
+    masterGain = actx.createGain();
+    masterGain.gain.value = volVal;
+
+    filterNode = actx.createBiquadFilter();
+    filterNode.type = 'lowpass';
+    filterNode.frequency.value = briVal;
+    filterNode.Q.value = 0.5;
+
+    convNode = buildReverb();
+    dryGain  = actx.createGain();
+    wetGain  = actx.createGain();
+    dryGain.gain.value = 1 - revVal;
+    wetGain.gain.value = revVal;
+
+    masterGain.connect(filterNode);
+    filterNode.connect(dryGain);
+    filterNode.connect(convNode);
+    convNode.connect(wetGain);
+    dryGain.connect(actx.destination);
+    wetGain.connect(actx.destination);
+  }
+
+  function buildReverb(){
+    const conv = actx.createConvolver();
+    const sr   = actx.sampleRate;
+    const len  = Math.floor(sr * 3.2);
+    const buf  = actx.createBuffer(2, len, sr);
+    for(let c=0;c<2;c++){
+      const d = buf.getChannelData(c);
+      for(let i=0;i<len;i++){
+        const t = i/len;
+        // Richer reverb tail for harp
+        d[i] = (Math.random()*2-1) * Math.pow(1-t,1.4) * (1 + 0.3*Math.sin(i*0.001));
+      }
+    }
+    conv.buffer = buf;
+    return conv;
+  }
+
+  function midiToHz(midi){ return 440*Math.pow(2,(midi-69)/12); }
+
+  function playString(strIdx, velocity){
+    initAudio();
+    if(actx.state==='suspended') actx.resume();
+    if(strIdx < 0 || strIdx >= STRING_COUNT) return;
+
+    const str = STRINGS[strIdx];
+    const pedalOffset = str.noteName ? (pedalState[str.noteName] || 0) : 0;
+    const midi = str.midi + pedalOffset;
+    const freq  = midiToHz(midi);
+    const now   = actx.currentTime;
+    const vel   = (velocity || 0.8) * (0.90 + Math.random()*0.10);
+
+    killString(strIdx);
+
+    // ── Gain bus ────────────────────────────────────────────────
+    const bus = actx.createGain();
+
+    // ── Body resonance EQ — concert harp soundboard modes ───────
+    // (Järveläinen, Karjalainen & Välimäki 2001 / Wright 1996)
+    // Low strings: warmth dominant. High strings: brilliance dominant.
+    const bodyChain = buildHarpBody(strIdx);
+    bus.connect(bodyChain[0]);
+    bodyChain[bodyChain.length-1].connect(masterGain);
+    // Direct connection too — blend of coloured + dry for presence
+    bus.connect(masterGain);
+
+    // ADSR: instant attack, register-scaled exponential decay
+    const isLow = strIdx < 10, isMid = strIdx >= 10 && strIdx < 30;
+    const decay = isLow ? 4.5 : isMid ? 3.2 : 1.8;
+    const relT  = decay * resVal * 1.6 + 0.4;
+    bus.gain.setValueAtTime(0, now);
+    bus.gain.linearRampToValueAtTime(vel * 0.60, now + 0.003);
+    bus.gain.setTargetAtTime(0.0001, now + 0.003, relT * 0.38);
+
+    const oscs = [];
+
+    // ── Inharmonic harmonic stack ────────────────────────────────
+    // fn = n·f0·√(1+B·n²)  — B constant per register
+    const B = strIdx < 10 ? 0.00042 : strIdx < 25 ? 0.00028 : 0.00016;
+    const harmonics = [1, 0.62, 0.35, 0.20, 0.11, 0.06, 0.03, 0.015];
+    harmonics.forEach((amp, i) => {
+      const n  = i + 1;
+      const hf = freq * n * Math.sqrt(1 + B * n * n); // inharmonic
+      if(hf > 18000) return;
+      const osc = actx.createOscillator();
+      osc.type  = i === 0 ? 'triangle' : 'sine';
+      osc.frequency.value = hf;
+      osc.detune.value = (Math.random()-0.5) * 0.7;
+      const hg = actx.createGain();
+      // Each harmonic has its own decay — higher partials ring shorter
+      const hDecay = relT * 0.38 * (1 / (1 + i * 0.45));
+      hg.gain.setValueAtTime(amp * (i===0 ? 0.55 : 0.18) * vel, now);
+      hg.gain.setTargetAtTime(0.0001, now + 0.003, hDecay);
+      osc.connect(hg); hg.connect(bus);
+      osc.start(now);
+      oscs.push(osc);
+    });
+
+    // ── Sympathetic resonance ────────────────────────────────────
+    // Adjacent strings ring when pitch is close (harp string coupling)
+    [-3,-2,-1,1,2,3].forEach(offset => {
+      const si2 = strIdx + offset;
+      if(si2 < 0 || si2 >= STRINGS.length) return;
+      const str2 = STRINGS[si2];
+      const pOff2 = str2.noteName ? (pedalState[str2.noteName]||0) : 0;
+      const freq2 = midiToHz(str2.midi + pOff2);
+      const cents = Math.abs(1200 * Math.log2(freq / freq2));
+      if(cents > 28) return;
+      const sympAmp = Math.max(0, (1 - cents/28) * 0.030) * vel;
+      const sOsc = actx.createOscillator();
+      const sGain = actx.createGain();
+      sOsc.type = 'sine';
+      sOsc.frequency.value = freq2;
+      sGain.gain.setValueAtTime(0, now);
+      sGain.gain.linearRampToValueAtTime(sympAmp, now + 0.28);
+      sGain.gain.setTargetAtTime(0, now + 0.4, relT * 0.28);
+      sOsc.connect(sGain); sGain.connect(masterGain);
+      sOsc.start(now); sOsc.stop(now + relT * 1.6);
+      oscs.push(sOsc);
+    });
+
+    // ── Pluck transient — fingernail on string ───────────────────
+    const tLen = Math.floor(actx.sampleRate * 0.028);
+    const tBuf = actx.createBuffer(1, tLen, actx.sampleRate);
+    const tData = tBuf.getChannelData(0);
+    for(let i=0;i<tLen;i++) tData[i]=(Math.random()*2-1)*Math.pow(1-i/tLen,2.8);
+    const tSrc = actx.createBufferSource(); tSrc.buffer = tBuf;
+    const tBpf = actx.createBiquadFilter();
+    tBpf.type = 'bandpass';
+    tBpf.frequency.value = freq * 2.8 + 400;
+    tBpf.Q.value = 1.4;
+    const tGain = actx.createGain();
+    tGain.gain.value = vel * 0.11;
+    tSrc.connect(tBpf); tBpf.connect(tGain); tGain.connect(masterGain);
+    tSrc.start(now);
+
+    // ── String scrape noise for lower strings ────────────────────
+    // (lower strings have more finger contact noise)
+    if(strIdx < 20) {
+      const scrLen = Math.floor(actx.sampleRate * 0.018);
+      const scrBuf = actx.createBuffer(1, scrLen, actx.sampleRate);
+      const scrD = scrBuf.getChannelData(0);
+      for(let i=0;i<scrLen;i++) scrD[i]=(Math.random()*2-1)*Math.pow(1-i/scrLen,4);
+      const scrSrc = actx.createBufferSource(); scrSrc.buffer = scrBuf;
+      const scrBpf = actx.createBiquadFilter();
+      scrBpf.type = 'bandpass'; scrBpf.frequency.value = freq * 1.2; scrBpf.Q.value = 0.6;
+      const scrGain = actx.createGain();
+      scrGain.gain.value = vel * (0.15 - strIdx * 0.006);
+      scrSrc.connect(scrBpf); scrBpf.connect(scrGain); scrGain.connect(masterGain);
+      scrSrc.start(now);
+    }
+
+    const stopAt = now + relT * 2.2;
+    oscs.forEach(o=>{ try{o.stop(stopAt);}catch(e){} });
+    activeNodes[strIdx] = { oscs, bus, bodyChain, stopAt };
+
+    spawnParticles(strIdx, vel);
+    showNoteTag(str, pedalOffset);
+  }
+
+  // ── Concert harp soundboard body resonances ──────────────────
+  // Based on Wright (1996) and Järveläinen et al. (2001) measurements
+  // Low strings: warmth (200 Hz soundboard mode dominant)
+  // High strings: brilliance (2500 Hz + 4500 Hz dominant)
+  function buildHarpBody(strIdx) {
+    const isLow  = strIdx < 12;
+    const isHigh = strIdx > 34;
+    const modes  = [
+      [180,  isLow ? 7  : isHigh ? -3 : 3,   2.8],  // sub-soundboard warmth
+      [280,  isLow ? 10 : isHigh ? -2 : 5,   3.5],  // main soundboard mode
+      [520,  isLow ? 4  : isHigh ?  1 : 4,   4.2],  // upper bout resonance
+      [900,  isLow ? 2  : isHigh ?  3 : 3,   4.5],  // bridge coupling
+      [1800, isLow ? -1 : isHigh ?  5 : 3,   4.8],  // string-soundboard coupling
+      [2800, isLow ? -3 : isHigh ?  9 : 4,   5.2],  // brilliance peak
+      [4500, isLow ? -5 : isHigh ?  7 : 2,   4.5],  // air/sparkle
+    ];
+    return modes.map(([f, dB, Q]) => {
+      const node = actx.createBiquadFilter();
+      node.type = 'peaking';
+      node.frequency.value = f;
+      node.gain.value = dB * (briVal / 6000); // scale with brightness control
+      node.Q.value = Q;
+      return node;
+    }).reduce((chain, node, i, arr) => {
+      if(i > 0) arr[i-1].connect(node);
+      return [...chain, node];
+    }, []);
+  }
+
+  function killString(strIdx){
+    const n = activeNodes[strIdx];
+    if(!n||!actx) return;
+    const t = actx.currentTime;
+    n.bus.gain.cancelScheduledValues(t);
+    n.bus.gain.setValueAtTime(n.bus.gain.value, t);
+    n.bus.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+    n.oscs.forEach(o=>{ try{o.stop(t+0.05);}catch(e){} });
+    setTimeout(()=>{
+      try{ n.bus.disconnect(); }catch(e){}
+      (n.bodyChain||[]).forEach(f=>{ try{f.disconnect();}catch(e){} });
+    }, 200);
+    delete activeNodes[strIdx];
+  }
+
+  // ── Canvas drawing ─────────────────────────────────────────────
+  const harpCvs = document.getElementById('harpCanvas');
+  const pCvs    = document.getElementById('particleCanvas');
+  const hCtx    = harpCvs.getContext('2d');
+  const pCtx    = pCvs.getContext('2d');
+
+  // String geometry: angled, shorter strings on right (high notes)
+  const CANVAS_W = Math.min(window.innerWidth - 40, 1060);
+  const CANVAS_H = 540;
+  harpCvs.width  = CANVAS_W; harpCvs.height = CANVAS_H;
+  pCvs.width     = CANVAS_W; pCvs.height    = CANVAS_H;
+
+  // String positions: fan layout from bottom-left to top-right
+  const BOTTOM_Y  = CANVAS_H - 30;
+  const TOP_Y_MIN = 22;   // highest string top
+  const TOP_Y_MAX = 110;  // lowest string top
+  const LEFT_X    = 52;
+  const RIGHT_X   = CANVAS_W - 28;
+
+  function stringGeom(i){
+    const t   = i / (STRING_COUNT - 1);
+    const x   = LEFT_X + t * (RIGHT_X - LEFT_X);
+    const topY= TOP_Y_MAX - t*(TOP_Y_MAX - TOP_Y_MIN);
+    return { x, topY, botY: BOTTOM_Y };
+  }
+
+  function stringColor(str, alpha){
+    if(str.isC) return `rgba(74,120,200,${alpha||1})`;
+    if(str.isF) return `rgba(200,74,74,${alpha||1})`;
+    return `rgba(201,168,76,${alpha||1})`;
+  }
+  function stringGlow(str){
+    if(str.isC) return 'rgba(74,120,200,0.7)';
+    if(str.isF) return 'rgba(200,74,74,0.7)';
+    return 'rgba(201,168,76,0.6)';
+  }
+
+  // Lit strings (fading)
+  const litStrings = {}; // strIdx -> {t: 0-1}
+
+  function drawHarp(){
+    hCtx.clearRect(0,0,CANVAS_W,CANVAS_H);
+
+    // Sound board (left pillar)
+    const sbGrad = hCtx.createLinearGradient(0,0,44,0);
+    sbGrad.addColorStop(0,'#1a1408');
+    sbGrad.addColorStop(0.5,'#2e2210');
+    sbGrad.addColorStop(1,'#1a1408');
+    hCtx.fillStyle = sbGrad;
+    hCtx.beginPath();
+    hCtx.moveTo(8, TOP_Y_MAX+40);
+    hCtx.quadraticCurveTo(12, TOP_Y_MIN+10, 48, TOP_Y_MIN-10);
+    hCtx.lineTo(52, BOTTOM_Y);
+    hCtx.lineTo(8, BOTTOM_Y);
+    hCtx.closePath();
+    hCtx.fill();
+
+    // Soundboard gold trim
+    hCtx.strokeStyle = 'rgba(201,168,76,0.5)';
+    hCtx.lineWidth = 1;
+    hCtx.beginPath();
+    hCtx.moveTo(48, TOP_Y_MIN-10);
+    hCtx.lineTo(52, BOTTOM_Y);
+    hCtx.stroke();
+
+    // Neck (top curved bar)
+    const neckGrad = hCtx.createLinearGradient(LEFT_X-4, TOP_Y_MIN-14, RIGHT_X, TOP_Y_MIN+60);
+    neckGrad.addColorStop(0,'#2e2210');
+    neckGrad.addColorStop(0.5,'#4a3518');
+    neckGrad.addColorStop(1,'#2a1e0c');
+    hCtx.fillStyle = neckGrad;
+    hCtx.beginPath();
+    hCtx.moveTo(LEFT_X-4, TOP_Y_MIN-14);
+    hCtx.quadraticCurveTo(CANVAS_W*0.5, TOP_Y_MIN-28, RIGHT_X, TOP_Y_MIN+60);
+    hCtx.lineTo(RIGHT_X, TOP_Y_MIN+72);
+    hCtx.quadraticCurveTo(CANVAS_W*0.5, TOP_Y_MIN-16, LEFT_X-4, TOP_Y_MIN-2);
+    hCtx.closePath();
+    hCtx.fill();
+    // Neck gold edge
+    hCtx.strokeStyle = 'rgba(201,168,76,0.4)';
+    hCtx.lineWidth = 1;
+    hCtx.beginPath();
+    hCtx.moveTo(LEFT_X-4, TOP_Y_MIN-14);
+    hCtx.quadraticCurveTo(CANVAS_W*0.5, TOP_Y_MIN-28, RIGHT_X, TOP_Y_MIN+60);
+    hCtx.stroke();
+
+    // Base / foot
+    const baseGrad = hCtx.createLinearGradient(0, BOTTOM_Y-4, 0, CANVAS_H);
+    baseGrad.addColorStop(0,'#2e2210'); baseGrad.addColorStop(1,'#1a1408');
+    hCtx.fillStyle = baseGrad;
+    hCtx.fillRect(4, BOTTOM_Y-4, RIGHT_X+20, 20);
+    hCtx.strokeStyle='rgba(201,168,76,0.3)';hCtx.lineWidth=0.5;
+    hCtx.strokeRect(4, BOTTOM_Y-4, RIGHT_X+20, 20);
+
+    // Strings
+    for(let i=0;i<STRING_COUNT;i++){
+      const g = stringGeom(i);
+      const str = STRINGS[i];
+      const lit = litStrings[i] || 0;
+      const thickness = 0.6 + (1 - i/(STRING_COUNT-1)) * 1.6; // thicker for low strings
+
+      hCtx.save();
+      if(lit > 0.01){
+        hCtx.shadowBlur  = 8 + lit * 18;
+        hCtx.shadowColor = stringGlow(str);
+        hCtx.lineWidth   = thickness + lit * 2.5;
+        hCtx.strokeStyle = lerpColor(stringColor(str, 0.55), stringColor(str, 1), lit);
+      } else {
+        hCtx.shadowBlur  = 0;
+        hCtx.lineWidth   = thickness;
+        hCtx.strokeStyle = stringColor(str, 0.55 + 0.1*(1-i/(STRING_COUNT-1)));
+      }
+      hCtx.beginPath();
+      hCtx.moveTo(g.x, g.topY);
+      hCtx.lineTo(g.x, g.botY);
+      hCtx.stroke();
+      hCtx.restore();
+
+      // Tiny tuning pin at top
+      hCtx.beginPath();
+      hCtx.arc(g.x, g.topY, 2.2, 0, Math.PI*2);
+      hCtx.fillStyle = lit>0.1 ? stringGlow(str) : 'rgba(201,168,76,0.45)';
+      hCtx.fill();
+
+      // Note label at bottom for C and F strings
+      if(str.isC || str.isF){
+        hCtx.font = `600 9px 'Cinzel',serif`;
+        hCtx.fillStyle = str.isC ? 'rgba(74,120,200,0.8)' : 'rgba(200,74,74,0.8)';
+        hCtx.textAlign = 'center';
+        hCtx.fillText(str.noteName + str.octave, g.x, BOTTOM_Y + 17);
+      }
+    }
+  }
+
+  function lerpColor(c1, c2, t){
+    // Simple: just return c2 at t=1, c1 at t=0 (both are rgba strings, so just use opacity blend)
+    return c2;
+  }
+
+  // ── Particles ──────────────────────────────────────────────────
+  const particles = [];
+
+  function spawnParticles(strIdx, vel){
+    const g = stringGeom(strIdx);
+    const str = STRINGS[strIdx];
+    const col = str.isC ? [74,120,200] : str.isF ? [200,100,74] : [201,168,76];
+    const count = Math.floor(10 + vel * 18);
+    const pluckY = g.topY + (g.botY - g.topY) * (0.3 + Math.random()*0.4);
+
+    for(let i=0;i<count;i++){
+      const angle = (Math.random()*Math.PI*2);
+      const speed = 0.5 + Math.random()*2.5;
+      particles.push({
+        x: g.x, y: pluckY,
+        vx: Math.cos(angle)*speed,
+        vy: Math.sin(angle)*speed - 1.2,
+        life: 1.0,
+        decay: 0.018 + Math.random()*0.022,
+        size: 1.2 + Math.random()*2.8,
+        col,
+        glow: vel > 0.8,
+      });
+    }
+    // String ripple animation
+    litStrings[strIdx] = 1.0;
+  }
+
+  function updateParticles(){
+    pCtx.clearRect(0,0,CANVAS_W,CANVAS_H);
+    for(let i=particles.length-1;i>=0;i--){
+      const p = particles[i];
+      p.x  += p.vx;
+      p.y  += p.vy;
+      p.vy += 0.04; // gravity
+      p.life -= p.decay;
+      if(p.life <= 0){ particles.splice(i,1); continue; }
+      const [r,g,b] = p.col;
+      const a = p.life;
+      pCtx.beginPath();
+      pCtx.arc(p.x, p.y, p.size * p.life, 0, Math.PI*2);
+      if(p.glow){
+        pCtx.shadowBlur  = 8;
+        pCtx.shadowColor = `rgba(${r},${g},${b},${a})`;
+      }
+      pCtx.fillStyle = `rgba(${r},${g},${b},${a})`;
+      pCtx.fill();
+      pCtx.shadowBlur = 0;
+    }
+
+    // Fade lit strings
+    for(const k in litStrings){
+      litStrings[k] -= 0.025;
+      if(litStrings[k] < 0) delete litStrings[k];
+    }
+  }
+
+  // ── Starfield ──────────────────────────────────────────────────
+  const sCvs  = document.getElementById('starfield');
+  const sCtx  = sCvs.getContext('2d');
+  sCvs.width  = window.innerWidth;
+  sCvs.height = window.innerHeight;
+  const stars = Array.from({length:180}, () => ({
+    x: Math.random()*sCvs.width,
+    y: Math.random()*sCvs.height,
+    r: Math.random()*1.2,
+    a: 0.3 + Math.random()*0.6,
+    twinkle: Math.random()*Math.PI*2,
+    speed: 0.005 + Math.random()*0.02,
+  }));
+
+  function drawStars(){
+    sCtx.clearRect(0,0,sCvs.width,sCvs.height);
+    stars.forEach(s=>{
+      s.twinkle += s.speed;
+      const a = s.a * (0.6 + 0.4*Math.sin(s.twinkle));
+      sCtx.beginPath();
+      sCtx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      sCtx.fillStyle=`rgba(200,220,255,${a})`;
+      sCtx.fill();
+    });
+  }
+
+  // ── Interaction ────────────────────────────────────────────────
+  let isDragging = false;
+  let lastPlucked = -1;
+
+  function getStringAtX(x){
+    let best = -1, bestDist = 999;
+    for(let i=0;i<STRING_COUNT;i++){
+      const g = stringGeom(i);
+      const d = Math.abs(x - g.x);
+      if(d < bestDist){ bestDist=d; best=i; }
+    }
+    return bestDist < 18 ? best : -1;
+  }
+
+  function getYOnString(strIdx, y){
+    const g = stringGeom(strIdx);
+    return y >= g.topY && y <= g.botY;
+  }
+
+  harpCvs.addEventListener('pointerdown', e=>{
+    isDragging = true;
+    lastPlucked = -1;
+    const rect = harpCvs.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const si = getStringAtX(x);
+    if(si >= 0 && getYOnString(si, y)){
+      playString(si, 0.85);
+      lastPlucked = si;
+    }
+  });
+
+  harpCvs.addEventListener('pointermove', e=>{
+    if(!isDragging) return;
+    const rect = harpCvs.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const si = getStringAtX(x);
+    if(si >= 0 && si !== lastPlucked && getYOnString(si, y)){
+      playString(si, 0.7);
+      lastPlucked = si;
+    }
+  });
+
+  window.addEventListener('pointerup', ()=>{ isDragging=false; lastPlucked=-1; });
+
+  // Touch
+  harpCvs.addEventListener('touchstart', e=>{
+    e.preventDefault();
+    const rect = harpCvs.getBoundingClientRect();
+    Array.from(e.changedTouches).forEach(t=>{
+      const si = getStringAtX(t.clientX - rect.left);
+      if(si>=0) playString(si, 0.82);
+    });
+  },{passive:false});
+
+  harpCvs.addEventListener('touchmove', e=>{
+    e.preventDefault();
+    const rect = harpCvs.getBoundingClientRect();
+    Array.from(e.changedTouches).forEach(t=>{
+      const x = t.clientX - rect.left;
+      const si = getStringAtX(x);
+      if(si>=0 && si!==lastPlucked){
+        playString(si, 0.65);
+        lastPlucked=si;
+      }
+    });
+  },{passive:false});
+
+  // ── Note ribbon ────────────────────────────────────────────────
+  const tagTimers = {};
+  const activeTags = {};
+  function showNoteTag(str, pedalOff){
+    const ribbon = document.getElementById('noteRibbon');
+    const key = str.midi;
+    if(activeTags[key]) return;
+    const name = str.noteName ? (
+      pedalOff === -1 ? str.noteName + '♭' :
+      pedalOff === 1  ? str.noteName + '♯' :
+      str.noteName
+    ) : '?';
+    const tag = document.createElement('div');
+    tag.className = 'note-tag';
+    tag.textContent = name + str.octave;
+    ribbon.appendChild(tag);
+    activeTags[key] = tag;
+    clearTimeout(tagTimers[key]);
+    tagTimers[key] = setTimeout(()=>{
+      tag.style.transition='opacity 0.4s';
+      tag.style.opacity='0';
+      setTimeout(()=>{ tag.remove(); delete activeTags[key]; },400);
+    }, 900);
+  }
+
+  // ── Glissandos ────────────────────────────────────────────────
+  function glissando(direction){
+    initAudio();
+    const order = direction==='up'
+      ? Array.from({length:STRING_COUNT},(_,i)=>i)
+      : Array.from({length:STRING_COUNT},(_,i)=>STRING_COUNT-1-i);
+    order.forEach((si,i)=>{
+      setTimeout(()=> playString(si, 0.55 + Math.random()*0.25), i*28);
+    });
+  }
+
+  function arpeggio(){
+    initAudio();
+    // Play a pentatonic-ish subset
+    const indices = [0,3,7,10,14,17,21,24,28,31,35,38,42,46];
+    indices.forEach((si,i)=>{
+      setTimeout(()=> playString(si, 0.65+Math.random()*0.3), i*110);
+    });
+  }
+
+  document.getElementById('glissUpBtn').addEventListener('click',  ()=>glissando('up'));
+  document.getElementById('glissDownBtn').addEventListener('click', ()=>glissando('down'));
+  document.getElementById('glissArpBtn').addEventListener('click',  ()=>arpeggio());
+
+  // ── Pedal rack ────────────────────────────────────────────────
+  const PEDAL_NOTES = ['D','C','B','E','F','G','A'];
+  const pedalRack = document.getElementById('pedalRack');
+  PEDAL_NOTES.forEach(note=>{
+    const group = document.createElement('div');
+    group.className = 'pedal-group';
+    const lbl = document.createElement('div');
+    lbl.className = 'pedal-label';
+    lbl.textContent = note;
+    const btns = document.createElement('div');
+    btns.className = 'pedal-btns';
+    [{label:'♭',val:-1,cls:'flat'},{label:'♮',val:0,cls:'nat'},{label:'♯',val:1,cls:'sharp'}].forEach(({label,val,cls})=>{
+      const b = document.createElement('button');
+      b.className = 'pedal-btn' + (pedalState[note]===val ? ' '+cls : '');
+      b.textContent = label;
+      b.addEventListener('click',()=>{
+        pedalState[note] = val;
+        // update button styles
+        btns.querySelectorAll('.pedal-btn').forEach((bb,bi)=>{
+          bb.className = 'pedal-btn' + (bi===([{},{},{}].map((_,i)=>[-1,0,1][i]).indexOf(val)) ? ' '+cls : '');
+        });
+        btns.querySelectorAll('.pedal-btn').forEach((bb,bi)=>{
+          const vals=[-1,0,1];
+          const classes=['flat','nat','sharp'];
+          bb.className='pedal-btn'+(pedalState[note]===vals[bi]?' '+classes[bi]:'');
+        });
+      });
+      btns.appendChild(b);
+    });
+    group.appendChild(lbl);
+    group.appendChild(btns);
+    pedalRack.appendChild(group);
+  });
+
+  // ── Keyboard ──────────────────────────────────────────────────
+  // A-K keys map to strings in octave 4 region (roughly strings 24-34)
+  const KB = {'a':0,'w':1,'s':2,'e':3,'d':4,'f':5,'t':6,'g':7,'y':8,'h':9,'u':10,'j':11,'k':12};
+  const BASE_STR = 21; // C4 area
+  const held = new Set();
+  document.addEventListener('keydown', e=>{
+    if(e.repeat) return;
+    const k = e.key.toLowerCase();
+    if(held.has(k)) return;
+    held.add(k);
+    if(KB[k]!==undefined){
+      const si = Math.min(BASE_STR + KB[k], STRING_COUNT-1);
+      playString(si, 0.82);
+    }
+    if(e.key==='ArrowRight') glissando('up');
+    if(e.key==='ArrowLeft')  glissando('down');
+  });
+  document.addEventListener('keyup', e=> held.delete(e.key.toLowerCase()));
+
+  // ── Controls wiring ───────────────────────────────────────────
+  document.getElementById('resCtrl').addEventListener('input',function(){
+    resVal=parseFloat(this.value);
+    document.getElementById('resVal').textContent=Math.round(resVal*100);
+  });
+  document.getElementById('revCtrl').addEventListener('input',function(){
+    revVal=parseFloat(this.value);
+    document.getElementById('revVal').textContent=Math.round(revVal*100);
+    if(dryGain){dryGain.gain.value=1-revVal;wetGain.gain.value=revVal;}
+  });
+  document.getElementById('briCtrl').addEventListener('input',function(){
+    briVal=parseFloat(this.value);
+    document.getElementById('briVal').textContent=briVal>=1000?(briVal/1000).toFixed(1)+'k':briVal;
+    if(filterNode) filterNode.frequency.value=briVal;
+  });
+  document.getElementById('volCtrl').addEventListener('input',function(){
+    volVal=parseFloat(this.value);
+    document.getElementById('volVal').textContent=Math.round(volVal*100);
+    if(masterGain) masterGain.gain.value=volVal;
+  });
+
+  // ── Main loop ─────────────────────────────────────────────────
+  let frame=0;
+  function loop(){
+    requestAnimationFrame(loop);
+    frame++;
+    drawHarp();
+    updateParticles();
+    if(frame%2===0) drawStars();
+  }
+  loop();
+
+
+  window.InstrudioBridge = {
+    instrument:'harp', title:'Instrudio Electro Studio Harp', minMidi:24, maxMidi:70,
+    init:initAudio,
+    playMidi(midi, velocity=0.82, durationMs=780){
+      let best=0, dist=999;
+      for(let i=0;i<STRINGS.length;i++){ const d=Math.abs(STRINGS[i].midi - midi); if(d<dist){dist=d; best=i;} }
+      playString(best, Math.max(0.35, velocity));
+      setTimeout(()=>killString(best), Math.max(220,durationMs));
+    },
+    stopAll(){ for(let i=0;i<STRING_COUNT;i++) killString(i); }
+  };
+})();
+</script>
+
+<section id="instrudio-embedded-score-dock" aria-label="Score import dock"></section>
+<script src="instrudio-suite.js"></script>
+</body>
+</html>

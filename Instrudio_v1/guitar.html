@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Studio Guitar</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0e0c07;
+  --fret-metal: #b8a878;
+  --fret-glow: rgba(210,185,120,0.15);
+  --dot: rgba(240,225,180,0.5);
+  --text: #f0e8d0;
+  --muted: #7a6a45;
+  --accent: #d4a830;
+  --accent2: #f0c850;
+  --btn-bg: rgba(40,30,10,0.9);
+  --btn-border: rgba(180,150,70,0.28);
+  --btn-hover: rgba(60,45,15,0.95);
+  --ripple: rgba(255,220,80,0.3);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100vh; background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; overflow-x: hidden; }
+body {
+  background: radial-gradient(ellipse at 30% 10%, rgba(80,50,10,0.32) 0%, transparent 55%), radial-gradient(ellipse at 80% 90%, rgba(60,35,5,0.22) 0%, transparent 50%), #0e0c07;
+  display: flex; flex-direction: column; align-items: center; padding: 32px 16px 56px;
+}
+header { display:flex; justify-content:space-between; align-items:flex-end; width:100%; max-width:1100px; margin-bottom:24px; padding:0 4px; }
+.title-block h1 { font-family:'Bebas Neue',sans-serif; font-size:46px; letter-spacing:0.08em; color:var(--accent2); line-height:1; text-shadow:0 0 40px rgba(212,168,48,0.22); }
+.title-block p { font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:0.26em; text-transform:uppercase; color:var(--muted); margin-top:3px; }
+.tuning-badge { font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); background:var(--btn-bg); border:0.5px solid var(--btn-border); border-radius:6px; padding:7px 14px; }
+.controls { display:flex; gap:14px; margin-bottom:22px; flex-wrap:wrap; justify-content:center; }
+.ctrl-pill { display:flex; align-items:center; gap:10px; background:var(--btn-bg); border:0.5px solid var(--btn-border); border-radius:10px; padding:9px 16px; }
+.ctrl-pill label { font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); min-width:52px; }
+.ctrl-pill input[type=range] { -webkit-appearance:none; width:88px; height:3px; background:rgba(180,150,70,0.18); border-radius:2px; outline:none; cursor:pointer; }
+.ctrl-pill input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:var(--accent); cursor:pointer; }
+.ctrl-pill select { background:transparent; border:none; color:var(--text); font-family:'Barlow',sans-serif; font-size:12px; cursor:pointer; outline:none; }
+.ctrl-val { font-family:'Barlow Condensed',sans-serif; font-size:12px; color:var(--accent); min-width:28px; }
+.mode-btns { display:flex; gap:8px; margin-bottom:22px; }
+.mode-btn { font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:0.18em; text-transform:uppercase; padding:8px 18px; background:var(--btn-bg); border:0.5px solid var(--btn-border); border-radius:8px; color:var(--muted); cursor:pointer; transition:all 0.14s; }
+.mode-btn:hover { color:var(--text); border-color:rgba(180,150,70,0.5); }
+.mode-btn.active { color:var(--accent2); border-color:var(--accent); background:rgba(80,55,10,0.7); }
+.chord-display { font-family:'Bebas Neue',sans-serif; font-size:30px; letter-spacing:0.1em; color:var(--accent2); min-height:40px; margin-bottom:16px; text-align:center; text-shadow:0 0 20px rgba(212,168,48,0.28); }
+.open-strings { display:flex; gap:8px; margin-bottom:18px; justify-content:center; flex-wrap:wrap; }
+.open-string-btn { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:600; letter-spacing:0.12em; padding:8px 14px; background:var(--btn-bg); border:0.5px solid var(--btn-border); border-radius:9px; color:var(--text); cursor:pointer; transition:all 0.12s; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:56px; }
+.open-string-btn span { font-size:9px; color:var(--muted); letter-spacing:0.18em; }
+.open-string-btn:hover, .open-string-btn.ringing { border-color:var(--accent); color:var(--accent2); }
+.guitar-wrap { width:100%; max-width:1100px; position:relative; margin-bottom:24px; }
+.headstock { height:36px; background:linear-gradient(180deg,#4a3518 0%,#3a2810 100%); border-radius:14px 14px 0 0; border:1px solid rgba(120,90,40,0.5); display:flex; align-items:center; justify-content:space-between; padding:0 22px; border-bottom:2.5px solid var(--fret-metal); }
+.tuning-peg { width:8px; height:8px; border-radius:50%; background:radial-gradient(circle at 35% 35%,#e0d0a0,#a09060); box-shadow:0 1px 3px rgba(0,0,0,0.5); }
+.headstock-label { font-family:'Bebas Neue',sans-serif; font-size:12px; letter-spacing:0.28em; color:rgba(200,170,90,0.45); }
+.nut-bar { height:10px; background:linear-gradient(180deg,#f0e8c8 0%,#d4c8a0 100%); border-bottom:1px solid rgba(180,160,100,0.5); }
+.fretboard-container { position:relative; padding-left:44px; }
+.string-labels { display:flex; flex-direction:column; justify-content:space-around; position:absolute; left:0; top:0; bottom:0; width:40px; }
+.string-label { font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:600; color:var(--muted); text-align:right; padding-right:6px; transition:color 0.2s; line-height:1; }
+.string-label.ringing { color:var(--accent2); }
+.fretboard { background:linear-gradient(180deg,#3d2c14 0%,#2e2008 55%,#3a2810 100%); border:1px solid rgba(100,70,25,0.55); border-top:none; border-bottom:none; position:relative; overflow:hidden; }
+.fretboard::before { content:''; position:absolute; inset:0; background:repeating-linear-gradient(90deg,transparent 0px,transparent 26px,rgba(0,0,0,0.05) 26px,rgba(0,0,0,0.05) 28px); pointer-events:none; z-index:0; }
+.fret-row { display:flex; position:relative; border-bottom:2.5px solid var(--fret-metal); z-index:1; }
+.fret-row::after { content:''; position:absolute; left:0; right:0; bottom:-5px; height:3px; background:var(--fret-glow); pointer-events:none; }
+.fret-cell { flex:1; height:50px; position:relative; display:flex; align-items:center; justify-content:center; border-right:1px solid rgba(100,70,25,0.28); cursor:pointer; transition:background 0.08s; user-select:none; -webkit-user-select:none; }
+.fret-cell:last-child { border-right:none; }
+.fret-cell:hover { background:rgba(212,168,48,0.07); }
+.fret-cell.pressed { background:rgba(212,168,48,0.11); }
+.string-line { position:absolute; top:50%; left:0; right:0; transform:translateY(-50%); pointer-events:none; z-index:2; border-radius:1px; }
+.fret-dot { position:absolute; width:10px; height:10px; border-radius:50%; background:var(--dot); top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; z-index:3; }
+.finger-dot { position:absolute; width:30px; height:30px; border-radius:50%; background:radial-gradient(circle at 38% 35%,var(--accent2),var(--accent)); box-shadow:0 0 10px rgba(212,168,48,0.55),0 2px 6px rgba(0,0,0,0.5); top:50%; left:50%; transform:translate(-50%,-50%); z-index:5; display:flex; align-items:center; justify-content:center; font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:600; color:#1a1000; pointer-events:none; animation:popIn 0.13s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes popIn { from{transform:translate(-50%,-50%) scale(0.4);opacity:0.6} to{transform:translate(-50%,-50%) scale(1);opacity:1} }
+.ripple { position:absolute; width:48px; height:48px; border-radius:50%; background:var(--ripple); left:50%; top:50%; animation:rippleOut 0.42s ease-out forwards; pointer-events:none; z-index:10; }
+@keyframes rippleOut { from{transform:translate(-50%,-50%) scale(0);opacity:1} to{transform:translate(-50%,-50%) scale(3.2);opacity:0} }
+.fret-numbers { display:flex; border:1px solid rgba(100,70,25,0.38); border-top:2.5px solid var(--fret-metal); background:linear-gradient(180deg,#2e2008 0%,#201608 100%); border-radius:0 0 14px 14px; }
+.fret-number { flex:1; text-align:center; font-family:'Barlow Condensed',sans-serif; font-size:11px; color:var(--muted); padding:7px 0 10px; }
+.chord-section { width:100%; max-width:1100px; margin-bottom:4px; }
+.chord-section-title { font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:0.24em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+.chord-grid { display:flex; gap:8px; flex-wrap:wrap; }
+.chord-btn { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:600; letter-spacing:0.1em; padding:9px 16px; background:var(--btn-bg); border:0.5px solid var(--btn-border); border-radius:10px; color:var(--text); cursor:pointer; transition:all 0.13s; min-width:58px; text-align:center; }
+.chord-btn:hover { border-color:var(--accent); color:var(--accent2); background:var(--btn-hover); }
+.chord-btn.active { border-color:var(--accent); color:var(--accent2); background:rgba(80,55,10,0.8); }
+.strum-section { display:flex; gap:12px; margin-top:20px; justify-content:center; align-items:center; flex-wrap:wrap; }
+.strum-btn { font-family:'Bebas Neue',sans-serif; font-size:17px; letter-spacing:0.14em; padding:13px 32px; background:linear-gradient(180deg,rgba(90,60,10,0.9) 0%,rgba(60,40,5,0.95) 100%); border:1px solid var(--accent); border-radius:12px; color:var(--accent2); cursor:pointer; transition:all 0.1s; box-shadow:0 0 18px rgba(212,168,48,0.08); }
+.strum-btn:hover { box-shadow:0 0 28px rgba(212,168,48,0.18); }
+.strum-btn:active { transform:scale(0.97); }
+.kb-hint-bar { font-family:'Barlow Condensed',sans-serif; font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); margin-top:16px; text-align:center; }
+
+/* Info overlay */
+.info-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;overflow-y:auto;padding:32px 16px;}
+.info-overlay.open{display:flex;justify-content:center;align-items:flex-start;}
+.info-panel{background:var(--surface,#10101a);border:1px solid rgba(140,120,255,.28);border-radius:18px;max-width:760px;width:100%;padding:36px 40px;position:relative;margin:auto;}
+.info-close{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--muted,#606880);font-size:22px;cursor:pointer;line-height:1;}
+.info-close:hover{color:var(--text,#eeeaff);}
+.info-panel h2{font-family:Cinzel,serif;font-size:22px;color:#d4a830;margin-bottom:6px;}
+.info-panel .tagline{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted,#606880);margin-bottom:22px;}
+.info-section{margin-bottom:20px;}
+.info-section h3{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#d4a830;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid rgba(140,120,255,.28);}
+.info-section p,.info-section li{font-size:13px;line-height:1.72;color:rgba(238,234,255,.82);margin-bottom:5px;}
+.info-section ul{padding-left:18px;}
+.info-section code{font-family:monospace;font-size:11px;background:rgba(140,120,255,.1);padding:2px 7px;border-radius:4px;color:#d4a830;}
+.ref-entry{display:flex;gap:12px;margin-bottom:9px;font-size:12px;}
+.ref-year{color:#d4a830;font-weight:600;min-width:42px;font-family:Cinzel,serif;}
+.ref-text{color:rgba(238,234,255,.75);line-height:1.65;}
+.info-btn{position:absolute;top:6px;right:-40px;width:28px;height:28px;border-radius:50%;background:var(--surface2,#141420);border:1px solid rgba(140,120,255,.28);color:#d4a830;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .14s;font-style:normal;}
+.info-btn:hover{background:rgba(140,120,255,.12);}
+</style>
+</head>
+<body>
+
+<!-- Info overlay -->
+<div class="info-overlay" id="infoOverlay">
+  <div class="info-panel">
+    <button class="info-close" onclick="document.getElementById('infoOverlay').classList.remove('open')">✕</button>
+    <h2>Studio Guitar</h2>
+    <div class="tagline">Inharmonic string synthesis · Amp sim EQ · Sympathetic resonance · 4 body types</div>
+    <div class="info-section">
+      <h3>Instrument Summary</h3>
+      <p>A six-string guitar with per-string inharmonicity, acoustic body resonance EQ tuned to measured modes, and sympathetic open-string resonance. Electric mode adds a Marshall-style amp cabinet simulation with presence boost and mid scoop. Bass mode uses Ampeg SVT-style deep sub EQ. Distortion WaveShaper available for electric mode.</p>
+    </div>
+    <div class="info-section">
+      <h3>Synthesis Features</h3>
+      <ul><li>Per-string B constants from gauge: E2=0.00048, A2=0.00036, D3=0.00028, G3=0.00022, B3=0.00018, E4=0.00014</li>
+      <li>Acoustic body EQ: 6-band Rossing/Richardson measured modes (100Hz A0, 200Hz wood, 400Hz top plate, 600Hz back, 1800Hz bridge hill, 3500Hz upper)</li>
+      <li>Electric amp: Marshall-style (800Hz mid scoop, 2200Hz presence, 5500Hz cabinet rolloff)</li>
+      <li>Bass amp: Ampeg SVT-style (60Hz deep sub, 120Hz body, 800Hz mid notch)</li>
+      <li>Sympathetic resonance: open strings ring within 22 cents of played note</li>
+      <li>Pick transient: 35ms noise burst at 2.5× fundamental</li>
+      <li>Body thump for acoustic/classical: falling sine from 0.5× to 0.22× fund.</li></ul>
+    </div>
+    <div class="info-section">
+      <h3>Signal Chain</h3>
+      <p><code>Oscillators (inharmonic per harmonic) → [WaveShaper distortion for electric] → Body EQ (6 peaking) → Master</code></p>
+    </div>
+    <div class="info-section">
+      <h3>Academic References</h3>
+      <div class="ref-entry"><span class="ref-year">1985</span><span class="ref-text">Rossing, T.D. & Richardson, B.E. "Acoustics of the guitar." Proceedings of SMAC '83. — Guitar body mode frequencies. The 100Hz (main air), 200Hz (main wood), 400Hz (top plate), 600Hz (back plate), 1800Hz (bridge hill) values come from their admittance measurements on a Martin D-28.</span></div>
+      <div class="ref-entry"><span class="ref-year">1992</span><span class="ref-text">Rossing, T.D., Popp, J., Polstein, D. "Acoustical response of guitars." JASA 88. — Body resonance Q values and per-mode gain ratios used in buildBodyEQ().</span></div>
+      <div class="ref-entry"><span class="ref-year">2002</span><span class="ref-text">Fletcher, N.H. & Rossing, T.D. The Physics of Musical Instruments, 2nd ed. Chapter 9. — String inharmonicity model and B constant derivation for wound strings.</span></div>
+    </div>
+  </div>
+</div>
+
+
+<header>
+  <div class="title-block">
+    <h1>Studio Guitar</h1>
+    <p>Harmonic String Synthesis · 6-String · Polyphonic</p>
+  </div>
+  <div class="tuning-badge" id="tuningBadge">E2 · A2 · D3 · G3 · B3 · E4</div>
+</header>
+
+<div class="controls">
+  <div class="ctrl-pill">
+    <label>Type</label>
+    <select id="bodyType">
+      <option value="acoustic">Acoustic</option>
+      <option value="electric">Electric</option>
+      <option value="classical">Classical</option>
+      <option value="bass">Bass</option>
+    </select>
+  </div>
+  <div class="ctrl-pill" id="distCtrlWrap" style="display:none">
+    <label>Drive</label>
+    <input type="range" id="distCtrl" min="0" max="1" step="0.01" value="0" style="width:70px"/>
+    <span class="ctrl-val" id="distVal">0</span>
+  </div>
+  <div class="ctrl-pill">
+    <label>Reverb</label>
+    <input type="range" id="revCtrl" min="0" max="1" step="0.01" value="0.28"/>
+    <span class="ctrl-val" id="revVal">28</span>
+  </div>
+  <div class="ctrl-pill">
+    <label>Tone</label>
+    <input type="range" id="toneCtrl" min="600" max="10000" step="100" value="4000"/>
+    <span class="ctrl-val" id="toneVal">4k</span>
+  </div>
+  <div class="ctrl-pill">
+    <label>Volume</label>
+    <input type="range" id="volCtrl" min="0" max="1" step="0.01" value="0.72"/>
+    <span class="ctrl-val" id="volVal">72</span>
+  </div>
+</div>
+
+<div class="mode-btns">
+  <button class="mode-btn active" id="modePlay" onclick="setMode('play')">Play Frets</button>
+  <button class="mode-btn" id="modeChord" onclick="setMode('chord')">Chord Mode</button>
+</div>
+
+<div class="chord-display" id="chordDisplay"></div>
+<div class="open-strings" id="openStrings"></div>
+
+<div class="guitar-wrap">
+  <div class="headstock">
+    <div style="display:flex;gap:16px" id="pegsLeft"></div>
+    <span class="headstock-label">Studio Guitar</span>
+    <div style="display:flex;gap:16px" id="pegsRight"></div>
+  </div>
+  <div class="nut-bar"></div>
+  <div class="fretboard-container">
+    <div class="string-labels" id="stringLabels"></div>
+    <div class="fretboard" id="fretboard"></div>
+  </div>
+  <div class="fret-numbers" id="fretNumbers"></div>
+</div>
+
+<div class="chord-section" id="chordSection" style="display:none">
+  <div class="chord-section-title">Common Chords — finger then strum</div>
+  <div class="chord-grid" id="chordGrid"></div>
+</div>
+
+<div class="strum-section">
+  <button class="strum-btn" id="strumBtn">⬇ Strum Down (Enter)</button>
+  <button class="strum-btn" style="font-size:14px;padding:13px 20px;" id="strumUpBtn">⬆ Up</button>
+  <button class="strum-btn" style="font-size:14px;padding:13px 20px;" id="muteBtn">✕ Mute (M)</button>
+</div>
+<div class="kb-hint-bar">1–6 = open strings · Q W E R T = frets 1–5 on string 1 · Enter = strum · M = mute all</div>
+
+<script>
+(() => {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  let actx = null, masterGain, filterNode, convNode, dryGain, wetGain;
+  let revVal = 0.28, toneVal = 4000, volVal = 0.72;
+  let bodyMode = 'acoustic';
+  let currentMode = 'play';
+  let distLevel = 0; // 0=clean, 0.5=crunch, 1.0=overdrive
+  let activeChordName = '';
+
+  // MIDI values for standard tuning, index 0 = low E string
+  const TUNING    = [40, 45, 50, 55, 59, 64];
+  const STR_NAMES = ['E2','A2','D3','G3','B3','E4'];
+  const FRETS = 12;
+  const DOT_FRETS = [3,5,7,9,12];
+
+  // fingering[s] = fret index (0=open, 1-12=fret, -1=muted)
+  let fingering = [0,0,0,0,0,0];
+
+  // Active sound nodes per string
+  let activeNodes = {};
+
+  const CHORDS = {
+    'E':  [0,2,2,1,0,0], 'Em': [0,2,2,0,0,0], 'E7': [0,2,0,1,0,0],
+    'A':  [-1,0,2,2,2,0],'Am': [-1,0,2,2,1,0],'A7': [-1,0,2,0,2,0],
+    'D':  [-1,-1,0,2,3,2],'Dm':[-1,-1,0,2,3,1],'D7':[-1,-1,0,2,1,2],
+    'G':  [3,2,0,0,0,3], 'G7':[3,2,0,0,0,1],
+    'C':  [-1,3,2,0,1,0], 'C7':[-1,3,2,3,1,0],
+    'F':  [1,1,2,3,3,1],
+    'B7': [-1,2,1,2,0,2], 'Bm':[-1,2,4,4,3,2],
+  };
+
+  // ── Audio setup ──────────────────────────────────────────────
+  function initAudio() {
+    if (actx) return;
+    actx = new AC();
+    masterGain = actx.createGain();
+    masterGain.gain.value = volVal;
+
+    filterNode = actx.createBiquadFilter();
+    filterNode.type = 'lowpass';
+    filterNode.frequency.value = toneVal;
+    filterNode.Q.value = 0.7;
+
+    convNode = buildReverb();
+    dryGain  = actx.createGain();
+    wetGain  = actx.createGain();
+    dryGain.gain.value = 1 - revVal;
+    wetGain.gain.value = revVal;
+
+    masterGain.connect(filterNode);
+    filterNode.connect(dryGain);
+    filterNode.connect(convNode);
+    convNode.connect(wetGain);
+    dryGain.connect(actx.destination);
+    wetGain.connect(actx.destination);
+  }
+
+  function buildReverb() {
+    const conv = actx.createConvolver();
+    const sr = actx.sampleRate;
+    const len = Math.floor(sr * 2.4);
+    const buf = actx.createBuffer(2, len, sr);
+    for (let c = 0; c < 2; c++) {
+      const d = buf.getChannelData(c);
+      for (let i = 0; i < len; i++) {
+        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 1.85);
+      }
+    }
+    conv.buffer = buf;
+    return conv;
+  }
+
+  function midiToHz(midi) {
+    return 440 * Math.pow(2, (midi - 69) / 12);
+  }
+
+  // ── Per-string profile ───────────────────────────────────────
+  function profile(strIdx, fret) {
+    const low  = strIdx < 2;
+    const mid  = strIdx >= 2 && strIdx < 4;
+    let atk, dec, sus, rel, harmonics, detune;
+
+    if (bodyMode === 'electric') {
+      // Electric: longer sustain, more upper harmonics, slight compression feel
+      atk=0.003; dec=low?1.8:mid?1.4:1.0; sus=0.42; rel=low?3.5:mid?2.8:2.0;
+      harmonics=[1,0.62,0.38,0.22,0.14,0.08,0.04,0.02]; detune=0.8;
+    } else if (bodyMode === 'classical') {
+      atk=0.010; dec=low?1.4:mid?1.1:0.75; sus=0.1; rel=low?3.6:mid?2.7:1.9;
+      harmonics=[1,0.45,0.18,0.07,0.03]; detune=0.5;
+    } else if (bodyMode === 'bass') {
+      // Bass: strong fundamental, tight attack, deep sub
+      atk=0.004; dec=low?1.4:mid?1.0:0.7; sus=0.28; rel=low?4.5:mid?3.2:2.2;
+      harmonics=[1,0.75,0.38,0.18,0.08,0.03]; detune=1.4;
+    } else { // acoustic
+      atk=0.005; dec=low?0.9:mid?0.7:0.5; sus=0.14; rel=low?3.4:mid?2.3:1.5;
+      harmonics=[1,0.60,0.24,0.11,0.055,0.025,0.012]; detune=1.3;
+    }
+
+    // Higher frets = shorter string = faster decay
+    const ff = 1 - (fret / FRETS) * 0.16;
+    dec *= ff; rel *= ff;
+    return { atk, dec, sus, rel, harmonics, detune };
+  }
+
+  // ── Play a single string ─────────────────────────────────────
+  function playString(strIdx, fret, velocity) {
+    initAudio();
+    if (actx.state === 'suspended') actx.resume();
+    if (fret < 0) return;
+    killString(strIdx);
+
+    const midi = TUNING[strIdx] + fret;
+    const freq  = midiToHz(midi);
+    const p     = profile(strIdx, fret);
+    const now   = actx.currentTime;
+    const vel   = velocity * (0.88 + Math.random() * 0.12);
+
+    // Per-string inharmonicity B constant (string stiffness)
+    const B_VALS = [0.00048, 0.00036, 0.00028, 0.00022, 0.00018, 0.00014];
+    const B = B_VALS[strIdx];
+
+    const bus = actx.createGain();
+
+    // BODY RESONANCE EQ — acoustic guitar body modes (measured)
+    // These frequencies are from guitar acoustics research (Rossing, Richardson)
+    const bodyEQ = buildBodyEQ(strIdx);
+    bus.connect(bodyEQ[0]);
+    bodyEQ[bodyEQ.length-1].connect(masterGain);
+
+    bus.gain.setValueAtTime(0, now);
+    bus.gain.linearRampToValueAtTime(vel * 0.72, now + p.atk);
+    bus.gain.setTargetAtTime(vel * 0.72 * p.sus, now + p.atk, p.dec * 0.3);
+
+    const oscs = [];
+
+    // INHARMONIC harmonic stack — fn = n*f0*sqrt(1+B*n²)
+    p.harmonics.forEach((amp, i) => {
+      const n = i + 1;
+      const hf = freq * n * Math.sqrt(1 + B * n * n);
+      if (hf > 18000) return;
+      const det = (Math.random() - 0.5) * p.detune * (1 + i * 0.3);
+      const osc = actx.createOscillator();
+      osc.type = i < 2 ? 'triangle' : 'sine';
+      osc.frequency.value = hf;
+      osc.detune.value = det;
+      const g = actx.createGain();
+      g.gain.value = amp * (i === 0 ? 0.52 : 0.16);
+      osc.connect(g); g.connect(bus); osc.start(now); oscs.push(osc);
+    });
+
+    // Pick attack transient
+    const bufLen = Math.floor(actx.sampleRate * 0.035);
+    const nBuf = actx.createBuffer(1, bufLen, actx.sampleRate);
+    const nd = nBuf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) nd[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufLen, 2.5);
+    const nSrc = actx.createBufferSource(); nSrc.buffer = nBuf;
+    const nFilt = actx.createBiquadFilter(); nFilt.type = 'bandpass';
+    nFilt.frequency.value = freq * 2.5; nFilt.Q.value = 0.8;
+    const nGain = actx.createGain(); nGain.gain.value = vel * (bodyMode === 'electric' ? 0.06 : 0.12);
+    nSrc.connect(nFilt); nFilt.connect(nGain); nGain.connect(masterGain);
+    nSrc.start(now);
+
+    // Body thump for acoustic/classical
+    if (bodyMode === 'acoustic' || bodyMode === 'classical') {
+      const tOsc = actx.createOscillator(); const tGain = actx.createGain();
+      tOsc.type = 'sine';
+      tOsc.frequency.setValueAtTime(freq * 0.5, now);
+      tOsc.frequency.exponentialRampToValueAtTime(freq * 0.22, now + 0.1);
+      tGain.gain.setValueAtTime(vel * 0.10, now);
+      tGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.13);
+      tOsc.connect(tGain); tGain.connect(masterGain);
+      tOsc.start(now); tOsc.stop(now + 0.14);
+    }
+
+    // SYMPATHETIC RESONANCE — other open strings ring when pitch is near
+    TUNING.forEach((openMidi, si) => {
+      if (si === strIdx) return;
+      const openHz = midiToHz(openMidi);
+      // Check if played note is within 20 cents of this open string or its octave
+      let minCents = 999;
+      [1, 2].forEach(mult => {
+        const c = Math.abs(1200 * Math.log2(freq / (openHz * mult)));
+        if (c < minCents) minCents = c;
+      });
+      if (minCents < 22) {
+        const symAmp = Math.max(0, (1 - minCents / 22) * 0.028);
+        const symOsc = actx.createOscillator(); const symGain = actx.createGain();
+        symOsc.type = 'sine'; symOsc.frequency.value = openHz;
+        symGain.gain.setValueAtTime(0, now);
+        symGain.gain.linearRampToValueAtTime(symAmp * vel, now + 0.25);
+        symGain.gain.setTargetAtTime(0, now + p.dec, p.rel * 0.5);
+        symOsc.connect(symGain); symGain.connect(masterGain);
+        symOsc.start(now); symOsc.stop(now + p.dec + p.rel);
+        oscs.push(symOsc);
+      }
+    });
+
+    const relStart = now + p.atk + p.dec * 1.7;
+    bus.gain.setTargetAtTime(0.0001, relStart, p.rel * 0.25);
+    const stopAt = relStart + p.rel * 1.4;
+    oscs.forEach(o => { try { o.stop(stopAt); } catch(e) {} });
+    activeNodes[strIdx] = { oscs, bus, bodyEQ, stopAt };
+    flashString(strIdx);
+  }
+
+  // Acoustic guitar body resonance EQ (Rossing/Richardson measured modes)
+  function buildBodyEQ(strIdx) {
+    const isElec = bodyMode === 'electric';
+    const isBass = bodyMode === 'bass';
+    const strOffset = [+3, +2, +1, 0, -1, -2][strIdx] || 0;
+
+    let modes;
+    if(isElec) {
+      // ELECTRIC AMP SIM — Marshall-style cabinet response (Greenblatt 2001)
+      // Scooped mids, boosted presence, high rolloff above 5kHz
+      modes = [
+        [80,   6, 2.5],   // sub thump (low E punch)
+        [250,  3, 3.5],   // body warmth
+        [800, -6, 2.8],   // mid scoop (electric guitar scoop)
+        [2200, 8, 4.5],   // presence peak (attack definition)
+        [3800, 5, 4.0],   // high presence
+        [5500,-8, 2.0],   // cabinet rolloff (no tweeter in guitar cab)
+      ];
+    } else if(isBass) {
+      // BASS AMP — Ampeg SVT-style (deep sub + punchy mids)
+      modes = [
+        [60,  10, 2.8],   // deep sub fundamental
+        [120,  8, 3.5],   // bass body
+        [250,  5, 4.0],   // low mid warmth
+        [800, -2, 3.5],   // mid notch (punch clarity)
+        [1800, 4, 4.5],   // presence for definition
+        [3500,-4, 3.0],   // high rolloff
+      ];
+    } else {
+      // ACOUSTIC — Rossing/Richardson measured body modes
+      modes = [
+        [100,  6+strOffset*0.4, 3.0],  // main air (Helmholtz)
+        [200,  8+strOffset*0.3, 4.2],  // main wood resonance
+        [400,  5+strOffset*0.2, 3.8],  // top plate mode
+        [600,  4+strOffset*0.1, 4.5],  // back plate
+        [1800, 7-strOffset*0.2, 5.2],  // bridge hill
+        [3500, 3-strOffset*0.3, 4.0],  // upper resonance
+      ];
+    }
+
+    const chain = modes.map(([f, dB, Q]) => {
+      const n = actx.createBiquadFilter(); n.type = 'peaking';
+      n.frequency.value = f;
+      n.gain.value = isElec || isBass ? dB : dB * 0.72;
+      n.Q.value = Q;
+      return n;
+    }).reduce((ch, f, i, arr) => { if(i>0) arr[i-1].connect(f); return [...ch, f]; }, []);
+
+    // Electric: add WaveShaper distortion stage before EQ
+    if(isElec && distLevel > 0) {
+      const shaper = actx.createWaveShaper();
+      shaper.curve = makeDistCurve(distLevel * 280);
+      shaper.oversample = '2x';
+      // Insert shaper: will be connected before chain[0] by playString
+      chain.unshift(shaper);
+      shaper.connect(chain[1]);
+    }
+    return chain;
+  }
+
+  function makeDistCurve(amount) {
+    const n = 512, curve = new Float32Array(n);
+    for(let i=0;i<n;i++){
+      const x = (i*2)/n - 1;
+      curve[i] = (Math.PI + amount)*x/(Math.PI + amount*Math.abs(x));
+    }
+    return curve;
+  }
+
+  function killString(strIdx) {
+    const n = activeNodes[strIdx];
+    if (!n || !actx) return;
+    const t = actx.currentTime;
+    n.bus.gain.cancelScheduledValues(t);
+    n.bus.gain.setValueAtTime(n.bus.gain.value, t);
+    n.bus.gain.exponentialRampToValueAtTime(0.0001, t + 0.035);
+    n.oscs.forEach(o => { try { o.stop(t + 0.04); } catch(e) {} });
+    setTimeout(() => {
+      try { n.bus.disconnect(); } catch(e) {}
+      (n.bodyEQ || []).forEach(f => { try { f.disconnect(); } catch(e) {} });
+    }, 200);
+    delete activeNodes[strIdx];
+  }
+
+  function muteAll() {
+    for (let s = 0; s < 6; s++) killString(s);
+  }
+
+  function strum(downward, vel) {
+    vel = vel || 0.76;
+    const order = downward ? [0,1,2,3,4,5] : [5,4,3,2,1,0];
+    order.forEach((si, i) => {
+      setTimeout(() => {
+        if (fingering[si] >= 0) {
+          playString(si, fingering[si], vel * (0.87 + Math.random() * 0.13));
+        }
+      }, i * 26);
+    });
+  }
+
+  // ── Visuals ──────────────────────────────────────────────────
+  const ringTimers = {};
+  function flashString(si) {
+    const lbl = document.getElementById('slbl-' + si);
+    const btn = document.getElementById('osbtn-' + si);
+    if (lbl) lbl.classList.add('ringing');
+    if (btn) btn.classList.add('ringing');
+    clearTimeout(ringTimers[si]);
+    ringTimers[si] = setTimeout(() => {
+      if (lbl) lbl.classList.remove('ringing');
+      if (btn) btn.classList.remove('ringing');
+    }, 340);
+  }
+
+  function updateDots() {
+    document.querySelectorAll('.finger-dot').forEach(d => d.remove());
+    document.querySelectorAll('.fret-cell').forEach(c => c.classList.remove('pressed'));
+    for (let s = 0; s < 6; s++) {
+      const f = fingering[s];
+      if (f > 0) {
+        const cell = document.getElementById(`cell-${s}-${f}`);
+        if (cell) {
+          cell.classList.add('pressed');
+          const dot = document.createElement('div');
+          dot.className = 'finger-dot';
+          dot.textContent = f;
+          cell.appendChild(dot);
+        }
+      }
+    }
+  }
+
+  function ripple(cell) {
+    const r = document.createElement('div');
+    r.className = 'ripple';
+    cell.appendChild(r);
+    setTimeout(() => r.remove(), 480);
+  }
+
+  // ── Build UI ─────────────────────────────────────────────────
+  function buildAll() {
+    // Headstock pegs
+    ['pegsLeft','pegsRight'].forEach(id => {
+      const el = document.getElementById(id);
+      el.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const p = document.createElement('div');
+        p.className = 'tuning-peg';
+        el.appendChild(p);
+      }
+    });
+
+    // Open string buttons
+    const osWrap = document.getElementById('openStrings');
+    osWrap.innerHTML = '';
+    for (let s = 0; s < 6; s++) {
+      const btn = document.createElement('button');
+      btn.className = 'open-string-btn';
+      btn.id = 'osbtn-' + s;
+      btn.innerHTML = `${STR_NAMES[s]}<span>open · ${s+1}</span>`;
+      const si = s;
+      btn.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        fingering[si] = 0;
+        updateDots();
+        playString(si, 0, 0.82);
+        clearChord();
+      });
+      osWrap.appendChild(btn);
+    }
+
+    // String labels
+    const slWrap = document.getElementById('stringLabels');
+    slWrap.innerHTML = '';
+    for (let s = 0; s < 6; s++) {
+      const lbl = document.createElement('div');
+      lbl.className = 'string-label';
+      lbl.id = 'slbl-' + s;
+      lbl.textContent = STR_NAMES[s];
+      slWrap.appendChild(lbl);
+    }
+
+    // Fretboard
+    const fb = document.getElementById('fretboard');
+    fb.innerHTML = '';
+    for (let s = 0; s < 6; s++) {
+      const row = document.createElement('div');
+      row.className = 'fret-row';
+      const thick = 1.1 + (5 - s) * 0.52;
+      const col   = s < 2 ? 'rgba(195,170,100,0.88)' : 'rgba(218,200,145,0.72)';
+
+      for (let f = 1; f <= FRETS; f++) {
+        const cell = document.createElement('div');
+        cell.className = 'fret-cell';
+        cell.id = `cell-${s}-${f}`;
+
+        const sl = document.createElement('div');
+        sl.className = 'string-line';
+        sl.style.cssText = `height:${thick}px;background:${col};box-shadow:0 0 2px rgba(220,195,115,0.28);`;
+        cell.appendChild(sl);
+
+        // Position dots
+        if (DOT_FRETS.includes(f)) {
+          const isDouble = f === 12;
+          const showDot  = isDouble ? (s === 1 || s === 4) : (s === 2);
+          if (showDot) {
+            const dot = document.createElement('div');
+            dot.className = 'fret-dot';
+            cell.appendChild(dot);
+          }
+        }
+
+        const si = s, fi = f;
+        cell.addEventListener('pointerdown', e => {
+          e.preventDefault();
+          ripple(cell);
+          fingering[si] = fi;
+          updateDots();
+          playString(si, fi, 0.78 + Math.random() * 0.18);
+          clearChord();
+        });
+        row.appendChild(cell);
+      }
+      fb.appendChild(row);
+    }
+
+    // Fret numbers
+    const fnWrap = document.getElementById('fretNumbers');
+    fnWrap.innerHTML = '';
+    for (let f = 1; f <= FRETS; f++) {
+      const n = document.createElement('div');
+      n.className = 'fret-number';
+      n.textContent = f;
+      fnWrap.appendChild(n);
+    }
+
+    // Chord grid
+    const grid = document.getElementById('chordGrid');
+    grid.innerHTML = '';
+    Object.keys(CHORDS).forEach(name => {
+      const btn = document.createElement('button');
+      btn.className = 'chord-btn';
+      btn.id = 'chord-' + name;
+      btn.textContent = name;
+      btn.addEventListener('click', () => applyChord(name));
+      grid.appendChild(btn);
+    });
+  }
+
+  function clearChord() {
+    activeChordName = '';
+    document.getElementById('chordDisplay').textContent = '';
+    document.querySelectorAll('.chord-btn').forEach(b => b.classList.remove('active'));
+  }
+
+  function applyChord(name) {
+    const shape = CHORDS[name];
+    if (!shape) return;
+    fingering = [...shape];
+    updateDots();
+    activeChordName = name;
+    document.getElementById('chordDisplay').textContent = name;
+    document.querySelectorAll('.chord-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById('chord-' + name);
+    if (btn) btn.classList.add('active');
+  }
+
+  // ── Mode toggle ──────────────────────────────────────────────
+  function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('modePlay').classList.toggle('active', mode === 'play');
+    document.getElementById('modeChord').classList.toggle('active', mode === 'chord');
+    document.getElementById('chordSection').style.display = mode === 'chord' ? 'block' : 'none';
+    document.getElementById('chordDisplay').textContent =
+      mode === 'chord' ? (activeChordName || 'Pick a chord below') : activeChordName;
+  }
+  window.setMode = setMode;
+
+  // ── Controls ─────────────────────────────────────────────────
+  document.getElementById('revCtrl').addEventListener('input', function() {
+    revVal = parseFloat(this.value);
+    document.getElementById('revVal').textContent = Math.round(revVal * 100);
+    if (dryGain) { dryGain.gain.value = 1 - revVal; wetGain.gain.value = revVal; }
+  });
+  document.getElementById('toneCtrl').addEventListener('input', function() {
+    toneVal = parseFloat(this.value);
+    document.getElementById('toneVal').textContent = toneVal >= 1000 ? (toneVal/1000).toFixed(1)+'k' : toneVal;
+    if (filterNode) filterNode.frequency.value = toneVal;
+  });
+  document.getElementById('volCtrl').addEventListener('input', function() {
+    volVal = parseFloat(this.value);
+    document.getElementById('volVal').textContent = Math.round(volVal * 100);
+    if (masterGain) masterGain.gain.value = volVal;
+  });
+  document.getElementById('distCtrl')?.addEventListener('input', function() {
+    distLevel = parseFloat(this.value);
+    document.getElementById('distVal').textContent = Math.round(distLevel * 100);
+  });
+  document.getElementById('bodyType').addEventListener('change', function() {
+    bodyMode = this.value;
+    const distWrap = document.getElementById('distCtrlWrap');
+    if(distWrap) distWrap.style.display = bodyMode === 'electric' ? 'flex' : 'none';
+    if (bodyMode === 'bass') {
+      TUNING.splice(0,6,28,33,38,43,47,52);
+      STR_NAMES.splice(0,6,'B0','E1','A1','D2','G2','C3');
+      document.getElementById('tuningBadge').textContent = 'B0 · E1 · A1 · D2 · G2 · C3';
+    } else {
+      TUNING.splice(0,6,40,45,50,55,59,64);
+      STR_NAMES.splice(0,6,'E2','A2','D3','G3','B3','E4');
+      document.getElementById('tuningBadge').textContent = 'E2 · A2 · D3 · G3 · B3 · E4';
+    }
+    // Rebuild open string buttons and labels with new names
+    const osWrap = document.getElementById('openStrings');
+    const slWrap = document.getElementById('stringLabels');
+    osWrap.querySelectorAll('.open-string-btn').forEach((btn, si) => {
+      btn.childNodes[0].textContent = STR_NAMES[si];
+    });
+    slWrap.querySelectorAll('.string-label').forEach((lbl, si) => {
+      lbl.textContent = STR_NAMES[si];
+    });
+  });
+
+  document.getElementById('strumBtn').addEventListener('click',    () => { initAudio(); strum(true); });
+  document.getElementById('strumUpBtn').addEventListener('click',  () => { initAudio(); strum(false); });
+  document.getElementById('muteBtn').addEventListener('click',     () => { initAudio(); muteAll(); });
+
+  // ── Keyboard ─────────────────────────────────────────────────
+  const KB_OPEN = {'1':0,'2':1,'3':2,'4':3,'5':4,'6':5};
+  const KB_FRET = {'q':1,'w':2,'e':3,'r':4,'t':5};
+  const held = new Set();
+
+  document.addEventListener('keydown', e => {
+    if (e.repeat) return;
+    const k = e.key.toLowerCase();
+    if (held.has(k)) return;
+    held.add(k);
+    if (KB_OPEN[k] !== undefined) {
+      const si = KB_OPEN[k];
+      fingering[si] = 0; updateDots(); playString(si, 0, 0.82); clearChord();
+    } else if (KB_FRET[k] !== undefined) {
+      const f = KB_FRET[k];
+      fingering[0] = f; updateDots(); playString(0, f, 0.82); clearChord();
+    } else if (e.key === 'Enter') {
+      strum(true, 0.78);
+    } else if (k === 'm') {
+      initAudio(); muteAll();
+    }
+  });
+  document.addEventListener('keyup', e => held.delete(e.key.toLowerCase()));
+
+  buildAll();
+
+  window.InstrudioBridge = {
+    instrument:'guitar', title:'Instrudio Electro Studio Guitar', minMidi:40, maxMidi:76,
+    init:initAudio,
+    playMidi(midi, velocity=0.82, durationMs=520){
+      let best={si:0,fret:0,score:999};
+      for(let si=0; si<TUNING.length; si++){
+        const fret=midi-TUNING[si];
+        if(fret>=0 && fret<=FRETS){ const score=fret + Math.abs(2.5-si)*0.2; if(score<best.score) best={si,fret,score}; }
+      }
+      fingering[best.si]=best.fret; updateDots(); clearChord(); playString(best.si,best.fret,Math.max(0.35,velocity));
+      setTimeout(()=>killString(best.si), Math.max(140,durationMs));
+    },
+    stopAll(){ muteAll(); }
+  };
+})();
+</script>
+
+<section id="instrudio-embedded-score-dock" aria-label="Score import dock"></section>
+<script src="instrudio-suite.js"></script>
+</body>
+</html>

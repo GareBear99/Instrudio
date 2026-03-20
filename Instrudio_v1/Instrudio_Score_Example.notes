@@ -1,0 +1,4 @@
+# Simple note-text example for Instrudio
+# Format: NOTE/DURATION_IN_BEATS separated by spaces
+# Use R for a rest.
+E4/1 F#4/1 G4/2 R/1 A4/0.5 B4/0.5 C5/2
