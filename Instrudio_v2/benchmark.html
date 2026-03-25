@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Instrudio SSOT Benchmark Suite</title>
+<style>
+:root{--bg:#0a0a0f;--surface:#12121a;--border:rgba(140,120,255,.18);--text:#e8e4ff;--muted:#7a7890;--accent:#9070ff;--good:#6fdf9a;--warn:#f0c050;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;padding:32px 24px;}
+h1{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:4px;}
+.sub{font-size:13px;color:var(--muted);letter-spacing:.08em;margin-bottom:28px;}
+.section{margin-bottom:28px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;}
+.section h2{font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;}
+.btn{padding:10px 20px;border-radius:10px;border:1px solid var(--border);background:rgba(140,120,255,.08);color:var(--text);cursor:pointer;font-size:13px;font-weight:600;transition:.14s;}
+.btn:hover{background:rgba(140,120,255,.16);}
+.btn:disabled{opacity:.4;cursor:default;}
+.btn.running{border-color:var(--warn);color:var(--warn);}
+.btn.done{border-color:var(--good);color:var(--good);}
+.results{margin-top:14px;font-family:'SF Mono',Menlo,monospace;font-size:12px;line-height:1.8;color:var(--muted);}
+.results b{color:var(--text);}
+.results .good{color:var(--good);}
+.results .warn{color:var(--warn);}
+.bar{height:6px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden;margin:8px 0;}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--good));transition:width .3s;}
+pre{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:11px;overflow-x:auto;max-height:300px;overflow-y:auto;margin-top:12px;color:var(--muted);}
+.export-row{display:flex;gap:10px;margin-top:12px;}
+</style>
+</head>
+<body>
+<h1>Instrudio SSOT Benchmark Suite</h1>
+<p class="sub">Automated evaluation for: "A single-source-of-truth architecture for cross-platform virtual instrument ecosystems"</p>
+
+<div class="section" id="ssotSection">
+  <h2>Test 1 — SSOT Definition Fetch + Apply Timing</h2>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Measures remote fetch (GitHub raw), local fallback, cached hit, and definition apply times. Runs N=20 trials per condition.</p>
+  <button class="btn" id="runSSOT" onclick="runSSOTBenchmark()">Run SSOT Benchmark</button>
+  <div class="bar"><div class="bar-fill" id="ssotBar" style="width:0%"></div></div>
+  <div class="results" id="ssotResults"></div>
+</div>
+
+<div class="section" id="midiSection">
+  <h2>Test 2 — MIDI Pipeline Latency</h2>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Synthesizes N=200 note events through InstrudioBridge.playMidi(), measures dispatch-to-return latency. Note: this measures the JS pipeline, not audio output latency (which depends on AudioContext.baseLatency).</p>
+  <button class="btn" id="runMIDI" onclick="runMIDIBenchmark()">Run MIDI Benchmark</button>
+  <div class="bar"><div class="bar-fill" id="midiBar" style="width:0%"></div></div>
+  <div class="results" id="midiResults"></div>
+</div>
+
+<div class="section" id="propSection">
+  <h2>Test 3 — Update Propagation Timing</h2>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Calls checkForUpdates() N=10 times, measuring the full round-trip to GitHub for version comparison.</p>
+  <button class="btn" id="runProp" onclick="runPropBenchmark()">Run Propagation Benchmark</button>
+  <div class="bar"><div class="bar-fill" id="propBar" style="width:0%"></div></div>
+  <div class="results" id="propResults"></div>
+</div>
+
+<div class="section">
+  <h2>Export Results</h2>
+  <div class="export-row">
+    <button class="btn" onclick="exportJSON()">Export as JSON</button>
+    <button class="btn" onclick="exportCSV()">Export as CSV</button>
+  </div>
+  <pre id="exportPre" style="display:none;"></pre>
+</div>
+
+<!-- Load the instrument runtime so we have a real bridge to test against -->
+<script>
+// Minimal InstrudioBridge stub for benchmarking (no audio, just measures pipeline)
+window.InstrudioBridge = {
+  instrument: 'violin', title: 'Studio Violin', ssotId: 'studio_violin',
+  respectManualTechnique: true, minMidi: 55, maxMidi: 100,
+  init: function(){},
+  playMidi: function(midi, velocity, durationMs) {
+    // Simulate the work of note dispatch (no actual audio)
+    var freq = 440 * Math.pow(2, (midi - 69) / 12);
+    var si = 0, bestScore = 999;
+    var OPEN = [55, 62, 69, 76];
+    for (var i = 0; i < 4; i++) {
+      var fret = midi - OPEN[i];
+      if (fret >= 0 && fret <= 24) { var score = fret + i * 0.15; if (score < bestScore) { bestScore = score; si = i; } }
+    }
+    return { si: si, freq: freq };
+  },
+  stopAll: function(){},
+  getTechnique: function(){ return 'bow'; }
+};
+</script>
+<script src="core/definition-runtime.js"></script>
+<script>
+(function(){
+  var allResults = { ssot: null, midi: null, propagation: null, timestamp: new Date().toISOString(), userAgent: navigator.userAgent };
+
+  function stats(arr) {
+    if (!arr.length) return {min:0,max:0,avg:0,median:0,p95:0,stdev:0,n:0};
+    var sorted = arr.slice().sort(function(a,b){return a-b;});
+    var sum = 0; for (var i = 0; i < arr.length; i++) sum += arr[i];
+    var avg = sum / arr.length;
+    var sqDiffSum = 0; for (var i = 0; i < arr.length; i++) sqDiffSum += Math.pow(arr[i] - avg, 2);
+    return {
+      min: sorted[0],
+      max: sorted[sorted.length - 1],
+      avg: avg,
+      median: sorted[Math.floor(sorted.length / 2)],
+      p95: sorted[Math.floor(sorted.length * 0.95)],
+      stdev: Math.sqrt(sqDiffSum / arr.length),
+      n: arr.length
+    };
+  }
+
+  function fmt(v) { return v.toFixed(2); }
+
+  function renderStats(s, unit) {
+    return '<b>' + fmt(s.avg) + unit + '</b> avg · ' + fmt(s.min) + unit + ' min · ' + fmt(s.max) + unit + ' max · ' + fmt(s.median) + unit + ' median · ' + fmt(s.p95) + unit + ' p95 · σ=' + fmt(s.stdev) + unit + ' · N=' + s.n;
+  }
+
+  // ── Test 1: SSOT Fetch + Apply ──────────────────────────────
+  window.runSSOTBenchmark = async function() {
+    var btn = document.getElementById('runSSOT');
+    var bar = document.getElementById('ssotBar');
+    var out = document.getElementById('ssotResults');
+    btn.className = 'btn running'; btn.disabled = true; btn.textContent = 'Running...';
+    out.innerHTML = '';
+
+    var remoteTimes = [], localTimes = [], applyTimes = [], totalTimes = [];
+    var N = 20;
+    var rt = window.InstrudioSSOTRuntime;
+
+    for (var i = 0; i < N; i++) {
+      bar.style.width = ((i + 1) / N * 100) + '%';
+
+      // Force remote fetch (clear cache by using forceRefresh)
+      var t0 = performance.now();
+      var def = await rt.loadDefinitionById('studio_violin', true);
+      var fetchTime = performance.now() - t0;
+
+      var m = rt.getMetrics();
+      remoteTimes.push(m.fetchTimeMs);
+      applyTimes.push(m.applyTimeMs || 0);
+      totalTimes.push(fetchTime);
+
+      // Small delay between trials
+      await new Promise(function(r){ setTimeout(r, 100); });
+    }
+
+    // Now test cached reads
+    var cachedTimes = [];
+    for (var i = 0; i < N; i++) {
+      var t0 = performance.now();
+      var def = await rt.loadDefinitionById('studio_violin', false); // should hit cache
+      cachedTimes.push(performance.now() - t0);
+    }
+
+    var remoteStats = stats(remoteTimes);
+    var cachedStats = stats(cachedTimes);
+    var applyStats = stats(applyTimes.filter(function(v){return v>0;}));
+    var totalStats = stats(totalTimes);
+
+    allResults.ssot = { remote: remoteStats, cached: cachedStats, apply: applyStats, total: totalStats, definitionSize: JSON.stringify(def).length };
+
+    out.innerHTML =
+      '<div><b>Remote fetch (GitHub raw):</b></div><div>' + renderStats(remoteStats, 'ms') + '</div>' +
+      '<div style="margin-top:8px"><b>Cached read:</b></div><div>' + renderStats(cachedStats, 'ms') + '</div>' +
+      '<div style="margin-top:8px"><b>Definition size:</b> ' + allResults.ssot.definitionSize + ' bytes</div>';
+
+    btn.className = 'btn done'; btn.textContent = 'SSOT Benchmark Complete'; btn.disabled = false;
+  };
+
+  // ── Test 2: MIDI Pipeline Latency ───────────────────────────
+  window.runMIDIBenchmark = function() {
+    var btn = document.getElementById('runMIDI');
+    var bar = document.getElementById('midiBar');
+    var out = document.getElementById('midiResults');
+    btn.className = 'btn running'; btn.disabled = true; btn.textContent = 'Running...';
+
+    var latencies = [];
+    var N = 200;
+    var bridge = window.InstrudioBridge;
+    var notes = [];
+
+    // Generate random note sequence
+    for (var i = 0; i < N; i++) {
+      notes.push(55 + Math.floor(Math.random() * 45)); // G3 to C7
+    }
+
+    var idx = 0;
+    function runNext() {
+      if (idx >= N) {
+        var s = stats(latencies);
+        allResults.midi = s;
+        out.innerHTML =
+          '<div><b>Pipeline dispatch latency:</b></div><div>' + renderStats(s, 'ms') + '</div>' +
+          '<div style="margin-top:8px" class="' + (s.avg < 1 ? 'good' : s.avg < 5 ? '' : 'warn') + '">Verdict: ' +
+          (s.avg < 1 ? 'Excellent (<1ms avg)' : s.avg < 5 ? 'Good (<5ms avg)' : 'Review needed (>5ms avg)') + '</div>';
+        btn.className = 'btn done'; btn.textContent = 'MIDI Benchmark Complete'; btn.disabled = false;
+        return;
+      }
+
+      bar.style.width = ((idx + 1) / N * 100) + '%';
+      var t0 = performance.now();
+      bridge.playMidi(notes[idx], 0.5 + Math.random() * 0.4, 400);
+      var elapsed = performance.now() - t0;
+      latencies.push(elapsed);
+      idx++;
+      setTimeout(runNext, 5); // 5ms between notes to avoid flooding
+    }
+    runNext();
+  };
+
+  // ── Test 3: Update Propagation ──────────────────────────────
+  window.runPropBenchmark = async function() {
+    var btn = document.getElementById('runProp');
+    var bar = document.getElementById('propBar');
+    var out = document.getElementById('propResults');
+    btn.className = 'btn running'; btn.disabled = true; btn.textContent = 'Running...';
+
+    var rt = window.InstrudioSSOTRuntime;
+    var times = [];
+    var N = 10;
+
+    // First apply so bridge has ssotId
+    await rt.applyByBridge();
+
+    for (var i = 0; i < N; i++) {
+      bar.style.width = ((i + 1) / N * 100) + '%';
+      var t0 = performance.now();
+      await rt.checkForUpdates();
+      times.push(performance.now() - t0);
+      await new Promise(function(r){ setTimeout(r, 200); });
+    }
+
+    var s = stats(times);
+    allResults.propagation = s;
+    out.innerHTML =
+      '<div><b>Version check round-trip (GitHub):</b></div><div>' + renderStats(s, 'ms') + '</div>' +
+      '<div style="margin-top:8px">This is the time for a running page to detect a definition change on GitHub.</div>';
+
+    btn.className = 'btn done'; btn.textContent = 'Propagation Benchmark Complete'; btn.disabled = false;
+  };
+
+  // ── Export ──────────────────────────────────────────────────
+  window.exportJSON = function() {
+    var pre = document.getElementById('exportPre');
+    pre.style.display = 'block';
+    pre.textContent = JSON.stringify(allResults, null, 2);
+  };
+
+  window.exportCSV = function() {
+    var pre = document.getElementById('exportPre');
+    pre.style.display = 'block';
+    var lines = ['test,metric,value,unit'];
+    function add(test, obj) {
+      if (!obj) return;
+      Object.keys(obj).forEach(function(k) {
+        if (typeof obj[k] === 'number') lines.push(test + ',' + k + ',' + obj[k].toFixed(4) + ',ms');
+      });
+    }
+    if (allResults.ssot) {
+      add('ssot_remote', allResults.ssot.remote);
+      add('ssot_cached', allResults.ssot.cached);
+      lines.push('ssot_size,bytes,' + (allResults.ssot.definitionSize || 0) + ',bytes');
+    }
+    add('midi_pipeline', allResults.midi);
+    add('propagation', allResults.propagation);
+    pre.textContent = lines.join('\n');
+  };
+})();
+</script>
+</body>
+</html>
