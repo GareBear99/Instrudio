@@ -182,14 +182,24 @@
   }
 
   function sendNoteOn(note, vel, ch) {
+    // Prefer NativeMIDI for Electron app
+    if (window.NativeMIDI && window.NativeMIDI.isElectron) {
+      window.NativeMIDI.sendNoteOn(note, vel || 0.8, ch || 0);
+    }
     sendRaw([0x90 | ((ch || 0) & 0x0f), note & 0x7f, Math.round((vel || 0.8) * 127) & 0x7f]);
   }
 
   function sendNoteOff(note, ch) {
+    if (window.NativeMIDI && window.NativeMIDI.isElectron) {
+      window.NativeMIDI.sendNoteOff(note, ch || 0);
+    }
     sendRaw([0x80 | ((ch || 0) & 0x0f), note & 0x7f, 0]);
   }
 
   function sendCC(cc, val, ch) {
+    if (window.NativeMIDI && window.NativeMIDI.isElectron) {
+      window.NativeMIDI.sendCC(cc, val, ch || 0);
+    }
     sendRaw([0xb0 | ((ch || 0) & 0x0f), cc & 0x7f, val & 0x7f]);
   }
 
@@ -213,6 +223,24 @@
     if (options.channel != null) channel = options.channel;
     if (options.onStatus) statusCb = options.onStatus;
     buildCCMap();
+
+    // Prefer NativeMIDI (Electron desktop app) when available
+    if (window.NativeMIDI && window.NativeMIDI.isElectron) {
+      console.log('[InstrudioMIDI] Using NativeMIDI (Electron native backend)');
+      window.NativeMIDI.onMessage(function(data) {
+        // Convert native MIDI message to the same format as Web MIDI
+        onMIDIMessage({ data: data.data });
+      });
+      return window.NativeMIDI.getPorts().then(function(ports) {
+        var inCount = ports.inputs ? ports.inputs.length : 0;
+        var outCount = ports.outputs ? ports.outputs.length : 0;
+        if (ports.virtualOutput) outCount++;
+        console.log('[InstrudioMIDI] Native MIDI ready — ' + inCount + ' in, ' + outCount + ' out (+ virtual: ' + (ports.virtualOutput || 'none') + ')');
+        if (statusCb) statusCb('ready', inCount, outCount);
+        return true;
+      });
+    }
+
     if (!navigator.requestMIDIAccess) {
       console.warn('[InstrudioMIDI] Web MIDI API not available in this browser.');
       if (statusCb) statusCb('unavailable', 0, 0);

@@ -1,0 +1,41 @@
+{
+  "name": "instrudio",
+  "version": "2.0.0",
+  "description": "Instrudio Desktop — SSOT virtual instrument suite with native MIDI",
+  "main": "main.js",
+  "author": "Gary Doman",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux"
+  },
+  "dependencies": {
+    "midi": "^2.0.0"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "com.instrudio.desktop",
+    "productName": "Instrudio",
+    "files": [
+      "main.js",
+      "preload.js",
+      "midi-backend.js",
+      "../*.html",
+      "../*.js",
+      "../core/**",
+      "../instruments/**"
+    ],
+    "mac": {
+      "category": "public.app-category.music",
+      "target": ["dmg", "zip"]
+    },
+    "win": {
+      "target": ["nsis", "zip"]
+    }
+  }
+}
