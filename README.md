@@ -1,85 +1,97 @@
-# Instrudio v2.8.0 — Full Instrument Definition Runtime Pass
+# Instrudio — Connected Instrument Ecosystem
 
-Instrudio is a browser-based instrument suite with 10 playable instrument pages, shared score import/playback, and a production-oriented platform blueprint for future plugin + mobile subscription integration.
+Cross-platform instrument suite where web demos, plugins, and the mobile app all share the same live-updating instrument core.
 
-## Included Now
-- 10 instrument HTML pages
-- homepage launcher
-- shared playback / import engine
-- MusicXML + note-text input
-- info overlays and keyboard shortcuts
-- deployment and QA docs
-- release manifest and checksums
+**Live:** [garebear99.github.io/Instrudio/Instrudio_v2/](https://garebear99.github.io/Instrudio/Instrudio_v2/)
 
-## Included For Next Stage
-- platform schemas
-- release manifest schema
-- plugin bridge contract
-- mobile entitlement model
-- instrument catalog
-- subscription tier model
-- production roadmap
+## V1 Core (fully connected)
 
-## Why this repo exists
-This repository is intended to become the single source of truth for:
-- free web demos
-- desktop plugin instrument mapping
-- mobile app connected play
-- entitlement-aware update flow
+| Instrument | MIDI | Bridge | Presets | Definition |
+|---|---|---|---|---|
+| Studio Grand (piano) | ✓ | ✓ | 5 | `studio_grand.json` |
+| Studio Violin | ✓ | ✓ | 6 | `studio_violin.json` |
+| Celestial Harp | ✓ | ✓ | 4 | `celestial_harp.json` |
+| Studio Bongos | ✓ | ✓ | 4 | `studio_bongos.json` |
 
-## Production Positioning
-The current package is production-ready as a static web release.
-The platform folder defines the next production layer for plugin/mobile connected rollout.
+6 additional instruments (Guitar, Saxophone, Accordion, Harmonica, Bagpipes, Triangle) are playable but not yet wired into the connected SSOT pipeline.
+
+## How it works
+
+### Single Source of Truth
+
+Every instrument is defined by a JSON file in `Instrudio_v2/instruments/definitions/`. This definition drives:
+
+- **Web page** — title, controls, presets, MIDI CC mappings, note range
+- **Plugin bridge** — instrument ID, control IDs, preset IDs
+- **Mobile app** — same definition, same IDs (planned)
+
+### Remote-first loading
+
+`core/definition-runtime.js` fetches definitions from this GitHub repo first (`raw.githubusercontent.com`), falling back to local files when offline. 5-minute cache TTL.
+
+**To update all outlets:** edit a definition JSON on GitHub → push → every web page, plugin, and mobile client picks up the change automatically.
+
+### External MIDI
+
+The V1 Core instruments accept MIDI input from any external controller via the Web MIDI API. They also send MIDI output when played, so they can drive external synths/DAWs.
+
+MIDI CC mappings are defined per-instrument in the definition JSON (e.g., CC1 = bow pressure on violin, CC7 = volume, CC74 = brightness).
+
+### Plugin Bridge
+
+`core/bridge-client.js` auto-connects to `ws://localhost:9100`. To run the bridge relay:
+
+```
+cd Instrudio_v2/platform/plugin
+npm install ws
+node bridge-server.js
+```
+
+Web pages and DAW plugins both connect to this relay. Messages follow `platform/plugin/bridge-contract.json`.
+
+## Repository structure
+
+```
+Instrudio_v2/
+├── index.html                    # Homepage
+├── piano.html                    # Studio Grand
+├── violin.html                   # Studio Violin (reference SSOT instrument)
+├── harp.html                     # Celestial Harp
+├── bongo.html                    # Studio Bongos
+├── guitar.html … triangle.html   # 6 additional instruments
+├── instrudio-suite.js            # Shared playback/import engine
+├── core/
+│   ├── definition-runtime.js     # Remote-first SSOT loader
+│   ├── midi-io.js                # Web MIDI I/O module
+│   ├── bridge-client.js          # Plugin WebSocket bridge client
+│   └── v1-ssot-manifest.json     # Release manifest
+├── instruments/
+│   └── definitions/              # ← THE SINGLE SOURCE OF TRUTH
+│       ├── studio_grand.json
+│       ├── studio_violin.json
+│       ├── celestial_harp.json
+│       ├── studio_bongos.json
+│       └── ... (6 more)
+└── platform/
+    ├── plugin/
+    │   ├── bridge-contract.json  # Event protocol spec
+    │   └── bridge-server.js      # Node.js WebSocket relay
+    ├── mobile/
+    │   └── entitlement-model.json
+    └── schemas/
+        ├── instrument.schema.json
+        └── release-manifest.schema.json
+```
+
+## Updating an instrument
+
+1. Edit the definition JSON (e.g., change a preset value, add a control, update the MIDI range)
+2. Bump the `version` field
+3. Push to `main`
+4. Every outlet picks up the change within 5 minutes (or immediately on page refresh)
 
 ## Version
-- Static Suite: v2.8.0
-- Platform Blueprint: v1.2.0
 
-
-## V1 single source of truth core
-
-The v1 core release is now centered on four canonical instruments:
-
-- Studio Grand
-- Studio Violin
-- Celestial Harp
-- Studio Bongos
-
-Their shared metadata lives in `instruments/definitions/` and the release grouping lives in `core/v1-ssot-manifest.json`.
-
-### Autoplay behavior
-Studio Violin now preserves the player's selected technique during autoplay. Built-in songs no longer force Pizzicato or Bowed over the user's current selection.
-
-
-## What changed in v2.7.0
-
-- Added a live `core/definition-runtime.js` loader for the four v1 core instruments.
-- Studio Grand, Studio Violin, Celestial Harp, and Studio Bongos now read canonical title, range, and autoplay-policy data from `instruments/definitions/`.
-- Studio Bongos now preserves the currently selected technique during autoplay, matching Studio Violin.
-- `core/v1-ssot-manifest.json` now points at the runtime used by the v1 core pages.
-
-
-## Full definition-runtime coverage
-
-All ten instrument pages now ship with shared definition metadata under `instruments/definitions/` and load through `core/definition-runtime.js`.
-
-### V1 release core
-- Studio Grand
-- Studio Violin
-- Celestial Harp
-- Studio Bongos
-
-### Extended SSOT coverage
-- Studio Guitar
-- Studio Saxophone
-- Studio Accordion
-- Studio Harmonica
-- Studio Bagpipes
-- Studio Triangle
-
-Studio Saxophone now also preserves the player's currently selected articulation during autoplay, matching the manual-technique behavior already added for Studio Violin and Studio Bongos.
-
-
-## Homepage Theme
-
-The homepage now uses the Studio Bongos warm bronze/gold visual theme to match the v1 launch identity.
+- Suite: v2.0.0
+- Platform Blueprint: v2.0.0
+- Definition Schema: v1.0.0

@@ -1,35 +1,103 @@
 {
   "id": "studio_bongos",
+  "instrumentId": "studio-bongos",
   "slug": "bongo",
   "name": "Studio Bongos",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "release": "v1",
   "page": "bongo.html",
-  "pageTitle": "Studio Bongos \u00b7 Instrudio",
+  "pageTitle": "Studio Bongos · Instrudio",
   "headline": "Studio Bongos",
   "subheadline": "Punchy hand percussion pair for the v1 connected core.",
   "category": "percussion",
   "bridgeInstrument": "bongo",
   "minMidi": 36,
   "maxMidi": 88,
-  "techniques": [
-    "open",
-    "mute",
-    "slap"
-  ],
+  "techniques": ["open", "mute", "slap"],
   "autoplay": {
     "respectsManualTechnique": true,
     "defaultTechnique": "open",
     "supportsLibrary": true
   },
   "ssotFields": [
-    "pageTitle",
-    "headline",
-    "page",
-    "bridgeInstrument",
-    "techniques",
-    "minMidi",
-    "maxMidi",
-    "release"
-  ]
+    "pageTitle", "headline", "page", "bridgeInstrument",
+    "techniques", "minMidi", "maxMidi", "release",
+    "controls", "presets", "engines", "availability"
+  ],
+
+  "ui": {
+    "theme": "ember-warm",
+    "layout": "dual-drum-center",
+    "icon": "assets/instruments/bongo/icon.png",
+    "heroTitle": "Studio Bongos",
+    "info": {
+      "short": "Circular membrane physics with Bessel function modal synthesis and 3 articulations.",
+      "long": "Circular membrane percussion using physically correct Bessel function frequency ratios. Six modes synthesised with per-mode amplitude and decay. Strike position determines mode excitation. 3 articulations: Open, Muffled, Slap. Hembra (low) and Macho (high) drums."
+    }
+  },
+
+  "performance": {
+    "noteRange": ["C2", "E6"],
+    "polyphony": 4,
+    "defaultVelocity": 100,
+    "supportsSustain": false,
+    "drums": [
+      {"name": "Hembra", "role": "low", "baseMidi": 55},
+      {"name": "Macho", "role": "high", "baseMidi": 67}
+    ]
+  },
+
+  "controls": [
+    {"controlId": "room",    "label": "Room",    "type": "knob", "default": 0.22, "min": 0.0,   "max": 1.0,  "step": 0.01, "midiCC": 91},
+    {"controlId": "tone",    "label": "Tone",    "type": "knob", "default": 2200, "min": 400,   "max": 5000, "step": 50,   "midiCC": 74},
+    {"controlId": "volume",  "label": "Volume",  "type": "knob", "default": 0.78, "min": 0.0,   "max": 1.0,  "step": 0.01, "midiCC": 7},
+    {"controlId": "tuning",  "label": "Tuning",  "type": "knob", "default": 0,    "min": -7,    "max": 7,    "step": 1,    "midiCC": 18},
+    {"controlId": "accent",  "label": "Accent",  "type": "knob", "default": 0.92, "min": 0.35,  "max": 1.35, "step": 0.01, "midiCC": 1}
+  ],
+
+  "presets": [
+    {
+      "presetId": "classic-cuban",
+      "name": "Classic Cuban",
+      "tier": "free",
+      "values": {"room": 0.22, "tone": 2200, "volume": 0.78, "tuning": 0, "accent": 0.92}
+    },
+    {
+      "presetId": "tight-studio",
+      "name": "Tight Studio",
+      "tier": "free",
+      "values": {"room": 0.10, "tone": 3200, "volume": 0.82, "tuning": 2, "accent": 1.05}
+    },
+    {
+      "presetId": "warm-lounge",
+      "name": "Warm Lounge",
+      "tier": "free",
+      "values": {"room": 0.45, "tone": 1400, "volume": 0.72, "tuning": -2, "accent": 0.80}
+    },
+    {
+      "presetId": "bright-salsa",
+      "name": "Bright Salsa",
+      "tier": "free",
+      "values": {"room": 0.18, "tone": 3800, "volume": 0.85, "tuning": 3, "accent": 1.15}
+    }
+  ],
+
+  "engines": {
+    "web": {"type": "webaudio", "synthesis": "bessel-modal", "features": ["circular-membrane-modes", "strike-position", "shell-eq", "kill-on-retrigger"]},
+    "plugin": {"type": "vst3", "status": "planned", "bridgeProtocol": "websocket", "bridgePort": 9100},
+    "mobile": {"type": "coreAudio", "status": "planned", "renderMode": "touch-pads"}
+  },
+
+  "availability": {
+    "web": true,
+    "plugin": false,
+    "mobile": false,
+    "subscriptionFeatures": ["plugin-link", "external-midi-mode", "premium-presets"]
+  },
+
+  "assets": {
+    "icon": "assets/instruments/bongo/icon.png",
+    "heroImage": "assets/instruments/bongo/hero.png",
+    "previewAudio": "assets/instruments/bongo/preview.mp3"
+  }
 }

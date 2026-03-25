@@ -118,6 +118,7 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
 <header>
   <h1>Studio Violin</h1>
   <p>Helmholtz · H2 Correction · Inharmonicity · Sympathetic Resonance · G D A E</p>
+  <div id="midiStatus" style="font-family:'Sorts Mill Goudy',serif;font-size:10px;letter-spacing:.14em;color:var(--muted);margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px;"><span id="midiDot" style="width:7px;height:7px;border-radius:50%;background:#444;display:inline-block;"></span><span id="midiLabel">MIDI: scanning…</span></div>
 </header>
 <div class="controls">
   <div class="ctrl"><label>Bow Press</label><input type="range" id="bowPress" min="0.05" max="1" step="0.01" value="0.6"/><span class="ctrl-val" id="bowPressVal">60</span></div>
@@ -138,6 +139,8 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
   <button class="mode-btn active" id="modeBow"  onclick="setMode('bow')">Bowed</button>
   <button class="mode-btn"        id="modePizz" onclick="setMode('pizz')">Pizzicato</button>
   <button class="mode-btn"        id="modeCol"  onclick="setMode('col')">Col Legno</button>
+  <button class="mode-btn"        id="modeTrem" onclick="setMode('trem')">Tremolo</button>
+  <button class="mode-btn"        id="modeSpic" onclick="setMode('spic')">Spiccato</button>
   <button class="mode-btn"        id="modeSingle" onclick="toggleSingle()" style="border-color:rgba(150,180,255,.2);color:#8090b0;">Single Note</button>
 </div>
 <div class="status-bar" id="statusBar">Click any string to begin</div>
@@ -165,6 +168,10 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
     <div class="panel-card">
       <div class="panel-card-title">Scales</div>
       <div class="scale-grid" id="scaleGrid"></div>
+    </div>
+    <div class="panel-card">
+      <div class="panel-card-title">Presets</div>
+      <div class="scale-grid" id="presetGrid"></div>
     </div>
   </div>
 </div>
@@ -502,29 +509,62 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
 
   function killAll(imm){for(let s=0;s<4;s++)killVoice(s,imm);isBowing=false;silenceSympathy();}
 
-  // ── Pizzicato ──────────────────────────────────────────────────
+  // ── Pizzicato (Karplus-Strong physical model) ───────────────────
   function pizzNote(si,freq,vel){
     killVoice(si,true);initAudio();
     if(actx.state==='suspended')actx.resume();
     const now=actx.currentTime,v=vel*(0.88+Math.random()*0.12);
-    const B=INHARM_B[si];
-    const out=actx.createGain();out.gain.setValueAtTime(0,now);out.gain.linearRampToValueAtTime(v*0.72,now+0.004);
-    const tc=0.35+(3-si)*0.18;out.gain.setTargetAtTime(0.0001,now+0.004,tc);
+    // Per-string decay: G string rings longer, E decays faster
+    const decayCoeff=[0.997,0.996,0.995,0.993][si];
+    const decayTime=[2.2,1.8,1.5,1.2][si];
+
+    const out=actx.createGain();out.gain.setValueAtTime(v*0.82,now);
+    out.gain.setTargetAtTime(0.0001,now+0.01,decayTime*0.35);
     const bn=buildBody(si,false,false);out.connect(bn[0]);bn[bn.length-1].connect(masterGain);
-    const ao=[];
-    [1,0.62,0.32,0.16,0.08,0.04].forEach((amp,i)=>{
-      const hf=freq*(i+1);if(hf>17000)return;
-      // Per-harmonic inharmonic stretch for pizz
-      const stretchedHz=hf*Math.sqrt(1+B*(i+1)*(i+1));
-      const o=actx.createOscillator();o.type=i<2?'triangle':'sine';o.frequency.value=stretchedHz;
-      const g=actx.createGain();g.gain.value=amp*(i===0?0.52:0.18)*v;
-      o.connect(g);g.connect(out);o.start(now);o.stop(now+tc*4+0.6);ao.push(o);
-    });
-    const tL=Math.floor(actx.sampleRate*0.018);const tB=actx.createBuffer(1,tL,actx.sampleRate);const td=tB.getChannelData(0);
-    for(let i=0;i<tL;i++)td[i]=(Math.random()*2-1)*Math.pow(1-i/tL,2.8);
-    const tS=actx.createBufferSource();tS.buffer=tB;const tf=actx.createBiquadFilter();tf.type='bandpass';tf.frequency.value=freq*2.2;tf.Q.value=1.2;
-    const tg=actx.createGain();tg.gain.value=v*0.15;tS.connect(tf);tf.connect(tg);tg.connect(out);tS.start(now);
-    voices[si]={mode:'pizz',allOscs:[...ao,tS],outGain:out,bodyNodes:bn,nGain:null,freq};
+
+    // Karplus-Strong: noise excitation → delay line → lowpass feedback
+    const period=1.0/freq;
+    // Excitation: short noise burst (2-3ms) filtered around string frequency
+    const excLen=Math.floor(actx.sampleRate*0.003);
+    const excBuf=actx.createBuffer(1,excLen,actx.sampleRate);
+    const excData=excBuf.getChannelData(0);
+    for(let i=0;i<excLen;i++) excData[i]=(Math.random()*2-1)*(1-i/excLen);
+    const excSrc=actx.createBufferSource();excSrc.buffer=excBuf;
+    const excBpf=actx.createBiquadFilter();excBpf.type='bandpass';
+    excBpf.frequency.value=freq;excBpf.Q.value=0.8;
+    const excGain=actx.createGain();excGain.gain.value=v*1.2;
+    excSrc.connect(excBpf);excBpf.connect(excGain);excGain.connect(out);
+
+    // Delay-line feedback loop (approximates KS string)
+    const delay=actx.createDelay(1.0/55); // max delay for lowest note G3
+    delay.delayTime.value=period;
+    // Lowpass averaging filter (KS damping)
+    const lpf=actx.createBiquadFilter();lpf.type='lowpass';
+    lpf.frequency.value=freq*4;lpf.Q.value=0.5;
+    // Feedback gain (controls decay rate)
+    const fb=actx.createGain();fb.gain.value=decayCoeff;
+    // Loop: excGain → delay → lpf → fb → delay (feedback) + fb → out
+    excGain.connect(delay);
+    delay.connect(lpf);lpf.connect(fb);
+    fb.connect(delay); // feedback loop
+    fb.connect(out);
+
+    // Pluck transient — finger snap noise
+    const tL=Math.floor(actx.sampleRate*0.012);
+    const tB=actx.createBuffer(1,tL,actx.sampleRate);const td=tB.getChannelData(0);
+    for(let i=0;i<tL;i++)td[i]=(Math.random()*2-1)*Math.pow(1-i/tL,3.5);
+    const tS=actx.createBufferSource();tS.buffer=tB;
+    const tg=actx.createGain();tg.gain.value=v*0.22;
+    tS.connect(tg);tg.connect(out);
+
+    excSrc.start(now);tS.start(now);
+    // Schedule cleanup
+    const stopTime=now+decayTime+0.5;
+    voices[si]={mode:'pizz',allOscs:[excSrc,tS],outGain:out,bodyNodes:bn,nGain:null,freq,
+      _ksNodes:[delay,lpf,fb,excBpf,excGain,tg]};
+    setTimeout(()=>{
+      try{fb.disconnect();delay.disconnect();lpf.disconnect();}catch(e){}
+    },(decayTime+0.6)*1000);
     updateSympathy(freq);flashStr(si);showPill(si,freq);
   }
 
@@ -544,19 +584,82 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
     voices[si]={mode:'col',allOscs:[...ao,cS],outGain:out,bodyNodes:[],nGain:null,freq};flashStr(si);showPill(si,freq);
   }
 
+  // ── Tremolo (rapid re-bowing via amplitude modulation) ─────────
+  function tremNote(si,freq,vel){
+    // Tremolo uses the same bowed string engine but adds a fast amplitude LFO
+    bowNote(si,freq,vel);
+    const v=voices[si];
+    if(!v||!v.outGain||!actx)return;
+    const now=actx.currentTime;
+    // Tremolo LFO: 8-14Hz square-ish wave (tanh-shaped for natural bow change feel)
+    const tremRate=8+bSpd*6; // faster bow speed = faster tremolo
+    const tremLFO=actx.createOscillator();
+    const tremShape=actx.createWaveShaper();
+    const tremCurve=new Float32Array(256);
+    for(let i=0;i<256;i++){const x=(i/127.5)-1;tremCurve[i]=Math.tanh(x*3);}
+    tremShape.curve=tremCurve;
+    tremLFO.type='sine';tremLFO.frequency.value=tremRate;
+    const tremGain=actx.createGain();tremGain.gain.value=0.35;
+    tremLFO.connect(tremShape);tremShape.connect(tremGain);
+    tremGain.connect(v.outGain.gain);
+    tremLFO.start(now);
+    v.tremLFO=tremLFO;v.tremGain=tremGain;v.tremShape=tremShape;
+    if(v.allOscs)v.allOscs.push(tremLFO);
+    v.mode='trem';
+  }
+
+  // ── Spiccato (bouncing bow — short strokes with decay) ────────
+  let spicTimers=[];
+  function spicNote(si,freq,vel){
+    // Spiccato: rapid short bow strokes with natural gap between
+    killVoice(si,true);initAudio();
+    if(actx.state==='suspended')actx.resume();
+    const strokeMs=80+bSpd*40; // 80-120ms bow contact
+    const gapMs=50+bPress*30;  // 50-80ms off-string
+    const cycleMs=strokeMs+gapMs;
+    let active=true;
+    function doStroke(){
+      if(!active)return;
+      bowNote(si,freq,vel||0.78);
+      const v=voices[si];
+      if(v)v.mode='spic';
+      setTimeout(()=>{
+        if(!active)return;
+        killVoice(si,true);
+        setTimeout(()=>doStroke(),gapMs);
+      },strokeMs);
+    }
+    doStroke();
+    // Store cancel function
+    const cancel=()=>{active=false;};
+    spicTimers[si]=cancel;
+    flashStr(si);showPill(si,freq);isBowing=true;
+  }
+
   function noteOn(si,fret,vel){
     // Single-note mode: kill all other strings before starting
     if(singleNote) for(let s=0;s<4;s++) if(s!==si) killVoice(s,true);
     const freq=midiHz(OPEN_MIDI[si]+fret);
     if(playMode==='pizz')pizzNote(si,freq,vel||0.78);
     else if(playMode==='col')colNote(si,freq,vel||0.78);
+    else if(playMode==='trem')tremNote(si,freq,vel||0.78);
+    else if(playMode==='spic')spicNote(si,freq,vel||0.78);
     else bowNote(si,freq,vel||0.78);
-    lf[`${si}-${fret}`]=1;isBowing=playMode==='bow';
+    lf[`${si}-${fret}`]=1;isBowing=(playMode==='bow'||playMode==='trem'||playMode==='spic');
+    // MIDI output: send note-on to external devices
+    const midi=OPEN_MIDI[si]+fret;
+    if(window.InstrudioMIDI&&window.InstrudioMIDI.isAvailable())window.InstrudioMIDI.sendNoteOn(midi,vel||0.78);
+    if(window.InstrudioBridgeClient&&window.InstrudioBridgeClient.isConnected())window.InstrudioBridgeClient.sendNoteOn(midi,vel||0.78);
   }
 
   function noteOff(si){
+    // Cancel spiccato loop if active
+    if(spicTimers[si]){spicTimers[si]();spicTimers[si]=null;}
     killVoice(si,false);isBowing=false;
     if(!voices.some(v=>v!==null))silenceSympathy();
+    // MIDI output: send note-off
+    if(window.InstrudioMIDI&&window.InstrudioMIDI.isAvailable())window.InstrudioMIDI.sendNoteOff(OPEN_MIDI[si]);
+    if(window.InstrudioBridgeClient&&window.InstrudioBridgeClient.isConnected())window.InstrudioBridgeClient.sendNoteOff(OPEN_MIDI[si]);
   }
 
   // ── Canvas ────────────────────────────────────────────────────
@@ -653,7 +756,7 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
     }
 
     // Same string: glide continuously — raw Hz, no fret snap
-    if(playMode!=='bow')return; // pizz/col: no drag glide
+    if(playMode!=='bow'&&playMode!=='trem')return; // pizz/col/spic: no drag glide
 
     const freq=xToHz(si,x);
     // Throttle: ignore if less than 0.5 cents change
@@ -661,7 +764,7 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
     lHz=freq;lFr=xToFr(x); // update lFr for visual dot
 
     const existing=voices[si];
-    if(existing&&existing.mode==='bow'&&existing.osc&&actx){
+    if(existing&&(existing.mode==='bow'||existing.mode==='trem')&&existing.osc&&actx){
       const now=actx.currentTime;
       // Immediate ramp — 12ms feels like finger sliding
       existing.osc.frequency.cancelScheduledValues(now);
@@ -690,11 +793,12 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
   }
   fCvs.addEventListener('pointerdown',e=>{e.preventDefault();drag=true;lSi=-1;lFr=-1;lHz=0;const{sx,sy:SY,r}=sc(fCvs);fbDown((e.clientX-r.left)*sx,(e.clientY-r.top)*SY,.82);});
   fCvs.addEventListener('pointermove',e=>{if(!drag)return;const{sx,sy:SY,r}=sc(fCvs);fbDrag((e.clientX-r.left)*sx,(e.clientY-r.top)*SY);});
-  fCvs.addEventListener('pointerup',()=>{drag=false;if(playMode==='bow'&&!sustain)killAll(false);});
-  fCvs.addEventListener('pointerleave',()=>{drag=false;if(playMode==='bow'&&!sustain)killAll(false);});
+  const bowLikeModes=new Set(['bow','trem','spic']);
+  fCvs.addEventListener('pointerup',()=>{drag=false;if(bowLikeModes.has(playMode)&&!sustain)killAll(false);});
+  fCvs.addEventListener('pointerleave',()=>{drag=false;if(bowLikeModes.has(playMode)&&!sustain)killAll(false);});
   fCvs.addEventListener('touchstart',e=>{e.preventDefault();drag=true;lSi=-1;lFr=-1;lHz=0;const{sx,sy:SY,r}=sc(fCvs);const t=e.changedTouches[0];fbDown((t.clientX-r.left)*sx,(t.clientY-r.top)*SY,.82);},{passive:false});
   fCvs.addEventListener('touchmove',e=>{e.preventDefault();const{sx,sy:SY,r}=sc(fCvs);const t=e.changedTouches[0];fbDrag((t.clientX-r.left)*sx,(t.clientY-r.top)*SY);},{passive:false});
-  fCvs.addEventListener('touchend',()=>{drag=false;if(playMode==='bow'&&!sustain)killAll(false);});
+  fCvs.addEventListener('touchend',()=>{drag=false;if(bowLikeModes.has(playMode)&&!sustain)killAll(false);});
 
   // ── Open string buttons ───────────────────────────────────────
   for(let s=0;s<4;s++){
@@ -702,8 +806,8 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
     btn.innerHTML=`${NAMES[s]}<span>open · ${s+1}</span>`;btn.style.borderColor=COLS[s]+'44';
     const si=s;
     btn.addEventListener('pointerdown',e=>{e.preventDefault();noteOn(si,0,.82);});
-    btn.addEventListener('pointerup',()=>{if(playMode==='bow'&&!sustain)noteOff(si);});
-    btn.addEventListener('pointerleave',()=>{if(playMode==='bow'&&!sustain)noteOff(si);});
+    btn.addEventListener('pointerup',()=>{if(bowLikeModes.has(playMode)&&!sustain)noteOff(si);});
+    btn.addEventListener('pointerleave',()=>{if(bowLikeModes.has(playMode)&&!sustain)noteOff(si);});
     document.getElementById('openStrRow').appendChild(btn);
   }
 
@@ -756,7 +860,14 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
     else{btn.classList.remove('active');btn.style.borderColor='rgba(150,180,255,.2)';btn.style.color='#8090b0';}
   }
   window.toggleSingle=toggleSingle;
-  function setMode(m){playMode=m;killAll(true);['Bow','Pizz','Col'].forEach(id=>{document.getElementById('mode'+id).classList.toggle('active',id.toLowerCase()===m||('bow'===m&&id==='Bow')||('pizz'===m&&id==='Pizz')||('col'===m&&id==='Col'));});if(m!=='bow')isBowing=false;}
+  function setMode(m){
+    playMode=m;killAll(true);
+    ['Bow','Pizz','Col','Trem','Spic'].forEach(id=>{
+      const el=document.getElementById('mode'+id);
+      if(el)el.classList.toggle('active',id.toLowerCase()===m);
+    });
+    if(m!=='bow'&&m!=='trem'&&m!=='spic')isBowing=false;
+  }
   window.setMode=setMode;
 
   // ── Controls ──────────────────────────────────────────────────
@@ -811,9 +922,51 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
   document.addEventListener('keyup',e=>{
     const k=e.key.toLowerCase();held.delete(k);
     if(k===' '){sustain=false;if(playMode==='bow')killAll(false);return;}
-    if(KO[k]!==undefined&&playMode==='bow'&&!sustain)noteOff(KO[k]);
-    if(KF[k]!==undefined&&playMode==='bow'&&!sustain)noteOff(0);
+    const bowModes=new Set(['bow','trem','spic']);
+    if(KO[k]!==undefined&&bowModes.has(playMode)&&!sustain)noteOff(KO[k]);
+    if(KF[k]!==undefined&&bowModes.has(playMode)&&!sustain)noteOff(0);
   });
+
+  // ── Presets (loaded from SSOT definition) ────────────────────
+  const controlMap={
+    bowPressure:'bowPress', bowSpeed:'bowSpeed', bowPoint:'bowPoint',
+    reverb:'revCtrl', volume:'volCtrl', vibRate:'vibRate',
+    vibDepth:'vibDepth', attack:'atkCtrl', brightness:'briCtrl',
+    character:'charSelect'
+  };
+  function applyPreset(presetId){
+    const def=window.InstrudioBridge?.ssotDefinition||window.InstrudioBridge?.getSSOTDefinition?.();
+    if(!def?.presets)return;
+    const preset=def.presets.find(p=>p.presetId===presetId);
+    if(!preset?.values)return;
+    Object.entries(preset.values).forEach(([key,val])=>{
+      const elId=controlMap[key]||key;
+      const el=document.getElementById(elId);
+      if(!el)return;
+      if(el.tagName==='SELECT'){el.value=val;el.dispatchEvent(new Event('change',{bubbles:true}));}
+      else{el.value=val;el.dispatchEvent(new Event('input',{bubbles:true}));}
+    });
+    // Update preset buttons
+    document.querySelectorAll('#presetGrid .scale-btn').forEach(b=>b.classList.toggle('active',b.dataset.presetId===presetId));
+    // Notify bridge
+    if(window.InstrudioBridgeClient&&window.InstrudioBridgeClient.isConnected())window.InstrudioBridgeClient.sendPresetLoad(presetId);
+    setSt('Preset: '+preset.name);
+    setTimeout(()=>setSt(''),2000);
+  }
+  window._instrudioApplyPreset=applyPreset;
+  function buildPresetButtons(){
+    const grid=document.getElementById('presetGrid');if(!grid)return;
+    const def=window.InstrudioBridge?.ssotDefinition||window.InstrudioBridge?.getSSOTDefinition?.();
+    if(!def?.presets)return;
+    grid.innerHTML='';
+    def.presets.forEach(p=>{
+      if(p.tier==='premium')return; // only show free presets
+      const btn=document.createElement('button');btn.className='scale-btn';btn.textContent=p.name;
+      btn.dataset.presetId=p.presetId;
+      btn.addEventListener('click',()=>applyPreset(p.presetId));
+      grid.appendChild(btn);
+    });
+  }
 
   function loop(){requestAnimationFrame(loop);drawFB();drawBow();drawViolin();}
   loop();
@@ -823,7 +976,11 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
     init:initAudio,
     getTechnique(){ return playMode; },
     resolveAutoplayTechnique(requestedTechnique){ return this.respectManualTechnique ? (this.getTechnique() || requestedTechnique) : requestedTechnique; },
-    setTechnique(next, opts={}){ if(opts && opts.source==='autoplay' && this.respectManualTechnique) return; if(next==='pizz') setMode('pizz'); else if(next==='col') setMode('col'); else setMode('bow'); },
+    setTechnique(next, opts={}){
+      if(opts && opts.source==='autoplay' && this.respectManualTechnique) return;
+      if(['bow','pizz','col','trem','spic'].includes(next)) setMode(next);
+      else setMode('bow');
+    },
     playMidi(midi, velocity=0.82, durationMs=620){
       let best={si:0,fret:0,score:999};
       for(let si=0; si<OPEN_MIDI.length; si++){
@@ -831,16 +988,57 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
         if(fret>=0 && fret<=24){ const score=fret + si*0.15; if(score<best.score) best={si,fret,score}; }
       }
       noteOn(best.si, best.fret, Math.max(0.35, velocity));
-      if(playMode==='bow') setTimeout(()=>noteOff(best.si), Math.max(180,durationMs));
+      const bowModes=new Set(['bow','trem','spic']);
+      if(bowModes.has(playMode)) setTimeout(()=>noteOff(best.si), Math.max(180,durationMs));
     },
-    stopAll(){ killAll(true); }
+    stopAll(){ killAll(true); },
+    // Pitch bend from external MIDI controller
+    _onPitchBend(norm){
+      if(!actx)return;
+      const semis=norm*2; // ±2 semitone range
+      voices.forEach(v=>{
+        if(!v||!v.osc||!v.freq)return;
+        const bent=v.freq*Math.pow(2,semis/12);
+        v.osc.frequency.setTargetAtTime(bent,actx.currentTime,0.005);
+        if(v.h2osc)v.h2osc.frequency.setTargetAtTime(bent*2,actx.currentTime,0.005);
+      });
+    }
   };
+
+  // Build presets after SSOT definition loads
+  setTimeout(buildPresetButtons,500);
 })();
 </script>
 
 <section id="instrudio-embedded-score-dock" aria-label="Score import dock"></section>
 <script src="core/definition-runtime.js"></script>
-<script>window.InstrudioSSOTRuntime&&window.InstrudioSSOTRuntime.applyByBridge&&window.InstrudioSSOTRuntime.applyByBridge();</script>
+<script>window.InstrudioSSOTRuntime&&window.InstrudioSSOTRuntime.applyByBridge&&window.InstrudioSSOTRuntime.applyByBridge().then(function(){if(window.InstrudioMIDI)window.InstrudioMIDI.rebuildCCMap();var pg=document.getElementById('presetGrid');if(pg&&!pg.children.length&&window._instrudioApplyPreset)setTimeout(function(){var def=window.InstrudioBridge&&(window.InstrudioBridge.ssotDefinition||(window.InstrudioBridge.getSSOTDefinition&&window.InstrudioBridge.getSSOTDefinition()));if(def&&def.presets){pg.innerHTML='';def.presets.forEach(function(p){if(p.tier==='premium')return;var btn=document.createElement('button');btn.className='scale-btn';btn.textContent=p.name;btn.dataset.presetId=p.presetId;btn.addEventListener('click',function(){window._instrudioApplyPreset(p.presetId);});pg.appendChild(btn);});}},100);});</script>
+<script src="core/midi-io.js"></script>
+<script src="core/bridge-client.js"></script>
+<script>
+// Initialize MIDI I/O with status indicator
+(function(){
+  var dot=document.getElementById('midiDot');
+  var label=document.getElementById('midiLabel');
+  function updateMidiUI(evt,a,b){
+    if(!dot||!label)return;
+    if(evt==='ready'){dot.style.background='#4a8';label.textContent='MIDI: '+a+' in / '+b+' out';}
+    else if(evt==='unavailable'){dot.style.background='#666';label.textContent='MIDI: not available';}
+    else if(evt==='denied'){dot.style.background='#a44';label.textContent='MIDI: access denied';}
+    else if(evt==='note-on'){dot.style.background='#e8a050';setTimeout(function(){dot.style.background='#4a8';},120);}
+    else if(evt==='cc'){dot.style.background='#5ae';setTimeout(function(){dot.style.background='#4a8';},80);}
+    else if(evt==='state-change'){
+      var ins=window.InstrudioMIDI.getInputs(),outs=window.InstrudioMIDI.getOutputs();
+      label.textContent='MIDI: '+ins.length+' in / '+outs.length+' out';
+    }
+  }
+  if(window.InstrudioMIDI)window.InstrudioMIDI.init({onStatus:updateMidiUI});
+  // Bridge client — connect silently (will auto-reconnect)
+  if(window.InstrudioBridgeClient)window.InstrudioBridgeClient.connect({onStatus:function(s){
+    if(s==='connected'&&label)label.textContent+=(' · Bridge ✓');
+  }});
+})();
+</script>
 <script src="instrudio-suite.js"></script>
 </body>
 </html>

@@ -1,11 +1,12 @@
 {
   "id": "studio_grand",
+  "instrumentId": "studio-grand",
   "slug": "piano",
   "name": "Studio Grand",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "release": "v1",
   "page": "piano.html",
-  "pageTitle": "Studio Grand \u00b7 Instrudio",
+  "pageTitle": "Studio Grand · Instrudio",
   "headline": "Studio Grand",
   "subheadline": "Flagship acoustic piano for the v1 connected core.",
   "category": "keys",
@@ -17,12 +18,85 @@
     "supportsLibrary": true
   },
   "ssotFields": [
-    "pageTitle",
-    "headline",
-    "page",
-    "bridgeInstrument",
-    "minMidi",
-    "maxMidi",
-    "release"
-  ]
+    "pageTitle", "headline", "page", "bridgeInstrument",
+    "minMidi", "maxMidi", "release",
+    "controls", "presets", "engines", "availability"
+  ],
+
+  "ui": {
+    "theme": "dark-gold",
+    "layout": "keyboard-center",
+    "icon": "assets/instruments/piano/icon.png",
+    "heroTitle": "Studio Grand",
+    "info": {
+      "short": "Concert grand piano with inharmonic oscillator stack, stereo spread, and hammer transients.",
+      "long": "Register-accurate inharmonic string physics using measured B constants per register (Conklin 1994). Stereo panning mirrors sitting at a concert grand. Hammer transients model felt-on-string impact velocity. Dual-string unison, sympathetic shimmer, and 5 tone profiles."
+    }
+  },
+
+  "performance": {
+    "noteRange": ["A0", "C8"],
+    "polyphony": 16,
+    "defaultVelocity": 100,
+    "supportsSustain": true
+  },
+
+  "controls": [
+    {"controlId": "volume",     "label": "Volume",     "type": "knob", "default": 0.70, "min": 0.0,   "max": 1.0,  "step": 0.01, "midiCC": 7},
+    {"controlId": "reverb",     "label": "Reverb",     "type": "knob", "default": 0.35, "min": 0.0,   "max": 1.0,  "step": 0.01, "midiCC": 91},
+    {"controlId": "brightness", "label": "Brightness", "type": "knob", "default": 3000, "min": 500,   "max": 8000, "step": 100,  "midiCC": 74},
+    {"controlId": "tone",       "label": "Tone",       "type": "select", "default": "grand", "options": ["grand", "bright", "warm", "upright", "jazz"]}
+  ],
+
+  "presets": [
+    {
+      "presetId": "concert-grand",
+      "name": "Concert Grand",
+      "tier": "free",
+      "values": {"volume": 0.70, "reverb": 0.35, "brightness": 3000, "tone": "grand"}
+    },
+    {
+      "presetId": "bright-stage",
+      "name": "Bright Stage",
+      "tier": "free",
+      "values": {"volume": 0.75, "reverb": 0.25, "brightness": 5500, "tone": "bright"}
+    },
+    {
+      "presetId": "warm-intimate",
+      "name": "Warm Intimate",
+      "tier": "free",
+      "values": {"volume": 0.65, "reverb": 0.50, "brightness": 1800, "tone": "warm"}
+    },
+    {
+      "presetId": "upright-character",
+      "name": "Upright Character",
+      "tier": "free",
+      "values": {"volume": 0.68, "reverb": 0.20, "brightness": 2800, "tone": "upright"}
+    },
+    {
+      "presetId": "jazz-lounge",
+      "name": "Jazz Lounge",
+      "tier": "free",
+      "values": {"volume": 0.72, "reverb": 0.40, "brightness": 2200, "tone": "jazz"}
+    }
+  ],
+
+  "engines": {
+    "web": {"type": "webaudio", "synthesis": "inharmonic-oscillator-stack", "features": ["stereo-spread", "hammer-transients", "dual-string-unison", "sympathetic-shimmer"]},
+    "plugin": {"type": "vst3", "status": "planned", "bridgeProtocol": "websocket", "bridgePort": 9100},
+    "mobile": {"type": "coreAudio", "status": "planned", "renderMode": "touch-keyboard"}
+  },
+
+  "availability": {
+    "web": true,
+    "plugin": false,
+    "mobile": false,
+    "subscriptionFeatures": ["plugin-link", "external-midi-mode", "premium-presets"]
+  },
+
+  "assets": {
+    "icon": "assets/instruments/piano/icon.png",
+    "heroImage": "assets/instruments/piano/hero.png",
+    "previewAudio": "assets/instruments/piano/preview.mp3"
+  }
 }

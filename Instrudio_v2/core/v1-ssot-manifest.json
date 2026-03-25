@@ -1,9 +1,17 @@
 {
-  "version": "1.2.0",
+  "version": "2.0.0",
   "releaseTrain": "Instrudio V1 Core",
+  "remoteBase": "https://raw.githubusercontent.com/GareBear99/Instrudio/main/Instrudio_v2/",
+  "updateCheck": {
+    "enabled": true,
+    "intervalMinutes": 5,
+    "source": "github-raw"
+  },
   "singleSourceOfTruth": {
     "definitionsPath": "instruments/definitions",
     "runtime": "core/definition-runtime.js",
+    "midiModule": "core/midi-io.js",
+    "bridgeClient": "core/bridge-client.js",
     "coreInstruments": [
       "studio_grand",
       "studio_violin",

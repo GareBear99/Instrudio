@@ -1,35 +1,165 @@
 {
   "id": "studio_violin",
+  "instrumentId": "studio-violin",
   "slug": "violin",
   "name": "Studio Violin",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "release": "v1",
   "page": "violin.html",
-  "pageTitle": "Studio Violin \u00b7 Instrudio",
+  "pageTitle": "Studio Violin · Instrudio",
   "headline": "Studio Violin",
   "subheadline": "Reference bowed string instrument for the v1 connected core.",
   "category": "strings",
   "bridgeInstrument": "violin",
   "minMidi": 55,
   "maxMidi": 100,
-  "techniques": [
-    "bow",
-    "pizz",
-    "col"
-  ],
+  "techniques": ["bow", "pizz", "col", "trem", "spic"],
   "autoplay": {
     "respectsManualTechnique": true,
     "defaultTechnique": "bow",
     "supportsLibrary": true
   },
   "ssotFields": [
-    "pageTitle",
-    "headline",
-    "page",
-    "bridgeInstrument",
-    "techniques",
-    "minMidi",
-    "maxMidi",
-    "release"
-  ]
+    "pageTitle", "headline", "page", "bridgeInstrument",
+    "techniques", "minMidi", "maxMidi", "release",
+    "controls", "presets", "engines", "availability"
+  ],
+
+  "ui": {
+    "theme": "amber-warm",
+    "layout": "fingerboard-center",
+    "icon": "assets/instruments/violin/icon.png",
+    "heroTitle": "Studio Violin",
+    "info": {
+      "short": "Helmholtz bowed string with H2 correction, Stradivari body EQ, and sympathetic resonance.",
+      "long": "Full physical modelling of a bowed violin string using Helmholtz motion synthesis, H2 correction oscillator, inharmonicity chorus, 8-band Stradivari body resonances, sympathetic open-string resonance, and continuous pitch glide on the fingerboard. All parameters derived from peer-reviewed acoustic measurements (Schelleng 1973, Jansson 2002, Woodhouse 2004, Smith 2010)."
+    }
+  },
+
+  "performance": {
+    "noteRange": ["G3", "E6"],
+    "polyphony": 4,
+    "defaultVelocity": 100,
+    "supportsSustain": true,
+    "openStrings": [
+      {"name": "G", "midi": 55, "hz": 195.998},
+      {"name": "D", "midi": 62, "hz": 293.665},
+      {"name": "A", "midi": 69, "hz": 440.000},
+      {"name": "E", "midi": 76, "hz": 659.255}
+    ],
+    "inharmonicityB": [0.00035, 0.00028, 0.00022, 0.00018],
+    "frets": 24
+  },
+
+  "controls": [
+    {"controlId": "bowPressure",  "label": "Bow Pressure",  "type": "knob",   "default": 0.60, "min": 0.05, "max": 1.0, "step": 0.01, "midiCC": 1},
+    {"controlId": "bowSpeed",     "label": "Bow Speed",     "type": "knob",   "default": 0.55, "min": 0.05, "max": 1.0, "step": 0.01, "midiCC": 2},
+    {"controlId": "bowPoint",     "label": "Bow Point",     "type": "knob",   "default": 0.60, "min": 0.05, "max": 0.95,"step": 0.01, "midiCC": 18},
+    {"controlId": "reverb",       "label": "Reverb",        "type": "knob",   "default": 0.32, "min": 0.0,  "max": 1.0, "step": 0.01, "midiCC": 91},
+    {"controlId": "volume",       "label": "Volume",        "type": "knob",   "default": 0.72, "min": 0.0,  "max": 1.0, "step": 0.01, "midiCC": 7},
+    {"controlId": "vibRate",      "label": "Vibrato Rate",  "type": "knob",   "default": 5.5,  "min": 3.0,  "max": 9.0, "step": 0.1},
+    {"controlId": "vibDepth",     "label": "Vibrato Depth", "type": "knob",   "default": 0.32, "min": 0.0,  "max": 1.0, "step": 0.01},
+    {"controlId": "attack",       "label": "Attack",        "type": "knob",   "default": 0.07, "min": 0.01, "max": 0.35,"step": 0.005},
+    {"controlId": "brightness",   "label": "Brightness",    "type": "knob",   "default": 0.75, "min": 0.1,  "max": 1.0, "step": 0.01, "midiCC": 74},
+    {"controlId": "character",    "label": "Character",     "type": "select", "default": "solo", "options": ["solo", "ensemble", "baroque", "sul"]}
+  ],
+
+  "presets": [
+    {
+      "presetId": "solo-cantabile",
+      "name": "Solo Cantabile",
+      "tier": "free",
+      "values": {
+        "bowPressure": 0.60, "bowSpeed": 0.55, "bowPoint": 0.60,
+        "reverb": 0.32, "volume": 0.72, "vibRate": 5.5, "vibDepth": 0.32,
+        "attack": 0.07, "brightness": 0.75, "character": "solo"
+      }
+    },
+    {
+      "presetId": "warm-ensemble",
+      "name": "Warm Ensemble",
+      "tier": "free",
+      "values": {
+        "bowPressure": 0.50, "bowSpeed": 0.45, "bowPoint": 0.55,
+        "reverb": 0.55, "volume": 0.68, "vibRate": 5.0, "vibDepth": 0.40,
+        "attack": 0.09, "brightness": 0.55, "character": "ensemble"
+      }
+    },
+    {
+      "presetId": "baroque-period",
+      "name": "Baroque Period",
+      "tier": "free",
+      "values": {
+        "bowPressure": 0.45, "bowSpeed": 0.60, "bowPoint": 0.65,
+        "reverb": 0.20, "volume": 0.70, "vibRate": 4.5, "vibDepth": 0.18,
+        "attack": 0.05, "brightness": 0.60, "character": "baroque"
+      }
+    },
+    {
+      "presetId": "sul-ponticello",
+      "name": "Sul Ponticello",
+      "tier": "free",
+      "values": {
+        "bowPressure": 0.75, "bowSpeed": 0.40, "bowPoint": 0.88,
+        "reverb": 0.38, "volume": 0.65, "vibRate": 6.0, "vibDepth": 0.22,
+        "attack": 0.04, "brightness": 0.95, "character": "sul"
+      }
+    },
+    {
+      "presetId": "pizz-bright",
+      "name": "Pizzicato Bright",
+      "tier": "free",
+      "values": {
+        "bowPressure": 0.50, "bowSpeed": 0.50, "bowPoint": 0.50,
+        "reverb": 0.25, "volume": 0.78, "vibRate": 5.5, "vibDepth": 0.0,
+        "attack": 0.01, "brightness": 0.85, "character": "solo"
+      }
+    },
+    {
+      "presetId": "cinematic-legato",
+      "name": "Cinematic Legato",
+      "tier": "premium",
+      "values": {
+        "bowPressure": 0.70, "bowSpeed": 0.62, "bowPoint": 0.52,
+        "reverb": 0.65, "volume": 0.75, "vibRate": 5.8, "vibDepth": 0.45,
+        "attack": 0.12, "brightness": 0.68, "character": "solo"
+      }
+    }
+  ],
+
+  "engines": {
+    "web": {
+      "type": "webaudio",
+      "synthesis": "helmholtz-physical-model",
+      "features": ["h2-correction", "inharmonicity-chorus", "stradivari-body-eq", "sympathetic-resonance", "karplus-strong-pizz"]
+    },
+    "plugin": {
+      "type": "vst3",
+      "status": "planned",
+      "bridgeProtocol": "websocket",
+      "bridgePort": 9100
+    },
+    "mobile": {
+      "type": "coreAudio",
+      "status": "planned",
+      "renderMode": "touch-fingerboard"
+    }
+  },
+
+  "availability": {
+    "web": true,
+    "plugin": false,
+    "mobile": false,
+    "subscriptionFeatures": [
+      "plugin-link",
+      "external-midi-mode",
+      "premium-presets"
+    ]
+  },
+
+  "assets": {
+    "icon": "assets/instruments/violin/icon.png",
+    "heroImage": "assets/instruments/violin/hero.png",
+    "previewAudio": "assets/instruments/violin/preview.mp3"
+  }
 }

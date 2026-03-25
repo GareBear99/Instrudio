@@ -279,6 +279,7 @@ header p{
 <header class="z1">
   <h1>Celestial Harp</h1>
   <p>47-string concert harp · harmonic synthesis · glissando mode</p>
+  <div id="midiStatus" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.14em;color:var(--muted);margin-top:5px;display:flex;align-items:center;justify-content:center;gap:5px;"><span id="midiDot" style="width:6px;height:6px;border-radius:50%;background:#444;display:inline-block;"></span><span id="midiLabel">MIDI: scanning…</span></div>
 </header>
 
 <div class="controls z1">
@@ -1013,6 +1014,16 @@ header p{
 <section id="instrudio-embedded-score-dock" aria-label="Score import dock"></section>
 <script src="core/definition-runtime.js"></script>
 <script>window.InstrudioSSOTRuntime&&window.InstrudioSSOTRuntime.applyByBridge&&window.InstrudioSSOTRuntime.applyByBridge();</script>
+<script src="core/midi-io.js"></script>
+<script src="core/bridge-client.js"></script>
+<script>
+(function(){
+  var dot=document.getElementById('midiDot'),label=document.getElementById('midiLabel');
+  function u(e,a,b){if(!dot||!label)return;if(e==='ready'){dot.style.background='#4a8';label.textContent='MIDI: '+a+' in / '+b+' out';}else if(e==='unavailable'){dot.style.background='#666';label.textContent='MIDI: not available';}else if(e==='denied'){dot.style.background='#a44';label.textContent='MIDI: denied';}else if(e==='note-on'){dot.style.background='#e8c96a';setTimeout(function(){dot.style.background='#4a8';},120);}else if(e==='state-change'){var ins=window.InstrudioMIDI.getInputs();label.textContent='MIDI: '+ins.length+' in / '+window.InstrudioMIDI.getOutputs().length+' out';}}
+  if(window.InstrudioMIDI)window.InstrudioMIDI.init({onStatus:u});
+  if(window.InstrudioBridgeClient)window.InstrudioBridgeClient.connect({onStatus:function(s){if(s==='connected'&&label)label.textContent+=(' · Bridge ✓');}});
+})();
+</script>
 <script src="instrudio-suite.js"></script>
 </body>
 </html>
