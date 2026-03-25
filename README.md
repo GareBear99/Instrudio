@@ -8,7 +8,24 @@
 
 Cross-platform instrument suite where web demos, plugins, and the mobile app all share the same live-updating instrument core.
 
-**Live:** [garebear99.github.io/Instrudio/Instrudio_v2/](https://garebear99.github.io/Instrudio/Instrudio_v2/)
+**Play Online:** [garebear99.github.io/Instrudio/Instrudio_v2/](https://garebear99.github.io/Instrudio/Instrudio_v2/)
+
+## ⬇ Download Plugins (Free)
+
+> **[All Downloads — v2.0.0 Release Page](https://github.com/GareBear99/Instrudio/releases/tag/v2.0.0)**
+
+| Plugin | VST3 (macOS) | AU (macOS) |
+|---|---|---|
+| Studio Violin | [Download VST3](https://github.com/GareBear99/Instrudio/releases/download/v2.0.0/Instrudio-Studio-Violin-VST3-macOS.zip) | [Download AU](https://github.com/GareBear99/Instrudio/releases/download/v2.0.0/Instrudio-Studio-Violin-AU-macOS.zip) |
+| Studio Grand | [Download VST3](https://github.com/GareBear99/Instrudio/releases/download/v2.0.0/Instrudio-Studio-Grand-VST3-macOS.zip) | [Download AU](https://github.com/GareBear99/Instrudio/releases/download/v2.0.0/Instrudio-Studio-Grand-AU-macOS.zip) |
+| Celestial Harp | [Download VST3](https://github.com/GareBear99/Instrudio/releases/download/v2.0.0/Instrudio-Celestial-Harp-VST3-macOS.zip) | [Download AU](https://github.com/GareBear99/Instrudio/releases/download/v2.0.0/Instrudio-Celestial-Harp-AU-macOS.zip) |
+| Studio Bongos | [Download VST3](https://github.com/GareBear99/Instrudio/releases/download/v2.0.0/Instrudio-Studio-Bongos-VST3-macOS.zip) | [Download AU](https://github.com/GareBear99/Instrudio/releases/download/v2.0.0/Instrudio-Studio-Bongos-AU-macOS.zip) |
+
+**Install:** Unzip VST3 → `~/Library/Audio/Plug-Ins/VST3/` · AU → `~/Library/Audio/Plug-Ins/Components/` · Rescan in your DAW.
+
+*Windows builds coming soon.*
+
+---
 
 ## V1 Core (fully connected)
 
