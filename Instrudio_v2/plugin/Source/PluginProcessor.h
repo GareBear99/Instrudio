@@ -37,8 +37,8 @@ public:
     void webViewNoteOff(int note);
 
 private:
-    juce::String currentURL { "https://garebear99.github.io/Instrudio/Instrudio_v2/violin.html" };
-    juce::String currentInstrument { "violin" };
+    juce::String currentURL { INSTRUDIO_INSTRUMENT_URL };
+    juce::String currentInstrument { INSTRUDIO_INSTRUMENT_ID };
     juce::MidiBuffer pendingWebMidi;
     juce::CriticalSection midiLock;
 

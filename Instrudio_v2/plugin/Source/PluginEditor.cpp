@@ -25,7 +25,12 @@ InstrudioEditor::InstrudioEditor(InstrudioProcessor& p)
     // Instrument selector dropdown
     for (int i = 0; i < NUM_INSTRUMENTS; ++i)
         instrumentSelector.addItem(INSTRUMENTS[i].label, i + 1);
-    instrumentSelector.setSelectedId(1); // Default: violin
+    // Find which instrument is compiled in
+    for (int i = 0; i < NUM_INSTRUMENTS; ++i) {
+        juce::String id(INSTRUMENTS[i].id);
+        juce::String compiled(INSTRUDIO_INSTRUMENT_ID);
+        if (id == compiled) { instrumentSelector.setSelectedId(i + 1); break; }
+    }
     instrumentSelector.onChange = [this] { onInstrumentChanged(); };
     addAndMakeVisible(instrumentSelector);
 

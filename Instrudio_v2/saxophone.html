@@ -63,8 +63,8 @@ header p{margin-top:6px;font-size:12px;letter-spacing:.26em;text-transform:upper
 
 /* Info overlay */
 .info-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;overflow-y:auto;padding:32px 16px;}
-.info-overlay.open{display:flex;justify-content:center;align-items:flex-start;}
-.info-panel{background:var(--surface,#10101a);border:1px solid rgba(140,120,255,.28);border-radius:18px;max-width:760px;width:100%;padding:36px 40px;position:relative;margin:auto;}
+.info-overlay.open{display:flex;justify-content:center;align-items:flex-start;-webkit-overflow-scrolling:touch;}
+.info-panel{background:var(--surface,#10101a);border:1px solid rgba(140,120,255,.28);border-radius:18px;max-width:760px;width:100%;max-height:calc(100vh - 80px);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:36px 40px;position:relative;margin:auto;}
 .info-close{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--muted,#606880);font-size:22px;cursor:pointer;line-height:1;}
 .info-close:hover{color:var(--text,#eeeaff);}
 .info-panel h2{font-family:Cinzel,serif;font-size:22px;color:#9070ff;margin-bottom:6px;}
