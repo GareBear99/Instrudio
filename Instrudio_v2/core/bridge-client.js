@@ -10,7 +10,11 @@
   'use strict';
 
   var ws = null;
-  var url = 'ws://localhost:9100';
+  // Cloudflare relay (production) with localhost fallback (dev)
+  var RELAY_BASE = 'wss://instrudio-relay.workers.dev';
+  var url = RELAY_BASE;
+  var sessionCode = '';
+  var authToken = '';
   var reconnectMs = 1000;
   var maxReconnectMs = 30000;
   var reconnectTimer = null;
@@ -94,6 +98,8 @@
   function connect(opts) {
     opts = opts || {};
     if (opts.url) url = opts.url;
+    if (opts.sessionCode) sessionCode = opts.sessionCode;
+    if (opts.authToken) authToken = opts.authToken;
     if (opts.onStatus) statusCb = opts.onStatus;
     intentionalClose = false;
     reconnectMs = 1000;
@@ -104,7 +110,17 @@
   function doConnect() {
     if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
     try {
-      ws = new WebSocket(url);
+      // Build relay URL with session code and auth
+      var connectUrl = url;
+      if (sessionCode) {
+        connectUrl = RELAY_BASE + '/relay/' + sessionCode;
+        var params = [];
+        if (authToken) params.push('token=' + encodeURIComponent(authToken));
+        var clientType = (typeof window !== 'undefined' && window.NativeMIDI) ? 'app' : 'plugin';
+        params.push('type=' + clientType);
+        if (params.length) connectUrl += '?' + params.join('&');
+      }
+      ws = new WebSocket(connectUrl);
     } catch (e) {
       scheduleReconnect();
       return;

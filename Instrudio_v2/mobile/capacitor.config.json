@@ -1,0 +1,13 @@
+{
+  "appId": "com.instrudio.app",
+  "appName": "Instrudio",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "StatusBar": {
+      "style": "Dark"
+    }
+  }
+}

@@ -279,7 +279,7 @@ header p{
 <header class="z1">
   <h1>Celestial Harp</h1>
   <p>47-string concert harp · harmonic synthesis · glissando mode</p>
-  <div id="midiStatus" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.14em;color:var(--muted);margin-top:5px;display:flex;align-items:center;justify-content:center;gap:5px;"><span id="midiDot" style="width:6px;height:6px;border-radius:50%;background:#444;display:inline-block;"></span><span id="midiLabel">MIDI: scanning…</span></div>
+  <div id="midiStatus" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.14em;color:var(--muted);margin-top:5px;display:flex;align-items:center;justify-content:center;gap:5px;"><span id="midiDot" style="width:6px;height:6px;border-radius:50%;background:#444;display:inline-block;"></span><span id="midiLabel">Connected MIDI via Instrudio App</span></div>
 </header>
 
 <div class="controls z1">
@@ -1014,8 +1014,8 @@ header p{
 <section id="instrudio-embedded-score-dock" aria-label="Score import dock"></section>
 <script src="core/definition-runtime.js"></script>
 <script>window.InstrudioSSOTRuntime&&window.InstrudioSSOTRuntime.applyByBridge&&window.InstrudioSSOTRuntime.applyByBridge();</script>
-<script src="core/midi-io.js"></script>
-<script src="core/bridge-client.js"></script>
+<!-- MIDI available in the Instrudio app (App Store) -->
+<!-- Connected MIDI via Instrudio app $0.99/mo -->
 <script>
 (function(){
   var dot=document.getElementById('midiDot'),label=document.getElementById('midiLabel');

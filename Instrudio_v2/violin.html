@@ -124,7 +124,7 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
 <header>
   <h1>Studio Violin</h1>
   <p>Helmholtz · H2 Correction · Inharmonicity · Sympathetic Resonance · G D A E</p>
-  <div id="midiStatus" style="font-family:'Sorts Mill Goudy',serif;font-size:10px;letter-spacing:.14em;color:var(--muted);margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px;"><span id="midiDot" style="width:7px;height:7px;border-radius:50%;background:#444;display:inline-block;"></span><span id="midiLabel">MIDI: scanning…</span></div>
+  <div id="midiStatus" style="font-family:'Sorts Mill Goudy',serif;font-size:10px;letter-spacing:.14em;color:var(--muted);margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px;"><span id="midiDot" style="width:7px;height:7px;border-radius:50%;background:#444;display:inline-block;"></span><span id="midiLabel">Connected MIDI via Instrudio App</span></div>
 </header>
 <div class="controls">
   <div class="ctrl"><label>Bow Press</label><input type="range" id="bowPress" min="0.05" max="1" step="0.01" value="0.6"/><span class="ctrl-val" id="bowPressVal">60</span></div>
@@ -1034,8 +1034,8 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
 <section id="instrudio-embedded-score-dock" aria-label="Score import dock"></section>
 <script src="core/definition-runtime.js"></script>
 <script>window.InstrudioSSOTRuntime&&window.InstrudioSSOTRuntime.applyByBridge&&window.InstrudioSSOTRuntime.applyByBridge().then(function(){if(window.InstrudioMIDI)window.InstrudioMIDI.rebuildCCMap();var pg=document.getElementById('presetGrid');if(pg&&!pg.children.length&&window._instrudioApplyPreset)setTimeout(function(){var def=window.InstrudioBridge&&(window.InstrudioBridge.ssotDefinition||(window.InstrudioBridge.getSSOTDefinition&&window.InstrudioBridge.getSSOTDefinition()));if(def&&def.presets){pg.innerHTML='';def.presets.forEach(function(p){if(p.tier==='premium')return;var btn=document.createElement('button');btn.className='scale-btn';btn.textContent=p.name;btn.dataset.presetId=p.presetId;btn.addEventListener('click',function(){window._instrudioApplyPreset(p.presetId);});pg.appendChild(btn);});}},100);});</script>
-<script src="core/midi-io.js"></script>
-<script src="core/bridge-client.js"></script>
+<!-- MIDI available in the Instrudio app (App Store) -->
+<!-- Connected MIDI via Instrudio app $0.99/mo -->
 <script>
 // Initialize MIDI I/O with status indicator
 (function(){

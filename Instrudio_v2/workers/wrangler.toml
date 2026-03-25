@@ -1,0 +1,22 @@
+name = "instrudio-relay"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# Durable Objects for WebSocket relay rooms
+[durable_objects]
+bindings = [
+  { name = "MIDI_RELAY", class_name = "MidiRelay" }
+]
+
+[[migrations]]
+tag = "v1"
+new_classes = ["MidiRelay"]
+
+# KV namespace for subscription tokens (create via: wrangler kv:namespace create SUBS)
+# [[kv_namespaces]]
+# binding = "SUBS"
+# id = "your-kv-namespace-id"
+
+[vars]
+SUBSCRIPTION_PRICE = "0.99"
+SUBSCRIPTION_PERIOD = "month"
