@@ -106,11 +106,17 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
       <p><code>PeriodicWave osc → H2 osc → Chorus oscs → WaveShaper → InjGain → WarmShelf → 8×peaking body EQ → Master</code></p>
     </div>
     <div class="info-section">
+      <h3>Novel Contribution</h3>
+      <p><strong>Single-Source-of-Truth Cross-Platform Virtual Instrument Architecture.</strong> This instrument demonstrates a novel architecture where one JSON definition file, version-controlled on GitHub, simultaneously drives: (1) the web audio synthesis engine and UI, (2) external MIDI CC routing and note mapping, (3) plugin bridge event protocol, (4) preset management, and (5) live auto-update propagation across all connected outlets. Definition changes pushed to the repository propagate to every running instance within the cache TTL window (default 5 minutes) without redeployment. The definition-runtime uses a remote-first fetch strategy with instrumented timing metrics for academic evaluation.</p>
+      <p><strong>Measurable claims:</strong> The Evaluation Metrics panel (right sidebar) displays live measurements of SSOT fetch latency, definition apply time, remote source availability, and MIDI pipeline latency — all captured via <code>performance.now()</code> high-resolution timestamps. These metrics are accessible programmatically via <code>InstrudioSSOTRuntime.getMetrics()</code> and <code>InstrudioMIDI.getLatencyMetrics()</code>.</p>
+    </div>
+    <div class="info-section">
       <h3>Academic References</h3>
       <div class="ref-entry"><span class="ref-year">1973</span><span class="ref-text">Schelleng, J.C. "The bowed string and the player." JASA 53(1):26–41. — Measured violin harmonic spectrum showing H2/H1=0.65. The H2 correction oscillator gain 0.38 was calibrated to reach this target.</span></div>
       <div class="ref-entry"><span class="ref-year">2002</span><span class="ref-text">Jansson, E.V. Acoustics for Violin and Guitar Makers, 4th ed. KTH Stockholm. — Stradivari body resonance frequencies A0, A1, B1−, B1+ from Table 6.1. Bridge hill at 2800Hz and Q=6.5 from Chapter 7.</span></div>
       <div class="ref-entry"><span class="ref-year">2004</span><span class="ref-text">Woodhouse, J. "Bowed string simulation using a thermal friction model." Acustica 90. — Helmholtz motion Fourier series derivation. The formula bₙ = 2/(n²π²D(1−D))·sin(nπD) is from Woodhouse's eq. 4.2.</span></div>
       <div class="ref-entry"><span class="ref-year">2010</span><span class="ref-text">Smith, J.O. Physical Audio Signal Processing. CCRMA, Stanford. — Digital waveguide theory and Thiran allpass interpolation. Vibrato Hz-based depth formula from Chapter 4.</span></div>
+      <div class="ref-entry"><span class="ref-year">2026</span><span class="ref-text">GareBear99. "Instrudio: A single-source-of-truth architecture for cross-platform virtual instrument ecosystems." GitHub, 2026. — Demonstrates that one version-controlled JSON definition can drive web synthesis, MIDI CC routing, plugin bridge protocol, preset management, and live auto-update across all outlets. Reference implementation with instrumented evaluation metrics. <a href="https://github.com/GareBear99/Instrudio" style="color:#9070ff;">github.com/GareBear99/Instrudio</a></span></div>
     </div>
   </div>
 </div>
@@ -172,6 +178,21 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
     <div class="panel-card">
       <div class="panel-card-title">Presets</div>
       <div class="scale-grid" id="presetGrid"></div>
+    </div>
+    <div class="panel-card" id="researchPanel">
+      <div class="panel-card-title">Evaluation Metrics</div>
+      <div style="font-size:10px;color:var(--muted);line-height:1.6;letter-spacing:.04em;" id="metricsDisplay">
+        <div>SSOT: <span id="mSrc" style="color:var(--amber);">—</span></div>
+        <div>Fetch: <span id="mFetch" style="color:var(--amber);">—</span></div>
+        <div>Apply: <span id="mApply" style="color:var(--amber);">—</span></div>
+        <div>Def: <span id="mVer" style="color:var(--amber);">—</span></div>
+        <div>Size: <span id="mSize" style="color:var(--amber);">—</span></div>
+        <div style="margin-top:6px;border-top:1px solid rgba(200,120,48,.15);padding-top:6px;">MIDI Latency</div>
+        <div>Avg: <span id="mLatAvg" style="color:var(--amber);">—</span></div>
+        <div>Min: <span id="mLatMin" style="color:var(--amber);">—</span></div>
+        <div>Max: <span id="mLatMax" style="color:var(--amber);">—</span></div>
+        <div>N: <span id="mLatN" style="color:var(--amber);">0</span></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1037,6 +1058,29 @@ header p{font-family:'Sorts Mill Goudy',serif;font-style:italic;font-size:12px;l
   if(window.InstrudioBridgeClient)window.InstrudioBridgeClient.connect({onStatus:function(s){
     if(s==='connected'&&label)label.textContent+=(' · Bridge ✓');
   }});
+  // ── Evaluation metrics panel updater ────────────────────────
+  function updateMetricsPanel(){
+    var rt=window.InstrudioSSOTRuntime,midi=window.InstrudioMIDI;
+    if(rt&&rt.getMetrics){
+      var m=rt.getMetrics();
+      var src=document.getElementById('mSrc'),fetch_=document.getElementById('mFetch'),apply_=document.getElementById('mApply'),ver=document.getElementById('mVer'),sz=document.getElementById('mSize');
+      if(src)src.textContent=m.fetchSource+(m.remoteAvailable?' (GitHub)':' (local)');
+      if(fetch_)fetch_.textContent=m.fetchTimeMs?m.fetchTimeMs.toFixed(1)+'ms':'—';
+      if(apply_)apply_.textContent=m.applyTimeMs?m.applyTimeMs.toFixed(2)+'ms':'—';
+      if(ver)ver.textContent=m.definitionId+' v'+m.definitionVersion;
+      if(sz)sz.textContent=m.definitionSizeBytes?m.definitionSizeBytes+' bytes':'—';
+    }
+    if(midi&&midi.getLatencyMetrics){
+      var lat=midi.getLatencyMetrics();
+      var la=document.getElementById('mLatAvg'),li=document.getElementById('mLatMin'),lx=document.getElementById('mLatMax'),ln=document.getElementById('mLatN');
+      if(la)la.textContent=lat.count?lat.avg.toFixed(2)+'ms':'—';
+      if(li)li.textContent=lat.count?lat.min.toFixed(2)+'ms':'—';
+      if(lx)lx.textContent=lat.count?lat.max.toFixed(2)+'ms':'—';
+      if(ln)ln.textContent=lat.count;
+    }
+  }
+  setInterval(updateMetricsPanel,1000);
+  setTimeout(updateMetricsPanel,1500);
 })();
 </script>
 <script src="instrudio-suite.js"></script>

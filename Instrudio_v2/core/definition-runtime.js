@@ -26,6 +26,21 @@
   var cache = {};   // id → {data, fetchedAt, version}
   var manifestCache = null;
 
+  // ── Evaluation metrics ─────────────────────────────────────────
+  var metrics = {
+    fetchSource: 'none',         // 'remote' | 'local' | 'cache'
+    fetchTimeMs: 0,              // time to fetch definition
+    applyTimeMs: 0,              // time to apply definition to page
+    totalLoadTimeMs: 0,          // fetch + apply
+    updateCheckTimeMs: 0,        // time for version comparison round-trip
+    definitionVersion: '0',
+    definitionId: '',
+    definitionSizeBytes: 0,
+    remoteAvailable: false,
+    lastUpdateCheck: 0,
+    history: []                  // array of {timestamp, fetchMs, applyMs, source}
+  };
+
   // ── Fetch helpers ─────────────────────────────────────────────
   function fetchJsonRemote(relPath) {
     var url = REMOTE_BASE + relPath;
@@ -38,10 +53,20 @@
       .then(function(res) { if (!res.ok) throw new Error(res.status); return res.json(); });
   }
 
-  // Remote-first: try GitHub, fall back to local
+  // Remote-first: try GitHub, fall back to local (instrumented)
   function fetchJson(relPath) {
-    return fetchJsonRemote(relPath).catch(function() {
-      return fetchJsonLocal(relPath);
+    var t0 = performance.now();
+    return fetchJsonRemote(relPath).then(function(data) {
+      metrics.fetchSource = 'remote';
+      metrics.remoteAvailable = true;
+      metrics.fetchTimeMs = performance.now() - t0;
+      return data;
+    }).catch(function() {
+      return fetchJsonLocal(relPath).then(function(data) {
+        metrics.fetchSource = 'local';
+        metrics.fetchTimeMs = performance.now() - t0;
+        return data;
+      });
     });
   }
 
@@ -122,11 +147,24 @@
 
   function applyByBridge() {
     var bridge = window.InstrudioBridge;
+    var t0 = performance.now();
     return findDefinitionForBridge(bridge).then(function(def) {
       if (!def) return null;
+      var tApply = performance.now();
       applyText(def);
       applyBridge(def, bridge);
       document.documentElement.dataset.instrudioSsot = def.id;
+      metrics.applyTimeMs = performance.now() - tApply;
+      metrics.totalLoadTimeMs = performance.now() - t0;
+      metrics.definitionVersion = def.version || '0';
+      metrics.definitionId = def.id || '';
+      metrics.definitionSizeBytes = JSON.stringify(def).length;
+      metrics.history.push({
+        timestamp: Date.now(),
+        fetchMs: Math.round(metrics.fetchTimeMs * 100) / 100,
+        applyMs: Math.round(metrics.applyTimeMs * 100) / 100,
+        source: metrics.fetchSource
+      });
       return def;
     });
   }
@@ -137,23 +175,27 @@
     if (!bridge || !bridge.ssotId) return Promise.resolve(false);
     var id = bridge.ssotId;
     var oldVersion = cache[id] && cache[id].version || '0';
+    var t0 = performance.now();
     return loadDefinitionById(id, true).then(function(def) {
+      metrics.updateCheckTimeMs = performance.now() - t0;
+      metrics.lastUpdateCheck = Date.now();
       if (!def) return false;
       var newVersion = def.version || '0';
       if (newVersion !== oldVersion) {
-        // Version changed — re-apply everything
         applyText(def);
         applyBridge(def, bridge);
-        // Rebuild MIDI CC map if available
         if (window.InstrudioMIDI && window.InstrudioMIDI.rebuildCCMap) {
           window.InstrudioMIDI.rebuildCCMap();
         }
-        console.log('[SSOT] Updated ' + id + ': ' + oldVersion + ' → ' + newVersion);
+        metrics.definitionVersion = newVersion;
+        console.log('[SSOT] Updated ' + id + ': ' + oldVersion + ' → ' + newVersion + ' (' + Math.round(metrics.updateCheckTimeMs) + 'ms)');
         return true;
       }
       return false;
     }).catch(function() { return false; });
   }
+
+  function getMetrics() { return JSON.parse(JSON.stringify(metrics)); }
 
   // ── Expose ────────────────────────────────────────────────────
   window.InstrudioSSOTRuntime = {
@@ -162,6 +204,7 @@
     applyByBridge: applyByBridge,
     checkForUpdates: checkForUpdates,
     loadManifest: loadManifest,
+    getMetrics: getMetrics,
     REMOTE_BASE: REMOTE_BASE
   };
 })();

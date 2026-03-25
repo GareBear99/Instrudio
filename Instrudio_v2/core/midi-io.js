@@ -16,6 +16,45 @@
   let channel = 0;         // listen/send channel (0-based, 0 = omni receive)
   const activeNotes = {};  // midi → true (for note-off tracking)
 
+  // ── Latency metrics (for academic evaluation) ──────────────
+  var latencyMetrics = {
+    samples: [],           // last N latency measurements in ms
+    maxSamples: 200,
+    min: Infinity,
+    max: 0,
+    avg: 0,
+    count: 0,
+    lastNoteOnTime: 0      // performance.now() of last MIDI note-on received
+  };
+
+  function recordLatency(midiArrivalTime) {
+    // Called by the instrument page after audio starts playing
+    // midiArrivalTime = performance.now() when MIDI message was received
+    var now = performance.now();
+    var latency = now - midiArrivalTime;
+    latencyMetrics.samples.push(latency);
+    if (latencyMetrics.samples.length > latencyMetrics.maxSamples) {
+      latencyMetrics.samples.shift();
+    }
+    latencyMetrics.count++;
+    if (latency < latencyMetrics.min) latencyMetrics.min = latency;
+    if (latency > latencyMetrics.max) latencyMetrics.max = latency;
+    // Running average
+    var sum = 0;
+    for (var i = 0; i < latencyMetrics.samples.length; i++) sum += latencyMetrics.samples[i];
+    latencyMetrics.avg = sum / latencyMetrics.samples.length;
+  }
+
+  function getLatencyMetrics() {
+    return {
+      min: latencyMetrics.min === Infinity ? 0 : Math.round(latencyMetrics.min * 100) / 100,
+      max: Math.round(latencyMetrics.max * 100) / 100,
+      avg: Math.round(latencyMetrics.avg * 100) / 100,
+      count: latencyMetrics.count,
+      samples: latencyMetrics.samples.length
+    };
+  }
+
   // ── Helpers ──────────────────────────────────────────────────
   function bridge() { return window.InstrudioBridge || null; }
 
@@ -93,11 +132,15 @@
     if (!b) return;
 
     if (status === 0x90 && data[2] > 0) {
-      // Note On
+      // Note On — timestamp for latency measurement
+      var noteArrival = performance.now();
+      latencyMetrics.lastNoteOnTime = noteArrival;
       const note = clampMidi(data[1]);
       const vel = data[2] / 127;
       activeNotes[note] = true;
       if (b.playMidi) b.playMidi(note, vel, 800);
+      // Record pipeline latency (MIDI receive → playMidi return)
+      recordLatency(noteArrival);
       if (statusCb) statusCb('note-on', note, vel);
     } else if (status === 0x80 || (status === 0x90 && data[2] === 0)) {
       // Note Off
@@ -217,6 +260,8 @@
     sendNoteOff: sendNoteOff,
     sendCC: sendCC,
     isAvailable: isAvailable,
-    rebuildCCMap: buildCCMap
+    rebuildCCMap: buildCCMap,
+    getLatencyMetrics: getLatencyMetrics,
+    recordLatency: recordLatency
   };
 })();
