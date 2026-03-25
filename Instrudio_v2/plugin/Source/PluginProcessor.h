@@ -19,7 +19,7 @@ public:
     bool acceptsMidi() const override { return true; }
     bool producesMidi() const override { return true; }
     bool isMidiEffect() const override { return false; }
-    double getTailLengthSeconds() const override { return 0.0; }
+    double getTailLengthSeconds() const override { return 2.0; }
 
     int getNumPrograms() override { return 1; }
     int getCurrentProgram() override { return 0; }
@@ -30,17 +30,14 @@ public:
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
 
-    juce::String getCurrentURL() const { return currentURL; }
-    void setInstrument(const juce::String& instrumentId);
+    juce::Synthesiser& getSynth() { return synth; }
+    juce::String getInstrumentId() const { return INSTRUDIO_INSTRUMENT_ID; }
 
-    void webViewNoteOn(int note, float velocity);
-    void webViewNoteOff(int note);
+    // MIDI activity tracking for UI
+    std::atomic<bool> midiActivity { false };
 
 private:
-    juce::String currentURL { INSTRUDIO_INSTRUMENT_URL };
-    juce::String currentInstrument { INSTRUDIO_INSTRUMENT_ID };
-    juce::MidiBuffer pendingWebMidi;
-    juce::CriticalSection midiLock;
+    juce::Synthesiser synth;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(InstrudioProcessor)
 };

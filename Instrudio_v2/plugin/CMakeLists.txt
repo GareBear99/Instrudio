@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(JUCE)
 
 # ── Macro to create one plugin per instrument ──────────────────
-macro(instrudio_plugin TARGET_NAME PRODUCT PLUGIN_CODE INSTRUMENT_ID INSTRUMENT_URL)
+macro(instrudio_plugin TARGET_NAME PRODUCT PLUGIN_CODE INSTRUMENT_ID)
     juce_add_plugin(${TARGET_NAME}
         COMPANY_NAME "Instrudio"
         PLUGIN_MANUFACTURER_CODE Inst
@@ -26,21 +26,23 @@ macro(instrudio_plugin TARGET_NAME PRODUCT PLUGIN_CODE INSTRUMENT_ID INSTRUMENT_
         Source/PluginProcessor.h
         Source/PluginEditor.cpp
         Source/PluginEditor.h
+        Source/ViolinVoice.h
+        Source/PianoVoice.h
+        Source/HarpVoice.h
+        Source/BongoVoice.h
     )
 
     target_compile_definitions(${TARGET_NAME} PUBLIC
-        JUCE_WEB_BROWSER=1
+        JUCE_WEB_BROWSER=0
         JUCE_USE_CURL=0
         JUCE_VST3_CAN_REPLACE_VST2=0
         JUCE_DISPLAY_SPLASH_SCREEN=0
         INSTRUDIO_INSTRUMENT_ID="${INSTRUMENT_ID}"
-        INSTRUDIO_INSTRUMENT_URL="${INSTRUMENT_URL}"
     )
 
     target_link_libraries(${TARGET_NAME}
         PRIVATE
             juce::juce_audio_utils
-            juce::juce_gui_extra
         PUBLIC
             juce::juce_recommended_config_flags
             juce::juce_recommended_lto_flags
@@ -50,17 +52,13 @@ endmacro()
 
 # ── 4 Core Instruments ─────────────────────────────────────────
 instrudio_plugin(InstrudioViolin
-    "Instrudio Studio Violin" InVi violin
-    "https://garebear99.github.io/Instrudio/Instrudio_v2/violin.html")
+    "Instrudio Studio Violin" InVi violin)
 
 instrudio_plugin(InstrudioGrand
-    "Instrudio Studio Grand" InGr piano
-    "https://garebear99.github.io/Instrudio/Instrudio_v2/piano.html")
+    "Instrudio Studio Grand" InGr piano)
 
 instrudio_plugin(InstrudioHarp
-    "Instrudio Celestial Harp" InHa harp
-    "https://garebear99.github.io/Instrudio/Instrudio_v2/harp.html")
+    "Instrudio Celestial Harp" InHa harp)
 
 instrudio_plugin(InstrudioBongos
-    "Instrudio Studio Bongos" InBo bongo
-    "https://garebear99.github.io/Instrudio/Instrudio_v2/bongo.html")
+    "Instrudio Studio Bongos" InBo bongo)
