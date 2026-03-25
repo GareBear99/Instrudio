@@ -1,8 +1,8 @@
 # Instrudio: A Single-Source-of-Truth Architecture for Cross-Platform Virtual Instrument Ecosystems
 
-**Author:** [Your Name]
+**Author:** Gary Doman
 **Affiliation:** Independent Researcher
-**Contact:** [your email]
+**Contact:** github.com/GareBear99
 **Repository:** https://github.com/GareBear99/Instrudio
 **Live Demo:** https://garebear99.github.io/Instrudio/Instrudio_v2/
 **Benchmark:** https://garebear99.github.io/Instrudio/Instrudio_v2/benchmark.html
