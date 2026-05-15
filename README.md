@@ -109,18 +109,6 @@ Instrudio_v2/
         └── release-manifest.schema.json
 ```
 
-cd ~/GITHUB_WORK/Instrudio 2>/dev/null || cd ~/GITHUB_WORK/instrudio 2>/dev/null || cd ~/Instrudio
-
-mkdir -p docs/outreach/api-publishing scripts/outreach
-
-cat > docs/outreach/api-publishing/INSTRUDIO_STUDIO_VIOLIN_DEVTO.md <<'MD'
----
-title: Studio Violin: Building a Physically Modelled Bowed-String Instrument in Instrudio
-published: false
-description: Studio Violin is the flagship Instrudio instrument: Helmholtz bowed-string synthesis, H2 correction, Stradivari body EQ, sympathetic resonance, MIDI control, and a single-source-of-truth JSON runtime.
-tags: music,webdev,audio,javascript
-canonical_url: https://github.com/GareBear99/Instrudio
----
 
 # Studio Violin: Building a Physically Modelled Bowed-String Instrument in Instrudio
 
