@@ -140,7 +140,7 @@ The instrument includes:
 
 The Helmholtz waveform uses a Fourier-style bowed-string model:
 
-```text
+
 bₙ = −(2 / (n²π²D(1−D))) · sin(nπD)
 D = 0.5 + bowPressure × 0.30
 
