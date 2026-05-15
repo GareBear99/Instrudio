@@ -109,6 +109,53 @@ Instrudio_v2/
         └── release-manifest.schema.json
 ```
 
+cd ~/GITHUB_WORK/Instrudio 2>/dev/null || cd ~/GITHUB_WORK/instrudio 2>/dev/null || cd ~/Instrudio
+
+mkdir -p docs/outreach/api-publishing scripts/outreach
+
+cat > docs/outreach/api-publishing/INSTRUDIO_STUDIO_VIOLIN_DEVTO.md <<'MD'
+---
+title: Studio Violin: Building a Physically Modelled Bowed-String Instrument in Instrudio
+published: false
+description: Studio Violin is the flagship Instrudio instrument: Helmholtz bowed-string synthesis, H2 correction, Stradivari body EQ, sympathetic resonance, MIDI control, and a single-source-of-truth JSON runtime.
+tags: music,webdev,audio,javascript
+canonical_url: https://github.com/GareBear99/Instrudio
+---
+
+# Studio Violin: Building a Physically Modelled Bowed-String Instrument in Instrudio
+
+I’m building **Instrudio**, a browser-based virtual instrument ecosystem, and the flagship instrument right now is **Studio Violin**.
+
+Studio Violin is a physically modelled bowed-string instrument built around Helmholtz motion synthesis, H2 harmonic correction, inharmonicity modelling, Stradivari-style body resonances, sympathetic open-string resonance, and live MIDI control.
+
+The goal is not just to make a violin-like web instrument. The goal is to prove that a single version-controlled instrument definition can drive synthesis, UI, MIDI routing, plugin bridge behavior, presets, and live update propagation from one source of truth.
+
+## What Studio Violin does
+
+Studio Violin models the behavior of a bowed violin string using a synthesis chain designed around acoustic measurements and practical browser audio constraints.
+
+The instrument includes:
+
+- Helmholtz bowed-string waveform synthesis
+- H2 correction oscillator
+- Inharmonicity chorus per string
+- 8-band Stradivari-style body EQ
+- Per-string tonal offsets
+- Sympathetic open-string resonance
+- Nonlinear bow coupling
+- Pressure-coupled vibrato
+- Interval-scaled portamento
+- Bow-pressure, bow-speed, bow-point, character, brightness, attack, and vibrato controls
+- External MIDI routing through the Instrudio app
+
+## Synthesis model
+
+The Helmholtz waveform uses a Fourier-style bowed-string model:
+
+```text
+bₙ = −(2 / (n²π²D(1−D))) · sin(nπD)
+D = 0.5 + bowPressure × 0.30
+
 ## Updating an instrument
 
 1. Edit the definition JSON (e.g., change a preset value, add a control, update the MIDI range)
