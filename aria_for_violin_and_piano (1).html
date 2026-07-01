@@ -1,0 +1,1317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Aria — for Violin &amp; Piano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f0d0a;
+    --bg2:#171310;
+    --panel:#1c1712;
+    --gold:#c9a24b;
+    --gold-dim:#8a7238;
+    --wine:#8a3a3a;
+    --ivory:#ece4d2;
+    --muted:#a2937a;
+    --hair: rgba(201,162,75,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at 20% -10%, rgba(138,58,58,0.10), transparent 45%),
+      radial-gradient(ellipse at 85% 110%, rgba(201,162,75,0.08), transparent 50%),
+      var(--bg);
+    color:var(--ivory);
+    font-family:'EB Garamond', serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:56px 20px 80px;
+  }
+  .stage{
+    width:100%;
+    max-width:760px;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    color:var(--gold-dim);
+    margin-bottom:14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:22px;height:1px;background:var(--gold-dim);
+    display:inline-block;
+  }
+  h1{
+    font-family:'Cormorant Garamond', serif;
+    font-weight:600;
+    font-style:italic;
+    font-size:clamp(40px,8vw,64px);
+    line-height:1.02;
+    margin:0 0 6px;
+    color:var(--ivory);
+    letter-spacing:0.01em;
+  }
+  h1 em{
+    color:var(--gold);
+    font-style:italic;
+  }
+  .subtitle{
+    font-family:'EB Garamond', serif;
+    font-style:italic;
+    color:var(--muted);
+    font-size:17px;
+    max-width:52ch;
+    line-height:1.5;
+    margin-bottom:34px;
+  }
+
+  /* ---- signature: bowed-string waveform ---- */
+  .string-wrap{
+    position:relative;
+    border-top:1px solid var(--hair);
+    border-bottom:1px solid var(--hair);
+    padding:22px 0;
+    margin-bottom:30px;
+  }
+  canvas#scope{
+    width:100%; height:120px; display:block;
+  }
+
+  /* ---- transport ---- */
+  .transport{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    margin-bottom:10px;
+  }
+  #playBtn{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size:19px;
+    letter-spacing:0.02em;
+    background:transparent;
+    color:var(--ivory);
+    border:1px solid var(--gold-dim);
+    border-radius:999px;
+    padding:13px 30px;
+    cursor:pointer;
+    transition:border-color .25s ease, color .25s ease, background .25s ease;
+  }
+  #playBtn:hover{ border-color:var(--gold); color:var(--gold); background:rgba(201,162,75,0.06); }
+  #playBtn:active{ transform:translateY(1px); }
+  #exportBtn{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.04em;
+    background:transparent;
+    color:var(--muted);
+    border:1px solid var(--hair);
+    border-radius:999px;
+    padding:9px 16px;
+    cursor:pointer;
+    transition:border-color .25s ease, color .25s ease, background .25s ease;
+    white-space:nowrap;
+  }
+  #exportBtn:hover:not(:disabled){ border-color:var(--gold-dim); color:var(--ivory); }
+  #exportBtn:disabled{ opacity:0.55; cursor:progress; }
+  .progress-track{
+    flex:1;
+    height:1px;
+    background:var(--hair);
+    position:relative;
+    overflow:visible;
+  }
+  .progress-fill{
+    position:absolute; left:0; top:-1px;
+    height:3px; width:0%;
+    background:var(--gold);
+    box-shadow:0 0 8px rgba(201,162,75,0.6);
+    transition:width .1s linear;
+  }
+  .timecode{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:0.05em;
+    min-width:44px;
+    text-align:right;
+  }
+  .hint{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    color:var(--muted);
+    letter-spacing:0.04em;
+    margin:14px 0 46px;
+    opacity:0.75;
+  }
+
+  /* ---- instrument notes ---- */
+  .notes{
+    border-top:1px solid var(--hair);
+    padding-top:30px;
+  }
+  .notes h2{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--gold-dim);
+    font-weight:500;
+    margin:0 0 20px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:26px 34px;
+  }
+  @media (max-width:600px){ .grid{grid-template-columns:1fr;} }
+  .card{
+    border-left:1px solid var(--hair);
+    padding-left:16px;
+  }
+  .card .k{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size:20px;
+    color:var(--gold);
+    margin:0 0 6px;
+  }
+  .card p{
+    margin:0;
+    font-size:15px;
+    line-height:1.55;
+    color:var(--muted);
+  }
+  .refs{
+    margin-top:36px;
+    padding-top:22px;
+    border-top:1px solid var(--hair);
+  }
+  .refs ol{
+    margin:0; padding-left:20px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11.5px;
+    line-height:1.9;
+    color:var(--muted);
+  }
+  .refs li span.y{ color:var(--gold-dim); margin-right:6px; }
+  .refs a{ color:var(--muted); }
+
+  .caveat{
+    margin-top:26px;
+    font-size:13px;
+    line-height:1.6;
+    color:var(--muted);
+    font-style:italic;
+    max-width:64ch;
+  }
+
+  /* ---- EQ8 body panel ---- */
+  .eq-panel{
+    margin-top:38px;
+    padding-top:30px;
+    border-top:1px solid var(--hair);
+  }
+  .eq-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-bottom:16px;
+  }
+  .eq-strings{
+    display:flex;
+    gap:6px;
+  }
+  .eq-strings button{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.05em;
+    background:transparent;
+    color:var(--muted);
+    border:1px solid var(--hair);
+    border-radius:4px;
+    padding:6px 12px;
+    cursor:pointer;
+    transition:all .2s ease;
+  }
+  .eq-strings button:hover{ color:var(--ivory); border-color:var(--gold-dim); }
+  .eq-strings button.active{
+    color:var(--bg);
+    background:var(--gold);
+    border-color:var(--gold);
+  }
+  .eq-canvas-wrap{
+    border:1px solid var(--hair);
+    border-radius:6px;
+    background:linear-gradient(180deg, rgba(201,162,75,0.03), transparent);
+    padding:6px 10px 2px;
+  }
+  canvas#eqCurve{
+    width:100%; height:220px; display:block;
+  }
+  .eq-bands-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:14px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    color:var(--muted);
+  }
+  .eq-bands-table th{
+    text-align:left;
+    font-weight:500;
+    color:var(--gold-dim);
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    font-size:9.5px;
+    padding:0 8px 8px 0;
+    border-bottom:1px solid var(--hair);
+  }
+  .eq-bands-table td{
+    padding:7px 8px 7px 0;
+    border-bottom:1px solid rgba(201,162,75,0.08);
+  }
+  .eq-bands-table tr:last-child td{ border-bottom:none; }
+  .eq-bands-table td.name{ color:var(--ivory); }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <div class="eyebrow">Instrudio Chamber Series — No. 1</div>
+  <h1>Aria, <em>for Violin &amp; Piano</em></h1>
+  <p class="subtitle">A physically‑modelled bowed violin — Helmholtz string motion, Stradivari body resonance, sympathetic strings — set against a warm, layered piano. Synthesised entirely in the browser.</p>
+
+  <div class="string-wrap">
+    <canvas id="scope"></canvas>
+  </div>
+
+  <div class="transport">
+    <button id="playBtn">▸ Play</button>
+    <div class="progress-track"><div class="progress-fill" id="fill"></div></div>
+    <div class="timecode" id="clock">0:00</div>
+    <button id="exportBtn" title="Render and download as a .wav file">⇩ Export</button>
+  </div>
+  <div class="hint">~76s · headphones recommended · one continuous take, no looping samples</div>
+
+  <div class="notes">
+    <h2>The Instruments</h2>
+    <div class="grid">
+      <div class="card">
+        <p class="k">Studio Violin</p>
+        <p>The bowed string is synthesised, not sampled. A Helmholtz sawtooth‑family waveform is built from its Fourier series and shaped by a bow‑pressure term, then corrected so the 2nd harmonic sits near the ratio measured on real bowed strings. Two detuned unison voices add the slight inharmonicity of a real string; a soft nonlinearity models bow‑string coupling. An eight‑band chain — a low shelf, five resonance bells, a notch, and a high shelf — recreates a Stradivari‑class body: the A0/A1/B1 wood‑and‑air resonances, the 1.1 kHz notch between them, and the "bridge hill" around 2.8 kHz, with the G string voiced warmer and the E string voiced brighter. The full chain is broken out below, with the exact curve for each string. Open strings ring quietly underneath as sympathetic resonance, and phrases glide between notes the way a bow does across a fingerboard rather than re‑triggering.</p>
+      </div>
+      <div class="card">
+        <p class="k">Piano Synth</p>
+        <p>A small additive piano: four decaying partials per note, doubled and gently detuned for width, under a lowpass filter that closes over the note's life — bright at the attack, mellow in the tail. Chords are arpeggiated rather than struck, so the pedal wash builds the harmonic bed for the violin's line.</p>
+      </div>
+      <div class="card">
+        <p class="k">Room</p>
+        <p>A single convolution reverb, generated at load time from a short exponentially‑decaying noise impulse, stands in for the hall. Both instruments share one send so they occupy the same space.</p>
+      </div>
+      <div class="card">
+        <p class="k">The Piece</p>
+        <p>Opens with two bare oscillators — a hand‑cranked siren winding up through a whoop and settling onto D, the plainest sound the engine can make, before anything physically modelled enters. From there: D major, roughly 60 bpm. Eight bars of a rising‑then‑resolving progression are played twice — sparser the first time, fuller the second, with a soft harmony line under the melody on the reprise — before a final sustained chord and a fading high note close it out.</p>
+      </div>
+    </div>
+
+    <div class="refs">
+      <h2>Reference points for the physical model</h2>
+      <ol>
+        <li><span class="y">1973</span>Schelleng, J.C. "The Bowed String and the Player." <em>JASA</em> 53(1):26–41 — measured harmonic ratio (H2/H1) used to calibrate the second‑harmonic correction.</li>
+        <li><span class="y">2002</span>Jansson, E.V. <em>Acoustics for Violin and Guitar Makers</em>, 4th ed. KTH Stockholm — body resonance frequencies (A0, A1, B1−, B1+) and bridge‑hill characteristics behind the EQ chain.</li>
+        <li><span class="y">2004</span>Woodhouse, J. "Bowed String Simulation Using a Thermal Friction Model." <em>Acustica</em> 90 — the Helmholtz‑motion Fourier series used for the source waveform.</li>
+        <li><span class="y">2010</span>Smith, J.O. <em>Physical Audio Signal Processing.</em> CCRMA, Stanford — general digital‑waveguide and bowed‑string synthesis background.</li>
+      </ol>
+    </div>
+
+    <p class="caveat">Note on scope: this page is a self‑contained Web Audio implementation of the violin model above — one file, no network dependency, no MIDI or plugin bridge. The multi‑platform "single‑source‑of‑truth" definition architecture described in the accompanying brief is a separate piece of infrastructure and isn't reproduced here.</p>
+
+    <div class="eq-panel">
+      <div class="eq-head">
+        <h2 style="margin:0;">Body EQ — full 8‑band chain</h2>
+        <div class="eq-strings" id="stringButtons">
+          <button data-string="G">G</button>
+          <button data-string="D">D</button>
+          <button data-string="A" class="active">A</button>
+          <button data-string="E">E</button>
+        </div>
+      </div>
+      <div class="eq-canvas-wrap">
+        <canvas id="eqCurve"></canvas>
+      </div>
+      <table class="eq-bands-table">
+        <thead>
+          <tr><th>Band</th><th>Type</th><th>Freq</th><th>Gain</th><th>Q</th></tr>
+        </thead>
+        <tbody id="eqBandsBody"></tbody>
+      </table>
+      <p class="caveat" style="margin-top:16px;">This is the exact 8‑band chain the violin voice runs through — same frequencies, gains and Q the audio engine uses, rendered here rather than recomputed for display. Selecting a string recalculates the bridge‑hill and warmth offsets and redraws the curve, matching what that string actually sounds like.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================================
+   AUDIO ENGINE
+   ========================================================================= */
+let ctx=null, masterGain=null, analyser=null, convolver=null, noiseBuffer=null;
+let activeNodes=[];
+let playing=false, resetTimer=null, songDuration=0, songStartCtxTime=0;
+
+function noteFreq(name){
+  const names=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  const m=name.match(/^([A-G]#?)(\d)$/);
+  const idx=names.indexOf(m[1]);
+  const octave=parseInt(m[2],10);
+  const semitonesFromA4=(octave-4)*12+(idx-9);
+  return 440*Math.pow(2, semitonesFromA4/12);
+}
+const nf=noteFreq;
+
+function impulseResponse(duration,decay){
+  const rate=ctx.sampleRate;
+  const length=Math.floor(rate*duration);
+  const impulse=ctx.createBuffer(2,length,rate);
+  for(let ch=0; ch<2; ch++){
+    const data=impulse.getChannelData(ch);
+    for(let i=0;i<length;i++){
+      data[i]=(Math.random()*2-1)*Math.pow(1-i/length, decay);
+    }
+  }
+  return impulse;
+}
+
+function buildAudioGraph(){
+  masterGain=ctx.createGain(); masterGain.gain.value=0.62; // more headroom below 0dBFS
+
+  // Gentle safety-net limiter, not a hard slam: a wide knee and moderate
+  // ratio so it eases in gradually on peaks instead of snapping gain
+  // reduction on and off around every transient (which itself sounds like
+  // clicking/pumping if the knee is narrow and the ratio is aggressive).
+  const limiter=ctx.createDynamicsCompressor();
+  limiter.threshold.value=-3;
+  limiter.knee.value=8;
+  limiter.ratio.value=6;
+  limiter.attack.value=0.006;
+  limiter.release.value=0.09;
+
+  analyser=ctx.createAnalyser(); analyser.fftSize=2048;
+  masterGain.connect(limiter);
+  limiter.connect(analyser);
+  analyser.connect(ctx.destination);
+
+  convolver=ctx.createConvolver();
+  convolver.buffer=impulseResponse(3.4,2.4);
+  const reverbReturn=ctx.createGain(); reverbReturn.gain.value=0.42;
+  convolver.connect(reverbReturn); reverbReturn.connect(masterGain);
+
+  // Per-voice filter chains get disconnected once they finish (see
+  // scheduleDisconnect), which prunes them from the render graph entirely.
+  // But the convolver and the limiter are permanent — they're on the shared
+  // bus for the whole piece and can never be disconnected — so during any
+  // quiet passage their internal feedback state (the reverb tail's IIR-style
+  // decay, the compressor's release curve settling back to unity) can still
+  // decay all the way toward true zero and drift into denormal range. A
+  // literal handful of quiet beats between phrases is enough. Since these
+  // two can't be pruned, the fix is the classic one instead: keep a
+  // permanently-running, completely inaudible DC offset (-180dBFS — below
+  // the noise floor of 16-bit output, let alone audible) feeding both, so
+  // neither one's internal state is ever forced through true silence.
+  const ditherFloor=ctx.createConstantSource();
+  ditherFloor.offset.value=1e-9;
+  ditherFloor.connect(masterGain);
+  ditherFloor.connect(convolver);
+  ditherFloor.start();
+
+  noiseBuffer=ctx.createBuffer(1, ctx.sampleRate*2, ctx.sampleRate);
+  const nd=noiseBuffer.getChannelData(0);
+  for(let i=0;i<nd.length;i++) nd[i]=Math.random()*2-1;
+}
+
+function initAudio(){
+  ctx=new (window.AudioContext||window.webkitAudioContext)();
+  buildAudioGraph();
+  startScope();
+}
+
+function isOffline(){
+  return !!(ctx && ctx.constructor && /Offline/i.test(ctx.constructor.name));
+}
+
+/* Disconnecting a voice's single outermost node removes its entire upstream
+   chain (oscillators, shaper, all 8 EQ filters) from the render graph in one
+   move, since nothing else keeps a path to the destination alive. Without
+   this, each finished voice's resonant filters (Q up to 6.5) keep being
+   rendered on a silent input for the rest of the piece — a classic feedback
+   structure decaying toward zero, which is exactly the scenario where values
+   drift into denormal-float range and CPU cost per sample spikes (this is
+   well documented for IIR filters and reverbs specifically: see the
+   music-dsp FAQ and EarLevel Engineering's writeups on denormal handling).
+   Only meaningful for the live context — an offline render is discarded
+   whole after rendering, so there's nothing to prune. */
+function scheduleDisconnect(nodes, atCtxTime){
+  if(isOffline()) return;
+  const delayMs=Math.max(0, (atCtxTime-ctx.currentTime)*1000)+30;
+  setTimeout(()=>{ nodes.forEach(n=>{ try{ n.disconnect(); }catch(e){} }); }, delayMs);
+}
+
+function connectToBus(node, sendAmt=0.3){
+  node.connect(masterGain);
+  const send=ctx.createGain(); send.gain.value=sendAmt;
+  node.connect(send); send.connect(convolver);
+}
+function track(...nodes){ nodes.forEach(n=>activeNodes.push(n)); }
+
+/* -------------------------------------------------------------------------
+   PIANO SYNTH — additive partials, closing lowpass, unison detune
+   ------------------------------------------------------------------------- */
+function playPianoNote(freq, t, dur, vel=0.5, duck=false){
+  const g=ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(Math.max(vel,0.001), t+0.01);
+  g.gain.exponentialRampToValueAtTime(Math.max(vel*0.28,0.0005), t+0.4);
+  g.gain.exponentialRampToValueAtTime(0.0001, t+dur+1.1);
+
+  // Masking-aware EQ: when the violin is playing, its presence lives mostly
+  // in the 2-5kHz band (the bridge-hill and upper-shelf resonances). Rather
+  // than have the two instruments fight for the same band, the piano's
+  // closing lowpass is pulled down a little further during those sections —
+  // carving room out psychoacoustically instead of relying on level alone.
+  const filt=ctx.createBiquadFilter();
+  filt.type='lowpass';
+  filt.frequency.setValueAtTime(duck?4200:5200, t);
+  filt.frequency.exponentialRampToValueAtTime(duck?1000:1300, t+1.0);
+  filt.Q.value=0.6;
+
+  g.connect(filt);
+  connectToBus(filt, 0.26);
+
+  const partials=[[1,1],[2,0.40],[3,0.16],[4,0.08]];
+  [-3,3].forEach(cents=>{
+    partials.forEach(([mult,amp])=>{
+      const o=ctx.createOscillator();
+      o.type='sine';
+      o.frequency.value=freq*mult;
+      o.detune.value=cents+(mult-1)*2;
+      const pg=ctx.createGain(); pg.gain.value=amp*0.5;
+      o.connect(pg); pg.connect(g);
+      o.start(t); o.stop(t+dur+1.3);
+      track(o);
+    });
+  });
+
+  scheduleDisconnect([filt], t+dur+1.35);
+}
+
+function scheduleChordBar(startTime, chord, dense){
+  playPianoNote(nf(chord.bass), startTime, dense?3.6:3.8, 0.42, true);
+  const notes=chord.notes;
+  const step=dense?0.5:1.0;
+  const count=dense?8:4;
+  const pattern=dense?[0,1,2,3,2,1,3,0]:[0,1,2,3];
+  for(let i=0;i<count;i++){
+    const idx=pattern[i%pattern.length]%notes.length;
+    const t=startTime+i*step;
+    const vel=0.30+((i%pattern.length===0)?0.10:0);
+    playPianoNote(nf(notes[idx]), t, step*1.8, vel, true);
+  }
+}
+
+/* -------------------------------------------------------------------------
+   VIOLIN — Helmholtz motion + H2 correction + inharmonicity chorus +
+   nonlinear bow coupling + Stradivari body EQ + sympathetic bed + portamento
+   ------------------------------------------------------------------------- */
+const STRING_B={G:0.00035,D:0.00028,A:0.00022,E:0.00018};
+function stringForFreq(f){
+  if(f<261.63) return 'G';
+  if(f<392.00) return 'D';
+  if(f<659.25) return 'A';
+  return 'E';
+}
+
+function helmholtzWave(bowPressure){
+  const N=28;
+  const D=0.5+bowPressure*0.30;
+  const real=new Float32Array(N);
+  const imag=new Float32Array(N);
+  for(let n=1;n<N;n++){
+    imag[n]=-(2/(n*n*Math.PI*Math.PI*D*(1-D)))*Math.sin(n*Math.PI*D);
+  }
+  const h1=Math.abs(imag[1])||1e-6;
+  const targetH2=h1*0.65; // Schelleng-measured H2/H1 target
+  imag[2]=Math.sign(imag[2]||1)*targetH2;
+  return ctx.createPeriodicWave(real, imag, {disableNormalization:false});
+}
+
+function makeBowCurve(amount){
+  const n=1024, curve=new Float32Array(n);
+  for(let i=0;i<n;i++){
+    const x=(i/(n-1))*2-1;
+    curve[i]=Math.tanh(x*amount)*0.88 + x*0.12;
+  }
+  return curve;
+}
+
+/* A resonant peaking filter's step response can genuinely overshoot its
+   nominal gain when hit with a fast transient — the bridge-hill band is
+   Q=6.5 at up to +8dB, and a bow attack is exactly the kind of fast-rising
+   input that excites that ring. The master limiter downstream only reacts
+   to the summed signal, after several voices' overshoots may have already
+   stacked — so each voice gets its own soft-knee ceiling first: transparent
+   below 0.85, gently compressed above it, asymptoting toward but never
+   quite reaching 1.0. This is the mirror image of the denormal fix: that
+   one stops values from decaying toward zero forever; this one stops a
+   resonance from ringing past its ceiling in the other direction.
+   ------------------------------------------------------------------------- */
+function createSafetyClip(){
+  const ws=ctx.createWaveShaper();
+  const n=2048, curve=new Float32Array(n), threshold=0.85;
+  for(let i=0;i<n;i++){
+    const x=(i/(n-1))*2-1;
+    const ax=Math.abs(x);
+    if(ax<=threshold){
+      curve[i]=x;
+    } else {
+      const excess=(ax-threshold)/(1-threshold);
+      curve[i]=Math.sign(x)*(threshold+(1-threshold)*Math.tanh(excess));
+    }
+  }
+  ws.curve=curve;
+  ws.oversample='2x';
+  return ws;
+}
+
+/* Single source of truth for the 8-band body EQ: audio engine and the
+   visual curve both read from this, so what you see is what plays. */
+function EQ_BANDS(bridgeOffsetDb=0, warmthOffsetDb=0){
+  return [
+    {label:'warmth',     f:180,  g:2.2+warmthOffsetDb, q:0.9,  type:'lowshelf'},
+    {label:'A0',         f:275,  g:3.2,                q:1.4,  type:'peaking'},
+    {label:'A1',         f:475,  g:2.4,                q:1.8,  type:'peaking'},
+    {label:'B1-',        f:530,  g:1.8,                q:2.2,  type:'peaking'},
+    {label:'B1+',        f:580,  g:1.8,                q:2.2,  type:'peaking'},
+    {label:'notch',      f:1100, g:-2.6,               q:3.2,  type:'peaking'},
+    {label:'bridge hill',f:2800, g:5.0+bridgeOffsetDb, q:6.5,  type:'peaking'},
+    {label:'upper',      f:4500, g:1.8,                q:0.8,  type:'highshelf'}
+  ];
+}
+
+function createBodyEQChain(bridgeOffsetDb=0, warmthOffsetDb=0){
+  const bands=EQ_BANDS(bridgeOffsetDb, warmthOffsetDb);
+  const input=ctx.createGain();
+  let prev=input;
+  bands.forEach(b=>{
+    const f=ctx.createBiquadFilter();
+    f.type=b.type; f.frequency.value=b.f; f.Q.value=b.q; f.gain.value=b.g;
+    prev.connect(f); prev=f;
+  });
+  return {input, output:prev};
+}
+
+/* Computes the combined magnitude response (dB) of the 8-band chain using
+   BiquadFilterNode.getFrequencyResponse, so the drawn curve is exactly
+   what the audio engine renders — not a separate approximation. */
+function computeEQCurve(bridgeOffsetDb, warmthOffsetDb, numPoints=220){
+  const OAC=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+  const off=new OAC(1, 2, 44100);
+  const bands=EQ_BANDS(bridgeOffsetDb, warmthOffsetDb);
+  const minF=Math.log10(60), maxF=Math.log10(12000);
+  const freqs=new Float32Array(numPoints);
+  for(let i=0;i<numPoints;i++){
+    freqs[i]=Math.pow(10, minF+(maxF-minF)*i/(numPoints-1));
+  }
+  const totalDb=new Float32Array(numPoints).fill(0);
+  bands.forEach(b=>{
+    const f=off.createBiquadFilter();
+    f.type=b.type; f.frequency.value=b.f; f.Q.value=b.q; f.gain.value=b.g;
+    const mag=new Float32Array(numPoints), phase=new Float32Array(numPoints);
+    f.getFrequencyResponse(freqs, mag, phase);
+    for(let i=0;i<numPoints;i++){ totalDb[i]+=20*Math.log10(Math.max(mag[i],1e-6)); }
+  });
+  return {freqs, db:totalDb, bands};
+}
+
+function buildPhrases(notes){
+  const phrases=[];
+  let cur=null;
+  notes.forEach(nt=>{
+    if(!nt.legato || !cur){
+      if(cur) phrases.push(cur);
+      cur={start:nt.b, notes:[nt]};
+    } else {
+      cur.notes.push(nt);
+    }
+  });
+  if(cur) phrases.push(cur);
+  return phrases;
+}
+
+function scheduleViolinPhrase(phrase, songStart, transpose=0, gainScale=1, pan=0){
+  const firstFreq=nf(phrase.notes[0].n)*Math.pow(2, transpose/12);
+  const stringName=stringForFreq(firstFreq);
+  const bowPressure=0.5+Math.random()*0.15;
+  const bowSpeed=0.55+Math.random()*0.2;
+
+  const wave=helmholtzWave(bowPressure);
+  const osc=ctx.createOscillator(); osc.setPeriodicWave(wave); osc.frequency.value=firstFreq;
+
+  const B=STRING_B[stringName];
+  const spreadCents=Math.min(2.5, B*7000);
+  const chorus1=ctx.createOscillator(); chorus1.setPeriodicWave(wave);
+  chorus1.frequency.value=firstFreq*Math.pow(2, spreadCents/1200);
+  const chorus2=ctx.createOscillator(); chorus2.setPeriodicWave(wave);
+  chorus2.frequency.value=firstFreq*Math.pow(2, -spreadCents/1200);
+
+  const mix=ctx.createGain();
+  const oscG=ctx.createGain(); oscG.gain.value=0.5;
+  const chG=ctx.createGain(); chG.gain.value=0.17;
+  osc.connect(oscG).connect(mix);
+  chorus1.connect(chG).connect(mix);
+  chorus2.connect(chG).connect(mix);
+
+  const vibrato=ctx.createOscillator(); vibrato.frequency.value=5.3; vibrato.type='sine';
+  const vibDepth=ctx.createGain();
+  vibDepth.gain.value=9*(0.6+bowPressure*0.6); // pressure-coupled vibrato depth
+  vibrato.connect(vibDepth);
+  vibDepth.connect(osc.detune); vibDepth.connect(chorus1.detune); vibDepth.connect(chorus2.detune);
+
+  const drive=Math.tanh(bowSpeed*bowPressure*3.8)*0.42;
+  const shaper=ctx.createWaveShaper();
+  shaper.curve=makeBowCurve(1.6+drive*4);
+  mix.connect(shaper);
+
+  const env=ctx.createGain(); env.gain.setValueAtTime(0.0001, ctx.currentTime);
+  shaper.connect(env);
+
+  const totalDur=phrase.notes.reduce((s,n)=>Math.max(s, (n.b-phrase.start)+n.d), 0);
+  const t0=songStart+phrase.start;
+  const attackT=0.02+bowSpeed*0.04;
+  const releaseT=0.10+(1-bowSpeed)*0.28;
+  const peak=0.6*gainScale;
+
+  env.gain.setValueAtTime(0.0001, t0);
+  env.gain.exponentialRampToValueAtTime(peak, t0+attackT+0.05);
+  const sustainStart=Math.max(t0+attackT+0.10, t0+totalDur-releaseT);
+  env.gain.setValueAtTime(peak, sustainStart);
+  env.gain.exponentialRampToValueAtTime(0.0001, t0+totalDur+releaseT);
+
+  const noiseSrc=ctx.createBufferSource(); noiseSrc.buffer=noiseBuffer;
+  const noiseFilt=ctx.createBiquadFilter(); noiseFilt.type='bandpass';
+  noiseFilt.frequency.value=firstFreq*2; noiseFilt.Q.value=1.1;
+  const noiseG=ctx.createGain();
+  noiseG.gain.setValueAtTime(0.0001, t0);
+  noiseG.gain.exponentialRampToValueAtTime(0.045*gainScale, t0+0.008);
+  noiseG.gain.exponentialRampToValueAtTime(0.0001, t0+attackT+0.06);
+  noiseSrc.connect(noiseFilt).connect(noiseG);
+
+  const body=createBodyEQChain(
+    stringName==='G'?-3:stringName==='E'?3:0,
+    stringName==='G'?2:0
+  );
+  env.connect(body.input);
+  noiseG.connect(body.input);
+
+  // Notch damping: extract just the bridge-hill band from the same signal
+  // about to hit the +5/+8dB peaking filter, invert it, and sum a small
+  // amount back in. This is real anti-resonance — the same principle used
+  // in feedback suppression — damping the ring at its source rather than
+  // only catching the overshoot downstream in the safety clip.
+  const damperTap=ctx.createBiquadFilter();
+  damperTap.type='bandpass';
+  damperTap.frequency.value=2800;
+  damperTap.Q.value=6.5;
+  const damperInvert=ctx.createGain();
+  damperInvert.gain.value=-0.11;
+  env.connect(damperTap);
+  damperTap.connect(damperInvert);
+  damperInvert.connect(body.input);
+
+  const panNode=ctx.createStereoPanner?ctx.createStereoPanner():ctx.createGain();
+  if(panNode.pan) panNode.pan.value=pan;
+  const safety=createSafetyClip();
+  body.output.connect(safety);
+  safety.connect(panNode);
+  connectToBus(panNode, 0.32);
+
+  let prevFreq=firstFreq;
+  phrase.notes.forEach((nt,i)=>{
+    const f=nf(nt.n)*Math.pow(2, transpose/12);
+    const noteTime=songStart+nt.b;
+    const c1=f*Math.pow(2, spreadCents/1200), c2=f*Math.pow(2, -spreadCents/1200);
+    if(i===0){
+      osc.frequency.setValueAtTime(f, noteTime);
+      chorus1.frequency.setValueAtTime(c1, noteTime);
+      chorus2.frequency.setValueAtTime(c2, noteTime);
+    } else {
+      const semitones=12*Math.log2(f/prevFreq);
+      const glide=(18+Math.abs(semitones)*4)/1000;
+      osc.frequency.exponentialRampToValueAtTime(f, noteTime+glide);
+      chorus1.frequency.exponentialRampToValueAtTime(c1, noteTime+glide);
+      chorus2.frequency.exponentialRampToValueAtTime(c2, noteTime+glide);
+    }
+    prevFreq=f;
+  });
+
+  const startAt=Math.max(0, t0-0.01);
+  const stopAt=t0+totalDur+releaseT+0.3;
+  [osc,chorus1,chorus2,vibrato].forEach(n=>{ n.start(startAt); n.stop(stopAt); track(n); });
+  noiseSrc.start(t0); noiseSrc.stop(t0+attackT+0.1); track(noiseSrc);
+
+  scheduleDisconnect([panNode], stopAt+0.05);
+}
+
+function startSympatheticBed(t0, dur){
+  const opens=[196.00,293.66,440.00,659.25];
+  const bedGain=ctx.createGain();
+  bedGain.gain.setValueAtTime(0.0001, t0);
+  bedGain.gain.linearRampToValueAtTime(0.035, t0+2);
+  bedGain.gain.setValueAtTime(0.035, t0+dur-2);
+  bedGain.gain.linearRampToValueAtTime(0.0001, t0+dur);
+  const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=3000;
+  bedGain.connect(lp);
+  connectToBus(lp, 0.4);
+  opens.forEach((f,i)=>{
+    const o=ctx.createOscillator(); o.type='triangle'; o.frequency.value=f;
+    const g=ctx.createGain(); g.gain.value=0.03/(i+1);
+    o.connect(g); g.connect(bedGain);
+    o.start(t0); o.stop(t0+dur+0.5);
+    track(o);
+  });
+  scheduleDisconnect([lp], t0+dur+0.55);
+}
+
+/* -------------------------------------------------------------------------
+   THE PIECE — D major, ~60bpm. Progression x2 (sparse, then full+harmony),
+   framed by a soft intro wash and a fading final chord.
+   ------------------------------------------------------------------------- */
+const chords=[
+  {notes:['D3','F#3','A3','C#4','E4'], bass:'D2'},
+  {notes:['C#3','E3','A3','C#4'],       bass:'C#2'},
+  {notes:['B2','D3','F#3','A3'],        bass:'B1'},
+  {notes:['G2','B2','D3','F#3'],        bass:'G1'},
+  {notes:['E2','G2','B2','D3','F#3'],   bass:'E1'},
+  {notes:['A2','D3','E3','G3'],         bass:'A1'},
+  {notes:['F#2','A2','C#3','E3'],       bass:'F#1'},
+  {notes:['A2','G2','B2','D3','E3'],    bass:'A1'}
+];
+
+const melody=[
+  {b:0,   n:'A4',  d:2},
+  {b:2,   n:'F#4', d:1,   legato:true},
+  {b:3,   n:'E4',  d:1,   legato:true},
+  {b:4,   n:'D4',  d:2,   legato:true},
+  {b:6,   n:'C#4', d:1,   legato:true},
+  {b:7,   n:'B3',  d:1,   legato:true},
+  {b:8,   n:'D4',  d:1.5},
+  {b:9.5, n:'F#4', d:1,   legato:true},
+  {b:10.5,n:'A4',  d:1.5, legato:true},
+  {b:12,  n:'B4',  d:2},
+  {b:14,  n:'A4',  d:1,   legato:true},
+  {b:15,  n:'F#4', d:1,   legato:true},
+  {b:16,  n:'G4',  d:1.5},
+  {b:17.5,n:'A4',  d:0.5, legato:true},
+  {b:18,  n:'B4',  d:2,   legato:true},
+  {b:20,  n:'C#5', d:2},
+  {b:22,  n:'B4',  d:1,   legato:true},
+  {b:23,  n:'A4',  d:1,   legato:true},
+  {b:24,  n:'G4',  d:1.5},
+  {b:25.5,n:'F#4', d:1,   legato:true},
+  {b:26.5,n:'E4',  d:1.5, legato:true},
+  {b:28,  n:'D4',  d:2},
+  {b:30,  n:'C#4', d:1,   legato:true},
+  {b:31,  n:'D4',  d:1,   legato:true}
+];
+
+/* -------------------------------------------------------------------------
+   WIND-UP SIREN — the opening. Everything else in this piece is layered,
+   physically-modelled synthesis; this is the opposite: two raw oscillators,
+   a filter, and an envelope, with nothing hidden. The idea is to let you
+   hear the most basic building block first — a hand-cranked siren spinning
+   up — and then have it resolve directly onto the tonic the piano's first
+   chord is built on, so the transition from "raw oscillator" to "physically
+   modelled instrument" happens as one continuous gesture, not a cut.
+   ------------------------------------------------------------------------- */
+function scheduleSiren(t0){
+  const dur=2.6;
+  const targetHi=nf('D4'), targetLo=nf('D3'); // resolves onto the piece's tonic
+
+  const osc=ctx.createOscillator(); osc.type='sawtooth'; // bright, electric, mechanical
+  const sub=ctx.createOscillator(); sub.type='square';   // an octave-down layer for body
+
+  const wobble=ctx.createOscillator(); wobble.type='sine';
+  const wobbleDepth=ctx.createGain();
+  wobble.connect(wobbleDepth);
+  wobbleDepth.connect(osc.detune);
+  wobbleDepth.connect(sub.detune);
+
+  const g=ctx.createGain();
+  const filt=ctx.createBiquadFilter(); filt.type='lowpass'; filt.Q.value=1.1;
+
+  osc.connect(g); sub.connect(g);
+  g.connect(filt);
+  connectToBus(filt, 0.3);
+
+  // frequency: a motor winding up, a siren whoop, then a glide down onto D
+  osc.frequency.setValueAtTime(28, t0);
+  osc.frequency.exponentialRampToValueAtTime(180, t0+1.05);
+  osc.frequency.exponentialRampToValueAtTime(560, t0+1.7);
+  osc.frequency.exponentialRampToValueAtTime(340, t0+2.05);
+  osc.frequency.exponentialRampToValueAtTime(targetHi, t0+dur);
+
+  sub.frequency.setValueAtTime(14, t0);
+  sub.frequency.exponentialRampToValueAtTime(90, t0+1.05);
+  sub.frequency.exponentialRampToValueAtTime(280, t0+1.7);
+  sub.frequency.exponentialRampToValueAtTime(170, t0+2.05);
+  sub.frequency.exponentialRampToValueAtTime(targetLo, t0+dur);
+
+  // the wobble speeds up as the "motor" winds up, then settles as it resolves
+  wobble.frequency.setValueAtTime(2, t0);
+  wobble.frequency.exponentialRampToValueAtTime(9, t0+1.7);
+  wobble.frequency.exponentialRampToValueAtTime(2.5, t0+dur);
+  wobbleDepth.gain.setValueAtTime(6, t0);
+  wobbleDepth.gain.linearRampToValueAtTime(22, t0+1.7);
+  wobbleDepth.gain.linearRampToValueAtTime(3, t0+dur);
+
+  filt.frequency.setValueAtTime(220, t0);
+  filt.frequency.exponentialRampToValueAtTime(3200, t0+1.7);
+  filt.frequency.exponentialRampToValueAtTime(1300, t0+dur);
+
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(0.32, t0+0.4);
+  g.gain.setValueAtTime(0.32, t0+dur-0.7);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+
+  const startAt=Math.max(0, t0-0.01), stopAt=t0+dur+0.15;
+  [osc,sub,wobble].forEach(n=>{ n.start(startAt); n.stop(stopAt); track(n); });
+  scheduleDisconnect([filt], stopAt+0.1);
+
+  return dur;
+}
+
+function scheduleComposition(){
+  const now=ctx.currentTime;
+  const sirenStart=now+0.1;
+  const sirenDur=scheduleSiren(sirenStart);
+
+  // the piano's opening chord fades in under the siren's final glide-down,
+  // so the resolution onto D lands as one gesture instead of a hard cut
+  const introStart=sirenStart+sirenDur-0.55;
+
+  playPianoNote(nf('D3'),  introStart,     3.4, 0.20);
+  playPianoNote(nf('A3'),  introStart+0.4, 3.0, 0.16);
+  playPianoNote(nf('F#4'), introStart+0.9, 2.6, 0.13);
+
+  const passStart=introStart+2.2;
+  const phrases=buildPhrases(melody);
+
+  // The violin's attack transient and the piano's downbeat transient used to
+  // land on the identical sample here. Two independent attacks summing at
+  // the exact same instant produces one large composite spike — enough to
+  // trigger hard gain reduction in the limiter, whose release then reads as
+  // an audible dip right after the entrance ("cutting out"). Staggering the
+  // violin by a fraction of a second spreads that energy in time instead of
+  // stacking it — which also happens to be how a real soloist phrases in
+  // anyway, entering just behind the beat rather than glued to it.
+  const ENTRANCE_OFFSET=0.11;
+
+  let bar=passStart;
+  chords.forEach(ch=>{ scheduleChordBar(bar, ch, false); bar+=4; });
+  phrases.forEach(p=>scheduleViolinPhrase(p, passStart+ENTRANCE_OFFSET, 0, 1, -0.08));
+  startSympatheticBed(passStart, 32);
+
+  const pass2Start=passStart+32;
+  let bar2=pass2Start;
+  chords.forEach(ch=>{ scheduleChordBar(bar2, ch, true); bar2+=4; });
+  phrases.forEach(p=>scheduleViolinPhrase(p, pass2Start+ENTRANCE_OFFSET, 0, 1.05, -0.08));
+  phrases.forEach(p=>scheduleViolinPhrase(p, pass2Start+ENTRANCE_OFFSET+0.05, -3, 0.42, 0.55));
+  startSympatheticBed(pass2Start, 32);
+
+  const outroStart=pass2Start+32;
+  playPianoNote(nf('D2'),  outroStart, 6.5, 0.36, true);
+  playPianoNote(nf('A3'),  outroStart, 6.5, 0.24, true);
+  playPianoNote(nf('F#4'), outroStart, 6.5, 0.18, true);
+  playPianoNote(nf('D5'),  outroStart, 6.5, 0.13, true);
+  scheduleViolinPhrase({start:0, notes:[{b:0, n:'D5', d:6}]}, outroStart+ENTRANCE_OFFSET, 0, 0.5, 0);
+
+  return (outroStart-now)+7.2;
+}
+
+/* =========================================================================
+   OSCILLOSCOPE — rotating triple buffer
+
+   Three off-DOM canvases (write / spare / display) share the render load.
+   Each frame draws fully into "write", then a single index-rotation swaps
+   which buffer is write/spare/display — an O(1) pointer move, never a
+   partial state — and the visible canvas is blitted from "display" in one
+   drawImage call. The renderer is never blocked waiting on the compositor,
+   and the visible canvas never shows a half-drawn frame.
+   ========================================================================= */
+const scopeCanvas=document.getElementById('scope');
+const scopeCtx=scopeCanvas.getContext('2d', {alpha:true});
+const scopeBuf=[document.createElement('canvas'), document.createElement('canvas'), document.createElement('canvas')];
+const scopeBufCtx=scopeBuf.map(c=>c.getContext('2d', {alpha:true}));
+let scopeWrite=0, scopeSpare=1, scopeDisplay=2;
+let scopeW=0, scopeH=0;
+
+function sizeScope(){
+  const dpr=window.devicePixelRatio||1;
+  scopeW=scopeCanvas.clientWidth; scopeH=scopeCanvas.clientHeight;
+  scopeCanvas.width=scopeW*dpr; scopeCanvas.height=scopeH*dpr;
+  scopeCtx.setTransform(dpr,0,0,dpr,0,0);
+  scopeBuf.forEach((c,i)=>{
+    c.width=scopeW*dpr; c.height=scopeH*dpr;
+    scopeBufCtx[i].setTransform(dpr,0,0,dpr,0,0);
+  });
+}
+new ResizeObserver(sizeScope).observe(scopeCanvas);
+sizeScope();
+
+let scopeData=null, scopeRAF=null;
+function startScope(){
+  scopeData=new Uint8Array(analyser.fftSize); // allocated once, reused every frame — no per-frame GC churn
+  if(!scopeRAF) scopeRAF=requestAnimationFrame(drawScope);
+}
+function stopScope(){
+  if(scopeRAF){ cancelAnimationFrame(scopeRAF); scopeRAF=null; }
+}
+document.addEventListener('visibilitychange', ()=>{
+  // don't burn CPU/battery animating a tab nobody can see
+  if(document.hidden) stopScope();
+  else if(analyser) startScope();
+});
+
+function drawScope(){
+  scopeRAF=requestAnimationFrame(drawScope);
+  if(!analyser) return;
+  analyser.getByteTimeDomainData(scopeData);
+
+  const wctx=scopeBufCtx[scopeWrite];
+  wctx.clearRect(0,0,scopeW,scopeH);
+  wctx.beginPath();
+  const step=scopeW/scopeData.length;
+  for(let i=0;i<scopeData.length;i++){
+    const v=(scopeData[i]-128)/128;
+    const x=i*step;
+    const y=scopeH/2 + v*scopeH*0.42;
+    if(i===0) wctx.moveTo(x,y); else wctx.lineTo(x,y);
+  }
+  wctx.strokeStyle='#c9a24b';
+  wctx.lineWidth=1.4;
+  wctx.shadowColor='rgba(201,162,75,0.55)';
+  wctx.shadowBlur=8;
+  wctx.stroke();
+
+  // atomic swap: rotate the three indices in one step, no torn frame possible
+  const finished=scopeWrite;
+  scopeWrite=scopeSpare;
+  scopeSpare=scopeDisplay;
+  scopeDisplay=finished;
+
+  scopeCtx.clearRect(0,0,scopeW,scopeH);
+  scopeCtx.drawImage(scopeBuf[scopeDisplay], 0,0, scopeW,scopeH);
+}
+
+/* =========================================================================
+   EQ8 BODY PANEL
+
+   The response curve for a given string never changes once computed (the
+   band definitions are fixed), so instead of recomputing on every click,
+   all four strings' curves are calculated once up front and cached. Switching
+   strings is then a single reference swap over an immutable object — no
+   recomputation, no partial state, nothing to tear. Drawing still goes
+   through one off-DOM back buffer so the visible canvas only ever receives
+   a single, fully-finished frame via drawImage rather than dozens of
+   incremental stroke/fill calls the browser could paint mid-way through.
+   ========================================================================= */
+const STRING_OFFSETS={
+  G:{bridge:-3, warmth:2},
+  D:{bridge:0,  warmth:0},
+  A:{bridge:0,  warmth:0},
+  E:{bridge:3,  warmth:0}
+};
+
+// Precompute + freeze once. Each entry is immutable; switching strings
+// swaps which frozen object "current" points to, atomically.
+const EQ_CURVE_CACHE=Object.freeze(
+  Object.fromEntries(
+    Object.entries(STRING_OFFSETS).map(([str,off])=>[
+      str, Object.freeze(computeEQCurve(off.bridge, off.warmth))
+    ])
+  )
+);
+
+const eqCanvas=document.getElementById('eqCurve');
+const eqCtx=eqCanvas.getContext('2d', {alpha:true});
+const eqBuf=document.createElement('canvas');
+const eqBufCtx=eqBuf.getContext('2d', {alpha:true});
+let eqW=0, eqH=0;
+
+function sizeEqCanvas(){
+  const dpr=window.devicePixelRatio||1;
+  eqW=eqCanvas.clientWidth; eqH=eqCanvas.clientHeight;
+  eqCanvas.width=eqW*dpr; eqCanvas.height=eqH*dpr;
+  eqCtx.setTransform(dpr,0,0,dpr,0,0);
+  eqBuf.width=eqW*dpr; eqBuf.height=eqH*dpr;
+  eqBufCtx.setTransform(dpr,0,0,dpr,0,0);
+}
+new ResizeObserver(()=>{ sizeEqCanvas(); drawEQ(currentEqString); }).observe(eqCanvas);
+sizeEqCanvas();
+
+const EQ_MINF=Math.log10(60), EQ_MAXF=Math.log10(12000), EQ_RANGE_DB=16;
+function eqFreqToX(f,w){ return (Math.log10(f)-EQ_MINF)/(EQ_MAXF-EQ_MINF)*w; }
+function eqDbToY(db,h){ return h/2 - (db/EQ_RANGE_DB)*(h/2-14); }
+
+let currentEqString='A';
+function drawEQ(stringName){
+  currentEqString=stringName;
+  const {freqs, db, bands}=EQ_CURVE_CACHE[stringName]; // O(1) lookup, no recompute
+  const w=eqW, h=eqH;
+  const c=eqBufCtx; // render fully into the back buffer first
+  c.clearRect(0,0,w,h);
+
+  c.strokeStyle='rgba(201,162,75,0.12)';
+  c.lineWidth=1;
+  [-12,-6,0,6,12].forEach(gdb=>{
+    const y=eqDbToY(gdb,h);
+    c.beginPath(); c.moveTo(0,y); c.lineTo(w,y); c.stroke();
+    c.fillStyle= gdb===0 ? 'rgba(201,162,75,0.55)' : 'rgba(162,147,122,0.55)';
+    c.font='10px JetBrains Mono, monospace';
+    c.fillText((gdb>0?'+':'')+gdb, 4, y-3);
+  });
+  [100,200,500,1000,2000,5000,10000].forEach(gf=>{
+    const x=eqFreqToX(gf,w);
+    c.beginPath(); c.moveTo(x,0); c.lineTo(x,h); c.stroke();
+    c.fillStyle='rgba(162,147,122,0.55)';
+    c.font='9px JetBrains Mono, monospace';
+    const label= gf>=1000 ? (gf/1000)+'k' : String(gf);
+    c.fillText(label, x+3, h-4);
+  });
+
+  c.beginPath();
+  for(let i=0;i<freqs.length;i++){
+    const x=eqFreqToX(freqs[i],w);
+    const y=eqDbToY(Math.max(-EQ_RANGE_DB,Math.min(EQ_RANGE_DB,db[i])),h);
+    if(i===0) c.moveTo(x,y); else c.lineTo(x,y);
+  }
+  const grad=c.createLinearGradient(0,0,w,0);
+  grad.addColorStop(0,'#8a3a3a');
+  grad.addColorStop(1,'#c9a24b');
+  c.strokeStyle=grad;
+  c.lineWidth=2;
+  c.shadowColor='rgba(201,162,75,0.35)';
+  c.shadowBlur=6;
+  c.stroke();
+  c.shadowBlur=0;
+
+  c.lineTo(w, eqDbToY(0,h));
+  c.lineTo(0, eqDbToY(0,h));
+  c.closePath();
+  c.fillStyle='rgba(201,162,75,0.05)';
+  c.fill();
+
+  bands.forEach(b=>{
+    const x=eqFreqToX(b.f,w);
+    const y=eqDbToY(Math.max(-EQ_RANGE_DB,Math.min(EQ_RANGE_DB,b.g)),h);
+    c.beginPath();
+    c.arc(x,y,3.2,0,Math.PI*2);
+    c.fillStyle='#ece4d2';
+    c.fill();
+    c.strokeStyle='#0f0d0a';
+    c.lineWidth=1;
+    c.stroke();
+  });
+
+  // single blit: the visible canvas jumps straight from old frame to new,
+  // never a partially-drawn one
+  eqCtx.clearRect(0,0,w,h);
+  eqCtx.drawImage(eqBuf, 0,0, w,h);
+
+  const tbody=document.getElementById('eqBandsBody');
+  const rows=bands.map(b=>{
+    const freqLabel = b.f>=1000 ? (b.f/1000).toFixed(2).replace(/0$/,'').replace(/\.$/,'')+'k' : b.f+'Hz';
+    return '<tr><td class="name">'+b.label+'</td><td>'+b.type+'</td><td>'+freqLabel+'</td>'+
+      '<td>'+(b.g>=0?'+':'')+b.g.toFixed(1)+'dB</td><td>'+b.q.toFixed(1)+'</td></tr>';
+  }).join('');
+  tbody.innerHTML=rows; // single reflow instead of N incremental appendChild calls
+}
+
+document.getElementById('stringButtons').addEventListener('click', (e)=>{
+  const btn=e.target.closest('button[data-string]');
+  if(!btn) return;
+  document.querySelectorAll('#stringButtons button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  drawEQ(btn.dataset.string);
+}, {passive:true});
+
+drawEQ('A');
+
+/* =========================================================================
+   TRANSPORT UI
+   ========================================================================= */
+const playBtn=document.getElementById('playBtn');
+const fill=document.getElementById('fill');
+const clock=document.getElementById('clock');
+let progressRAF=null;
+
+function fmtTime(s){
+  s=Math.max(0,s);
+  const m=Math.floor(s/60), r=Math.floor(s%60);
+  return m+':'+String(r).padStart(2,'0');
+}
+
+function tickProgress(){
+  if(!playing){ return; }
+  const elapsed=ctx.currentTime-songStartCtxTime;
+  const pct=Math.min(100,(elapsed/songDuration)*100);
+  fill.style.width=pct+'%';
+  clock.textContent=fmtTime(elapsed);
+  progressRAF=requestAnimationFrame(tickProgress);
+}
+
+function setPlayingState(isPlaying){
+  playing=isPlaying;
+  playBtn.textContent=isPlaying?'■ Stop':'▸ Play';
+  if(isPlaying){
+    songStartCtxTime=ctx.currentTime;
+    tickProgress();
+  } else {
+    if(progressRAF) cancelAnimationFrame(progressRAF);
+    fill.style.width='0%';
+    clock.textContent='0:00';
+  }
+}
+
+playBtn.addEventListener('click', async ()=>{
+  if(!ctx) initAudio();
+  if(ctx.state==='suspended') await ctx.resume();
+
+  if(playing){
+    const now=ctx.currentTime;
+    masterGain.gain.cancelScheduledValues(now);
+    masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+    masterGain.gain.linearRampToValueAtTime(0.0001, now+0.12);
+    activeNodes.forEach(n=>{ try{ n.stop(now+0.13); }catch(e){} });
+    activeNodes=[];
+    clearTimeout(resetTimer);
+    setTimeout(()=>{
+      masterGain.gain.cancelScheduledValues(ctx.currentTime);
+      masterGain.gain.setValueAtTime(0.62, ctx.currentTime);
+    }, 220);
+    setPlayingState(false);
+  } else {
+    activeNodes=[];
+    songDuration=scheduleComposition();
+    setPlayingState(true);
+    resetTimer=setTimeout(()=>{ setPlayingState(false); }, songDuration*1000+300);
+  }
+});
+
+/* =========================================================================
+   EXPORT — render the whole piece offline and download as a .wav
+
+   OfflineAudioContext runs the identical graph-building and scheduling code
+   used for live playback, but as fast as the machine can compute rather than
+   in real time, into a plain AudioBuffer instead of the speakers. The global
+   ctx/masterGain/convolver/noiseBuffer/analyser pointers are swapped to the
+   offline context, the whole piece is scheduled (synchronous — no awaits in
+   that call chain), and then swapped back immediately, before the render
+   itself is awaited. So an export triggered mid-playback can't corrupt the
+   live session: nothing about the live graph is touched after the swap-back.
+   ========================================================================= */
+function encodeWav(buffer){
+  const numCh=buffer.numberOfChannels, len=buffer.length, sr=buffer.sampleRate;
+  const bytesPerSample=2, blockAlign=numCh*bytesPerSample;
+  const dataSize=len*blockAlign;
+  const out=new ArrayBuffer(44+dataSize);
+  const view=new DataView(out);
+  const writeStr=(off,s)=>{ for(let i=0;i<s.length;i++) view.setUint8(off+i, s.charCodeAt(i)); };
+
+  writeStr(0,'RIFF'); view.setUint32(4, 36+dataSize, true); writeStr(8,'WAVE');
+  writeStr(12,'fmt '); view.setUint32(16,16,true); view.setUint16(20,1,true);
+  view.setUint16(22,numCh,true); view.setUint32(24,sr,true);
+  view.setUint32(28, sr*blockAlign, true); view.setUint16(32, blockAlign, true);
+  view.setUint16(34, 16, true);
+  writeStr(36,'data'); view.setUint32(40, dataSize, true);
+
+  // Plain rounding to 16-bit correlates the quantization error with the
+  // signal itself, which is audible as gritty distortion on quiet material
+  // (the reverb tail, the fade-out) even though each individual error is
+  // technically "below" one bit. TPDF dither — the sum of two independent
+  // uniform random values, which shapes into a triangular distribution —
+  // decorrelates that error into flat, fixed-level noise instead. It's a
+  // textbook example of a sub-audible signal that measurably changes what
+  // you perceive: the noise floor itself isn't the point, removing the
+  // correlated distortion it replaces is.
+  const chans=[]; for(let c=0;c<numCh;c++) chans.push(buffer.getChannelData(c));
+  let off=44;
+  for(let i=0;i<len;i++){
+    for(let c=0;c<numCh;c++){
+      const tpdf=(Math.random()-Math.random())/0x8000; // triangular dither, ±1 LSB
+      const s=Math.max(-1, Math.min(1, chans[c][i]+tpdf));
+      view.setInt16(off, Math.round(s<0 ? s*0x8000 : s*0x7fff), true);
+      off+=2;
+    }
+  }
+  return new Blob([out], {type:'audio/wav'});
+}
+
+const exportBtn=document.getElementById('exportBtn');
+exportBtn.addEventListener('click', async ()=>{
+  exportBtn.disabled=true;
+  const originalLabel=exportBtn.textContent;
+  exportBtn.textContent='Rendering…';
+
+  const savedCtx=ctx, savedMaster=masterGain, savedConv=convolver,
+        savedNoise=noiseBuffer, savedAnalyser=analyser, savedActive=activeNodes;
+  try{
+    const OAC=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+    const SR=44100, LENGTH_SEC=90; // ~76s piece + release tails + reverb decay, with margin
+    const off=new OAC(2, Math.ceil(SR*LENGTH_SEC), SR);
+
+    ctx=off;
+    buildAudioGraph();
+    activeNodes=[];
+    scheduleComposition();
+
+    // restore the live pointers now — everything past this line is async
+    // and must not touch the live session's state
+    ctx=savedCtx; masterGain=savedMaster; convolver=savedConv;
+    noiseBuffer=savedNoise; analyser=savedAnalyser; activeNodes=savedActive;
+
+    const rendered=await off.startRendering();
+    const blob=encodeWav(rendered);
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download='aria_for_violin_and_piano.wav';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  } catch(err){
+    ctx=savedCtx; masterGain=savedMaster; convolver=savedConv;
+    noiseBuffer=savedNoise; analyser=savedAnalyser; activeNodes=savedActive;
+    console.error('Export failed:', err);
+    exportBtn.textContent='Export failed';
+    setTimeout(()=>{ exportBtn.textContent=originalLabel; exportBtn.disabled=false; }, 2200);
+    return;
+  }
+  exportBtn.textContent='Downloaded ✓';
+  setTimeout(()=>{ exportBtn.textContent=originalLabel; exportBtn.disabled=false; }, 1800);
+});
+</script>
+</body>
+</html>
